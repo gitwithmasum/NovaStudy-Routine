@@ -1,4 +1,4 @@
-<p align="center"><img src="./assets/icon-512.png" alt="NovaStudy futuristic graduation cap logo" width="148" /></p>
+<p align="center"><img src="./assets/novastudy-readme-banner.webp" alt="NovaStudy Student Routine OS — futuristic app banner with graduation-cap branding, timetable, exam planner and revision dashboard" width="100%" /></p>
 
 # ✦ NovaStudy — Student Routine OS
 
