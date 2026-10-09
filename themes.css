@@ -263,3 +263,6 @@ html[data-theme="gold"] .theme-option.is-selected{border-color:#f4ce7c}
 @media(max-width:420px){.mobile-brand b{display:none}.theme-switch{padding:7px 9px}.top-install{padding:8px 7px}.theme-gallery{gap:8px}.theme-option{padding:6px}.theme-option-name strong{font-size:11px}.theme-option-name small{font-size:9px}}
 @media(max-width:330px){#themeLabel{display:none}}
 @media(prefers-reduced-motion:reduce){.theme-option{transition:none}.theme-option:hover{transform:none}}
+
+/* Match the new graduation icon to Black & Gold mode */
+html[data-theme="gold"] .brand-image{border-color:#c4974e;box-shadow:0 0 19px rgba(209,161,71,.28)}

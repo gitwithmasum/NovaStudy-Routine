@@ -1,3 +1,5 @@
+<p align="center"><img src="./assets/icon-512.png" alt="NovaStudy futuristic graduation cap logo" width="148" /></p>
+
 # ✦ NovaStudy — Student Routine OS
 
 **A futuristic, responsive, offline-first student planner with installable PWA support.**
@@ -159,3 +161,6 @@ MIT — © 2026 Masum Billah.
 
 ### Try it
 Select **Exams & revision → Add exam → Plan revision**. Check your **Weekly routine** for one-time blocks and **Tasks & goals** for linked revision to-dos.
+
+### Graduation-cap app branding (v1.3.1)
+The selected futuristic graduation-cap artwork is now the app icon for installable PWA (192px and 512px), browser favicon, Apple touch icon and sidebar/mobile navigation logo. Updated files preserve all previous routine and exam-planner features. If the old icon persists after updating, refresh/reinstall the installed app to clear old cached icons.
