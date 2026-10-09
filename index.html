@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#080e20" />
+  <meta name="description" content="NovaStudy — a futuristic, offline-ready routine and task planner for students at every level." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="NovaStudy" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./assets/icon-192.png" />
+  <link rel="apple-touch-icon" href="./assets/icon-192.png" />
+  <link rel="stylesheet" href="./styles.css" />
+  <title>NovaStudy — Routine OS</title>
+</head>
+<body>
+  <div class="app-shell" id="appShell">
+    <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+      <a class="brand" href="#dashboard" aria-label="NovaStudy home">
+        <span class="brand-symbol">N<span class="brand-spark">✦</span></span>
+        <span><strong>NOVASTUDY</strong><small>ROUTINE OPERATING SYSTEM</small></span>
+      </a>
+      <div class="sidebar-caption">WORKSPACE / 01</div>
+      <nav class="nav-list" aria-label="Pages">
+        <button class="nav-btn active" data-nav="dashboard"><span class="nav-ico">▦</span><span>Dashboard</span><span class="nav-arrow">›</span></button>
+        <button class="nav-btn" data-nav="schedule"><span class="nav-ico">▤</span><span>Weekly routine</span><span class="nav-arrow">›</span></button>
+        <button class="nav-btn" data-nav="tasks"><span class="nav-ico">☑</span><span>Tasks & goals</span><span class="nav-arrow">›</span></button>
+        <button class="nav-btn" data-nav="subjects"><span class="nav-ico">◈</span><span>Subjects</span><span class="nav-arrow">›</span></button>
+        <button class="nav-btn" data-nav="settings"><span class="nav-ico">⚙</span><span>My profile & settings</span><span class="nav-arrow">›</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="status-pill"><span class="live-dot"></span> SYSTEM ONLINE <span class="mini-label">LOCAL FIRST</span></div>
+        <div class="sidebar-footer">Built for every student.<br />Classroom → Campus → Beyond.</div>
+      </div>
+    </aside>
+    <main class="content">
+      <header class="topbar">
+        <div class="mobile-brand"><span class="brand-symbol mini">N</span><b>NOVASTUDY</b></div>
+        <div class="breadcrumb"><span class="breadcrumb-muted">WORKSPACE</span><span class="slash">/</span><span id="pageLabel">DASHBOARD</span></div>
+        <div class="topbar-actions">
+          <div class="clock" id="liveClock" aria-label="Local time">--:--</div>
+          <button class="outline-button top-install" id="installBtn" type="button"><span>⇩</span> Install app</button>
+          <button class="avatar-button" type="button" data-nav="settings" title="Profile" aria-label="Open profile">ST</button>
+        </div>
+      </header>
+      <div id="view" class="view"></div>
+      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>1.0</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
+    </main>
+  </div>
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <button data-nav="dashboard" class="active"><span>▦</span><small>Home</small></button>
+    <button data-nav="schedule"><span>▤</span><small>Routine</small></button>
+    <button data-nav="tasks"><span>☑</span><small>Tasks</small></button>
+    <button data-nav="subjects"><span>◈</span><small>Subjects</small></button>
+    <button data-nav="settings"><span>⚙</span><small>Settings</small></button>
+  </nav>
+  <dialog id="modal" class="modal"><div id="modalBody"></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./presets.js" defer></script>
+  <script src="./core.js" defer></script>
+  <script src="./views.js" defer></script>
+  <script src="./editors.js" defer></script>
+  <script src="./app.js" defer></script>
+</body>
+</html>
