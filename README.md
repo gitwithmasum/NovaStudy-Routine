@@ -13,6 +13,7 @@ A free, no-login routine app for learners from early childhood to university / p
 - **Auto study planner:** Generate balanced study blocks for 1–7 days with adjustable start time, length, breaks and sessions/day; preserves existing entries and avoids clashes.
 - **Timetable:** Add/edit/delete weekly sessions; day, start/end, course, location, session type. Detects overlap without blocking intentional overlaps.
 - **Dashboard:** Today's timeline, total planned hours, pending missions, task completion.
+- **Themes (v1.1):** One-click Futuristic Cyber / Black & Gold appearance toggle in the header and Settings. Preference is saved under `novastudy_theme_v1` independently of routine data; existing browser schedules and tasks are preserved.
 - **Missions:** To-dos with due dates, subject associations, priorities, completion, filtering and search.
 - **Privacy:** Data is stored locally in your browser. No accounts, analytics, server databases, or external runtime dependencies.
 - **Backup:** Export/import JSON; import asks for confirmation, checks basic backup format and limits file size.

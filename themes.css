@@ -1,0 +1,224 @@
+/* NovaStudy OS — isolated Black & Gold theme
+   The default Cyber design remains untouched in styles.css.
+   The chosen theme is stored separately from novastudy_state_v1. */
+html[data-theme="gold"]{
+  color-scheme:dark;
+  --bg:#080706;
+  --panel:#15110a;
+  --panel2:#20190d;
+  --line:#604a27;
+  --text:#fff3d4;
+  --muted:#c2ae89;
+  --mint:#ebbb61;
+  --purple:#f1cf87;
+  --gold:#f5cc76;
+  --gold-strong:#f6ce74;
+  --gold-soft:#d0a34f;
+  --gold-dark:#9f732c;
+}
+html[data-theme="gold"] body{
+  background:
+    radial-gradient(ellipse at 86% -10%,rgba(198,133,34,.19) 0%,transparent 47%),
+    radial-gradient(ellipse at 18% 96%,rgba(130,91,26,.14) 0%,transparent 55%),
+    #080706;
+  color:var(--text);
+}
+html[data-theme="gold"] .sidebar{
+  background:linear-gradient(170deg,#100d08f5,#0a0805f5);
+  border-color:#4e3a1e;
+}
+html[data-theme="gold"] .brand strong,
+html[data-theme="gold"] .view-title,
+html[data-theme="gold"] .panel-title,
+html[data-theme="gold"] .stat-value{color:#fff1c9}
+html[data-theme="gold"] .brand small,
+html[data-theme="gold"] .sidebar-caption,
+html[data-theme="gold"] .sidebar-footer,
+html[data-theme="gold"] .nav-arrow,
+html[data-theme="gold"] .breadcrumb-muted,
+html[data-theme="gold"] .app-footer{color:#aa9069}
+html[data-theme="gold"] .brand-symbol,
+html[data-theme="gold"] .avatar-button{
+  background:linear-gradient(135deg,#e6b45e,#92621e);
+  border-color:#e8bc67;
+  color:#140e06;
+  box-shadow:0 0 30px #c894403b;
+}
+html[data-theme="gold"] .brand-spark{color:#fff1c4}
+html[data-theme="gold"] .nav-btn{color:#d7c29e}
+html[data-theme="gold"] .nav-btn:hover,
+html[data-theme="gold"] .nav-btn.active{
+  color:#fff4d7;
+  background:linear-gradient(110deg,#372812,#22190e);
+  border-color:#8e6a34;
+}
+html[data-theme="gold"] .nav-ico,
+html[data-theme="gold"] .eyebrow,
+html[data-theme="gold"] .section-caption,
+html[data-theme="gold"] .stat-icon{color:#ebbb61}
+html[data-theme="gold"] .status-pill{
+  color:#f1d394;
+  background:#241b0d;
+  border-color:#6b5128;
+}
+html[data-theme="gold"] .live-dot{
+  background:#e8bb6d;
+  box-shadow:0 0 12px #edb961;
+}
+html[data-theme="gold"] .mini-label{color:#bd9a5b}
+html[data-theme="gold"] .topbar{
+  background:rgba(15,11,6,.8);
+  border-color:#46351d;
+}
+html[data-theme="gold"] .clock{color:#f4dca6}
+html[data-theme="gold"] .hero{
+  background:
+    radial-gradient(circle at 80% 40%,rgba(219,162,62,.20),transparent 46%),
+    linear-gradient(115deg,#1f180e,#100d08 80%);
+  border-color:#98713d;
+  box-shadow:0 18px 55px #0006, inset 0 1px #d9ae6029;
+}
+html[data-theme="gold"] .hero p{color:#dcc7a3}
+html[data-theme="gold"] .orbit{
+  border-color:#d9ac59;
+  box-shadow:0 0 0 19px #a17a3255,0 0 0 40px #68491d22,0 0 40px #d7a44b56;
+}
+html[data-theme="gold"] .orbit-core{
+  color:#f7d790;
+  text-shadow:0 0 25px #dca14c;
+}
+html[data-theme="gold"] .orbit-core small{color:#fff0bf}
+html[data-theme="gold"] .panel{
+  background:linear-gradient(145deg,#20190f,#100d08);
+  border-color:#5d4525;
+  box-shadow:0 15px 38px #0005,inset 0 1px #ffe5a00e;
+}
+html[data-theme="gold"] .subject-card{
+  background:linear-gradient(135deg,#2a2010,#151008);
+  border-color:#71532b;
+}
+html[data-theme="gold"] .primary-btn{
+  background:linear-gradient(125deg,#f4d789,#c58f32);
+  border-color:#eed293;
+  color:#1b1204;
+  box-shadow:0 13px 33px #b5802f3b;
+}
+html[data-theme="gold"] .outline-button,
+html[data-theme="gold"] .secondary-btn,
+html[data-theme="gold"] .tiny-btn,
+html[data-theme="gold"] .modal-close,
+html[data-theme="gold"] .import-label{
+  background:#21190e;
+  color:#f7ddac;
+  border-color:#76552a;
+}
+html[data-theme="gold"] .secondary-btn:hover,
+html[data-theme="gold"] .tiny-btn:hover,
+html[data-theme="gold"] .outline-button:hover{
+  background:#403018;
+  border-color:#d6a64d;
+}
+html[data-theme="gold"] .danger-btn{
+  background:#332016;
+  border-color:#8c583e;
+  color:#ffbd9d;
+}
+html[data-theme="gold"] .chip,
+html[data-theme="gold"] .day-pill,
+html[data-theme="gold"] .filter-chip{
+  background:#251b0e;
+  border-color:#5f4626;
+  color:#e4cb9c;
+}
+html[data-theme="gold"] .day-pill.active,
+html[data-theme="gold"] .filter-chip.active{
+  background:#5a3c15;
+  color:#fff0cd;
+  border-color:#d2a455;
+}
+html[data-theme="gold"] .day-pill small,
+html[data-theme="gold"] .time-label small,
+html[data-theme="gold"] .session-text small,
+html[data-theme="gold"] .task-main small{color:#bda57e}
+html[data-theme="gold"] .time-label{color:#f0cf88}
+html[data-theme="gold"] .timeline-card,
+html[data-theme="gold"] .task-row,
+html[data-theme="gold"] .separator{border-color:#4e3b22}
+html[data-theme="gold"] .priority.high{color:#ffc18f}
+html[data-theme="gold"] .priority.medium{color:#f0d07c}
+html[data-theme="gold"] .priority.low{color:#c6d89a}
+html[data-theme="gold"] .task-tick{accent-color:#e8b75a}
+html[data-theme="gold"] .field label,
+html[data-theme="gold"] .form-grid label{color:#ebd5a8}
+html[data-theme="gold"] .field input,
+html[data-theme="gold"] .field select,
+html[data-theme="gold"] .form-grid input,
+html[data-theme="gold"] .form-grid select,
+html[data-theme="gold"] .toolbar input{
+  background:#120f0a;
+  color:#fff0d1;
+  border-color:#73572e;
+}
+html[data-theme="gold"] input::placeholder{color:#b39a70}
+html[data-theme="gold"] button:focus-visible,
+html[data-theme="gold"] input:focus-visible,
+html[data-theme="gold"] select:focus-visible{
+  outline-color:#f0c66f;
+}
+html[data-theme="gold"] .hint-banner{
+  background:#241b0e;
+  color:#ddc79e;
+  border-color:#795b30;
+}
+html[data-theme="gold"] .modal{
+  background:#1a140b;
+  border-color:#8c6735;
+  color:#fff0d1;
+}
+html[data-theme="gold"] .modal::backdrop{background:#050300dd}
+html[data-theme="gold"] .toast{
+  background:#292011;
+  border-color:#bb8d43;
+  color:#fff0cc;
+}
+html[data-theme="gold"] .mobile-nav{
+  background:#130e08f5;
+  border-color:#77562a;
+}
+html[data-theme="gold"] .mobile-nav button{color:#cbb58e}
+html[data-theme="gold"] .mobile-nav button.active{color:#ffdf9a}
+.theme-switch{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;white-space:nowrap}
+.theme-symbol{font-size:17px;line-height:1;color:var(--mint)}
+html[data-theme="gold"] .theme-switch{
+  background:linear-gradient(125deg,#292011,#493219);
+  border-color:#d1a658;
+  color:#ffe6ad;
+  box-shadow:0 0 18px #bf8d3855;
+}
+html[data-theme="gold"] .theme-symbol{color:#f3ce80}
+.appearance-panel{
+  display:flex;
+  gap:14px;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  border:1px solid var(--line);
+  background:rgba(150,150,200,.045);
+  border-radius:13px;
+  padding:15px;
+  margin:12px 0;
+}
+.appearance-copy{flex:1;min-width:160px}
+.appearance-copy b{display:block;font-size:12px;margin-bottom:5px}
+.appearance-copy small{display:block;color:var(--muted);font-size:11px;line-height:1.6}
+html[data-theme="gold"] .appearance-panel{
+  background:linear-gradient(125deg,#2a1f0f,#151009);
+  border-color:#825f2d;
+}
+html[data-theme="gold"] .appearance-copy small{color:#ccb38a}
+@media(max-width:660px){
+  .theme-switch{padding:8px 10px;font-size:10px;min-height:33px}
+  .theme-symbol{font-size:15px}
+  .appearance-panel{align-items:stretch}
+  .appearance-panel button{width:100%}
+}

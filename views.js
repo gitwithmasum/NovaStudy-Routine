@@ -28,7 +28,15 @@ function settings(){const p=s().profile,c=C[p.category];return heading("IDENTITY
 <div class="field wide"><label>Group / department</label><select id="profileTrack" name="track">${option(Object.keys(c.tracks),p.track)}</select></div>
 <div class="field wide"><label>Week begins</label><select name="weekStart">${option([[6,"Saturday"],[0,"Sunday"],[1,"Monday"]],p.weekStart)}</select></div><div class="wide"><button class="primary-btn" type="submit">Save profile →</button></div></form>
 <div class="hint-banner">Changing class or subject group never deletes existing routines, subjects or missions.</div></section>
-<section class="panel"><div class="panel-header"><b class="panel-title">Data & notifications</b><span class="chip">LOCAL FIRST</span></div><p class="panel-sub">Your routines are saved in THIS browser, not in a cloud database. Export regularly to avoid losing data.</p><div class="settings-actions">${button("⇩ Export JSON backup","export","secondary-btn")}<label class="import-label">⇧ Import backup<input type="file" id="importFile" accept=".json,application/json"></label></div><hr class="separator">
+<section class="panel"><div class="panel-header"><b class="panel-title">Data & notifications</b><span class="chip">LOCAL FIRST</span></div><div class="appearance-panel">
+  <div class="appearance-copy">
+    <b>Appearance</b>
+    <small>Keep the robotic Cyber look or switch to luxury Black & Gold. Your timetable and tasks stay unchanged.</small>
+  </div>
+  <button type="button" class="secondary-btn" data-action="toggle-theme" data-theme-choice>
+    ${document.documentElement.dataset.theme==="gold"?"Use Futuristic Cyber":"Use Black & Gold"}
+  </button>
+</div><hr class="separator"><p class="panel-sub">Your routines are saved in THIS browser, not in a cloud database. Export regularly to avoid losing data.</p><div class="settings-actions">${button("⇩ Export JSON backup","export","secondary-btn")}<label class="import-label">⇧ Import backup<input type="file" id="importFile" accept=".json,application/json"></label></div><hr class="separator">
 <label class="toggle-line"><span><b>In-app reminders</b><small>Only while app is open; no background alarms</small></span><input type="checkbox" id="remindersSwitch" ${p.reminders?"checked":""}></label>
 <div class="hint-banner">PWA works over HTTPS/localhost after first load. Installing does not create an Android APK or iOS IPA.</div></section></div>`}
 window.NOVA_VIEWS={button,heading,empty,option,session,task,dashboard,schedule,tasks,subjects,settings};

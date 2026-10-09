@@ -11,7 +11,17 @@
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="192x192" href="./assets/icon-192.png" />
   <link rel="apple-touch-icon" href="./assets/icon-192.png" />
+  <script>
+    // Keep the user's appearance preference independent from routine and task data.
+    try {
+      document.documentElement.dataset.theme =
+        localStorage.getItem("novastudy_theme_v1") === "gold" ? "gold" : "cyber";
+    } catch {
+      document.documentElement.dataset.theme = "cyber";
+    }
+  </script>
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./themes.css" />
   <title>NovaStudy — Routine OS</title>
 </head>
 <body>
@@ -40,12 +50,16 @@
         <div class="breadcrumb"><span class="breadcrumb-muted">WORKSPACE</span><span class="slash">/</span><span id="pageLabel">DASHBOARD</span></div>
         <div class="topbar-actions">
           <div class="clock" id="liveClock" aria-label="Local time">--:--</div>
+          <button class="outline-button theme-switch" id="themeToggle" type="button"
+            data-action="toggle-theme" aria-label="Switch theme" aria-pressed="false">
+            <span class="theme-symbol" aria-hidden="true">◐</span><span id="themeLabel">Cyber</span>
+          </button>
           <button class="outline-button top-install" id="installBtn" type="button"><span>⇩</span> Install app</button>
           <button class="avatar-button" type="button" data-nav="settings" title="Profile" aria-label="Open profile">ST</button>
         </div>
       </header>
       <div id="view" class="view"></div>
-      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>1.0</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
+      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>1.1</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
     </main>
   </div>
   <nav class="mobile-nav" aria-label="Mobile navigation">

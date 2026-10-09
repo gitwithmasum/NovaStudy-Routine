@@ -91,3 +91,6 @@ git push
 - Cloud sync/login নেই। রুটিন একটি ব্রাউজার/ডিভাইসে localStorage-এ থাকে।
 - Browser notifications **শুধু অ্যাপ খোলা থাকলে** কাজ করার জন্য তৈরি; background push/alarm গ্যারান্টিযুক্ত নয়।
 - APK/Play Store/App Store publishing এই v1 প্রকল্পের অংশ নয়। ভবিষ্যতে Capacitor/TWA দিয়ে মোবাইল প্যাকেজ তৈরি করা যায়।
+## Theme (v1.1)
+
+Header-এর **Cyber / Black Gold** button বা **Settings → Appearance** থেকে Black & Gold থিম চালু/বন্ধ করা যায়। পছন্দ করা থিম এই ব্রাউজারে সংরক্ষিত থাকে। আগের routine, task, subjects-এর data পরিবর্তন হয় না।
