@@ -1,0 +1,66 @@
+/* NovaStudy v1.3 — Smart Timetable, Exams, and Revision */
+.exam-dashboard,.exam-card,.exam-kpi,.repeat-helper{
+  border:1px solid var(--line);background:var(--panel);border-radius:15px;
+}
+.exam-dashboard{
+  display:flex;justify-content:space-between;align-items:center;gap:18px;
+  padding:20px 24px;margin:0 0 18px;
+  background:linear-gradient(120deg,var(--panel),var(--panel2));
+}
+.exam-dashboard h3{font-size:18px;margin:7px 0;color:var(--text)}
+.exam-dashboard p{color:var(--muted);font-size:12px;line-height:1.6;margin:0}
+.exam-dashboard-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.exam-countdown{
+  display:inline-flex;align-items:center;justify-content:center;min-height:30px;
+  padding:7px 11px;border:1px solid var(--mint);border-radius:999px;
+  color:var(--mint);font-size:11px;font-weight:850;background:color-mix(in srgb,var(--mint) 8%,transparent);
+  white-space:nowrap;
+}
+.exam-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 18px}
+.exam-kpi{padding:17px 19px;background:linear-gradient(135deg,var(--panel2),var(--panel))}
+.exam-kpi small{display:block;font-size:10px;font-weight:850;letter-spacing:1.1px;color:var(--muted)}
+.exam-kpi strong{display:block;margin-top:8px;font-size:20px;color:var(--text);overflow-wrap:anywhere}
+.exam-list{display:grid;gap:14px}
+.exam-card{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:18px;padding:18px 20px;background:linear-gradient(130deg,var(--panel2),var(--panel));
+}
+.exam-card.is-completed{opacity:.72}
+.exam-card-main{display:flex;align-items:center;gap:14px;min-width:0;flex:1}
+.exam-date-block{
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  min-width:61px;min-height:64px;padding:7px 10px;border-radius:13px;
+  border:1px solid var(--mint);color:var(--mint);background:color-mix(in srgb,var(--mint) 9%,transparent);
+}
+.exam-date-block strong{font-size:22px}.exam-date-block small{font-size:11px;text-transform:uppercase}
+.exam-card-info{display:grid;gap:7px;min-width:0}
+.exam-card-info b{font-size:15px;overflow-wrap:anywhere}
+.exam-card-info span,.exam-card-info small{color:var(--muted);font-size:11px;overflow-wrap:anywhere}
+.exam-card-side{display:flex;flex-direction:column;align-items:flex-end;gap:11px}
+.exam-revision-meta{font-size:10px;color:var(--muted)}
+.exam-card-actions{display:flex;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+.exam-card-actions button{font-size:10px;padding:8px 11px}
+.repeat-helper{padding:12px;color:var(--muted);font-size:11px;line-height:1.65;margin-bottom:13px}
+.schedule-recurring-indicator{display:inline-block;color:var(--mint);font-size:10px;margin-top:4px}
+html[data-theme="gold"] .exam-dashboard,
+html[data-theme="gold"] .exam-card,
+html[data-theme="gold"] .exam-kpi{
+  background:linear-gradient(130deg,#241a0e,#110d07);border-color:#76552b;
+}
+html[data-theme="gold"] .exam-countdown,
+html[data-theme="gold"] .exam-date-block{border-color:#dcaf55;color:#f2cc78;background:#38270f}
+@media(max-width:960px){.exam-card{align-items:flex-start;flex-direction:column}.exam-card-side{align-items:flex-start;width:100%}.exam-card-actions{justify-content:flex-start}}
+@media(max-width:660px){
+  .mobile-nav{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .mobile-nav button{min-width:0;font-size:8px;padding:5px 0;overflow:hidden}
+  .mobile-nav button span{font-size:18px}
+  .mobile-nav button small{font-size:9px}
+  .exam-dashboard{flex-direction:column;align-items:stretch;padding:16px}
+  .exam-dashboard-actions{justify-content:space-between}
+  .exam-kpis{grid-template-columns:1fr 1fr}
+  .exam-kpi:last-child{grid-column:1/-1}
+  .exam-card{padding:15px}
+  .exam-card-actions{width:100%;gap:6px}
+  .exam-card-actions button{flex:1}
+}
+@media(max-width:370px){.mobile-nav button small{font-size:8px}.exam-kpi strong{font-size:16px}}

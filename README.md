@@ -147,3 +147,15 @@ NovaStudy-Routine/
 ## License
 
 MIT — © 2026 Masum Billah.
+## v1.3 — Smart Timetable & Exam Planner
+
+- **Exams & revision** (desktop and mobile): add, edit, complete/reopen, or delete an exam with subject, date, start/end, location, and notes.
+- **Countdown:** next upcoming exam appears on the dashboard, with dynamic device-local countdowns on the Exam page.
+- **Repeat controls:** sessions can repeat weekly (optional end date), or occur once on a specific date. Existing saved timetable entries remain weekly by default.
+- **Revision plan:** select an exam, session count, duration, and start time. NovaStudy adds dated **one-time revision sessions plus linked tasks**, shifting forward in 15-minute steps where needed to avoid clashes. Running again avoids duplicate dates; tightly spaced exams may result in fewer sessions.
+- **Backward-compatible data:** existing `novastudy_state_v1` records and v1 JSON backup files remain valid; `exams: []` is initialized if missing. No need to reset local storage.
+- **Privacy:** all data remains on the device. No cross-device sync or guaranteed background alarms.
+- **Deleting an exam** does not delete existing revision sessions/tasks, preventing accidental loss of your study history.
+
+### Try it
+Select **Exams & revision → Add exam → Plan revision**. Check your **Weekly routine** for one-time blocks and **Tasks & goals** for linked revision to-dos.

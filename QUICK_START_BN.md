@@ -98,3 +98,13 @@ Header-এর **Cyber / Black Gold** button বা **Settings → Appearance** �
 ### v1.2 — Theme selection
 
 Settings → Appearance-এ **Cyber** ও **Black & Gold** এর visual preview card থাকবে। Card-এ click করে theme select করবে, অথবা header-এর theme button ব্যবহার করবে। Preference refresh-এর পরও থাকবে; একই browser-এর অন্য tab-এও sync হবে। Routine data বদলাবে না।
+
+## v1.3 — Smart Timetable ও Exam Planner
+
+1. Desktop sidebar অথবা mobile bottom navigation থেকে **Exams** খোলো।
+2. **Add exam** দিয়ে পরীক্ষার নাম, বিষয়, তারিখ, সময়, ভেন্যু ও notes যোগ করো।
+3. **Plan revision** থেকে session সংখ্যা, duration ও preferred start time নির্বাচন করো।
+4. Auto planner পরীক্ষার আগের দিনগুলোয় clash এড়িয়ে এককালীন (one-time) study sessions এবং related tasks তৈরি করবে।
+5. Weekly routine editor-এ **Every week** অথবা **One time** বেছে নেওয়া যায়।
+6. আগের routine, tasks, subjects এবং v1 backup অক্ষত থাকে। LocalStorage-এর পুরো data clear করবে না।
+7. Countdown device-local time অনুযায়ী; background notifications এই version-এ নেই।
