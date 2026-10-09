@@ -94,3 +94,7 @@ git push
 ## Theme (v1.1)
 
 Header-এর **Cyber / Black Gold** button বা **Settings → Appearance** থেকে Black & Gold থিম চালু/বন্ধ করা যায়। পছন্দ করা থিম এই ব্রাউজারে সংরক্ষিত থাকে। আগের routine, task, subjects-এর data পরিবর্তন হয় না।
+
+### v1.2 — Theme selection
+
+Settings → Appearance-এ **Cyber** ও **Black & Gold** এর visual preview card থাকবে। Card-এ click করে theme select করবে, অথবা header-এর theme button ব্যবহার করবে। Preference refresh-এর পরও থাকবে; একই browser-এর অন্য tab-এও sync হবে। Routine data বদলাবে না।

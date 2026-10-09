@@ -28,14 +28,22 @@ function settings(){const p=s().profile,c=C[p.category];return heading("IDENTITY
 <div class="field wide"><label>Group / department</label><select id="profileTrack" name="track">${option(Object.keys(c.tracks),p.track)}</select></div>
 <div class="field wide"><label>Week begins</label><select name="weekStart">${option([[6,"Saturday"],[0,"Sunday"],[1,"Monday"]],p.weekStart)}</select></div><div class="wide"><button class="primary-btn" type="submit">Save profile →</button></div></form>
 <div class="hint-banner">Changing class or subject group never deletes existing routines, subjects or missions.</div></section>
-<section class="panel"><div class="panel-header"><b class="panel-title">Data & notifications</b><span class="chip">LOCAL FIRST</span></div><div class="appearance-panel">
+<section class="panel"><div class="panel-header"><b class="panel-title">Data & notifications</b><span class="chip">LOCAL FIRST</span></div><div class="appearance-panel appearance-panel-v12">
   <div class="appearance-copy">
-    <b>Appearance</b>
-    <small>Keep the robotic Cyber look or switch to luxury Black & Gold. Your timetable and tasks stay unchanged.</small>
+    <b>Choose your theme</b>
+    <small>Choose an interface style without changing your saved routine, tasks, or subjects.</small>
   </div>
-  <button type="button" class="secondary-btn" data-action="toggle-theme" data-theme-choice>
-    ${document.documentElement.dataset.theme==="gold"?"Use Futuristic Cyber":"Use Black & Gold"}
-  </button>
+  <div class="theme-gallery" role="group" aria-label="Appearance theme">
+    <button type="button" class="theme-option" data-action="theme-select" data-theme-value="cyber" aria-pressed="false" aria-label="Use Futuristic Cyber theme">
+      <span class="theme-preview theme-preview-cyber" aria-hidden="true"><span class="preview-top"></span><span class="preview-main"><i></i><b></b><em></em></span></span>
+      <span class="theme-option-bottom"><span class="theme-option-name"><strong>Futuristic Cyber</strong><small>Cyan + violet</small></span><span class="theme-check" aria-hidden="true">✓</span></span>
+    </button>
+    <button type="button" class="theme-option" data-action="theme-select" data-theme-value="gold" aria-pressed="false" aria-label="Use Black and Gold theme">
+      <span class="theme-preview theme-preview-gold" aria-hidden="true"><span class="preview-top"></span><span class="preview-main"><i></i><b></b><em></em></span></span>
+      <span class="theme-option-bottom"><span class="theme-option-name"><strong>Black & Gold</strong><small>Midnight + gold</small></span><span class="theme-check" aria-hidden="true">✓</span></span>
+    </button>
+  </div>
+  <small class="theme-save-note">Your appearance preference is saved on this device, including after refresh.</small>
 </div><hr class="separator"><p class="panel-sub">Your routines are saved in THIS browser, not in a cloud database. Export regularly to avoid losing data.</p><div class="settings-actions">${button("⇩ Export JSON backup","export","secondary-btn")}<label class="import-label">⇧ Import backup<input type="file" id="importFile" accept=".json,application/json"></label></div><hr class="separator">
 <label class="toggle-line"><span><b>In-app reminders</b><small>Only while app is open; no background alarms</small></span><input type="checkbox" id="remindersSwitch" ${p.reminders?"checked":""}></label>
 <div class="hint-banner">PWA works over HTTPS/localhost after first load. Installing does not create an Android APK or iOS IPA.</div></section></div>`}
