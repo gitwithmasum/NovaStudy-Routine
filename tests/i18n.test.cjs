@@ -78,7 +78,7 @@ test('translated relative dates and counters use Bangla digits',()=>{
 test('app wiring and service worker are prepared for offline bilingual use',()=>{
  const files=Object.fromEntries(['index.html','app.js','views.js','editors.js','exams.js','sw.js'].map(f=>[f,readFileSync(path.join(root,f),'utf8')]));
  assert.ok(files['index.html'].includes('src="./i18n.js"'));
- assert.ok(files['index.html'].includes('<b>1.5.0</b>'));
+ assert.ok(files['index.html'].includes('<b>1.6.0</b>'));
  assert.ok(files['app.js'].includes('I.useExternal(e.newValue)'));
  assert.ok(files['views.js'].includes('data-lang="bn"'));
  assert.ok(files['editors.js'].includes('aria-labelledby'));

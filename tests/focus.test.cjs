@@ -107,3 +107,26 @@ test('v1.6 integration, offline cache, and bilingual hooks are included',()=>{
    assert.doesNotThrow(()=>new vm.Script(readFileSync(path.join(root,f),'utf8'),{filename:f}));
  }
 });
+
+test('Web Audio alert schedules chimes that all finish before 10 seconds',()=>{
+ const notes=[];
+ class FakeAudio {
+   constructor(){this.state='running';this.currentTime=100;this.destination={};}
+   createOscillator(){return {frequency:{value:0},connect:()=>{},start:()=>{},stop:time=>notes.push(time)};}
+   createGain(){return {gain:{setValueAtTime:()=>{},exponentialRampToValueAtTime:()=>{}},connect:()=>{}};}
+   resume(){return Promise.resolve();}
+ }
+ const st=storage();
+ const w={NOVA:{date:d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-'),escape:s=>String(s)},
+ NOVA_I18N:{language:'en',number:s=>String(s),t:s=>s,displayDate:s=>s},AudioContext:FakeAudio,confirm:()=>true};
+ const doc={hidden:false,getElementById:()=>null,querySelector:()=>null,addEventListener:()=>{}};
+ vm.runInNewContext(source,{window:w,document:doc,localStorage:st,setInterval:()=>0,Date,JSON,Math});
+ const F=w.NOVA_FOCUS;
+ let notified=0;
+ F.init({onComplete:()=>notified++,toast:()=>{},refresh:()=>{}});
+ assert.equal(F.start(1000),true);
+ F.tick(1501000,false);
+ assert.equal(notes.length,12);
+ assert.ok(Math.max(...notes)-100<10);
+ assert.equal(notified,1);
+});
