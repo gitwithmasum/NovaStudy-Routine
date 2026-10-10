@@ -89,3 +89,11 @@ test('app wiring and service worker are prepared for offline bilingual use',()=>
    assert.doesNotThrow(()=>new vm.Script(readFileSync(path.join(root,f),'utf8'),{filename:f}));
  }
 });
+
+test('education category and class labels translate without modifying underlying options',()=>{
+ const {I}=setup('bn');
+ assert.equal(I.t('Class 9'),'শ্রেণি ৯');
+ assert.equal(I.t('Undergraduate — Year 2'),'স্নাতক — দ্বিতীয় বর্ষ');
+ assert.notEqual(I.t('Computer / IT'),'Computer / IT');
+ assert.equal(I.t('Class 11 / HSC 1st Year'),'শ্রেণি ১১ / এইচএসসি প্রথম বর্ষ');
+});
