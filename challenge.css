@@ -1,0 +1,48 @@
+/* CSE 100 / responsive learning console. Both existing theme palettes use CSS variables. */
+.challenge-hero{display:grid;grid-template-columns:1fr auto;gap:12px 22px;border:1px solid var(--line);border-radius:20px;padding:22px;margin-bottom:16px;background:radial-gradient(ellipse at 85% 20%,color-mix(in srgb,var(--mint) 19%,transparent),transparent 55%),linear-gradient(135deg,var(--panel2),var(--panel));box-shadow:0 20px 60px #0002}
+.challenge-hero h2{font-size:clamp(38px,5vw,62px);line-height:1;margin:9px 0 5px;letter-spacing:-.04em}
+.challenge-hero p,.challenge-hero-score small{color:var(--muted);font-size:12px;margin:0}
+.challenge-hero-score{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:5px}
+.challenge-hero-score strong{font-size:34px;color:var(--mint)}
+.challenge-hero-bar{grid-column:1/-1}
+.challenge-bar{height:8px;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:color-mix(in srgb,var(--bg) 75%,var(--panel));}
+.challenge-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--purple),var(--mint));transition:width .2s ease}
+.challenge-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.challenge-stat{display:flex;flex-direction:column;gap:5px;padding:17px 14px;border:1px solid var(--line);border-radius:15px;background:var(--panel)}
+.challenge-stat b{font-size:24px}.challenge-stat span{font-size:11px;color:var(--muted)}
+.challenge-import{margin-bottom:20px}
+.challenge-controls,.challenge-toolbar{display:flex;align-items:flex-end;flex-wrap:wrap;gap:11px;margin:16px 0}
+.challenge-controls label,.challenge-toolbar label,.challenge-status-label{display:flex;flex-direction:column;gap:7px;color:var(--muted);font-size:12px;font-weight:700}
+.challenge-controls input,.challenge-controls select,.challenge-toolbar input,.challenge-toolbar select,.challenge-status-label select{width:100%;min-width:150px;max-width:300px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:9px;padding:10px;min-height:39px}
+.challenge-controls button{min-height:40px}
+.challenge-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(235px,1fr);align-items:start;gap:16px}
+.challenge-topic-list{display:grid;gap:13px}
+.challenge-topic{border:1px solid var(--line);background:var(--panel2);border-radius:15px;padding:16px;min-width:0}
+.challenge-topic.is-completed{border-color:var(--mint);background:color-mix(in srgb,var(--mint) 7%,var(--panel))}
+.challenge-topic-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.challenge-index{font-size:12px;color:var(--mint);font-weight:800;margin-right:10px}
+.challenge-topic-block{font-size:10px;color:var(--muted)}
+.challenge-tag{font-size:10px;padding:5px 8px;border:1px solid var(--line);border-radius:999px;color:var(--text)}
+.challenge-notimported{color:var(--muted)}
+.challenge-topic h3{font-size:15px;line-height:1.45;margin:13px 0 6px;overflow-wrap:anywhere}
+.challenge-topic p{color:var(--muted);font-size:12px;line-height:1.7;margin:0 0 12px}
+.challenge-practice{border-left:3px solid var(--mint);padding:10px 12px;background:color-mix(in srgb,var(--mint) 7%,transparent);border-radius:0 9px 9px 0;color:var(--text);font-size:12px;line-height:1.7;margin-bottom:13px}
+.challenge-practice strong{display:block;color:var(--mint);margin-bottom:3px}
+.challenge-status-label select{max-width:240px}
+.challenge-block-list{display:grid;gap:17px;padding-top:12px}
+.challenge-block-summary{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;font-size:11px;min-width:0}
+.challenge-block-summary strong{line-height:1.6;font-size:11px;overflow-wrap:anywhere}
+.challenge-block-summary span{color:var(--muted)}
+.challenge-block-summary .challenge-bar{grid-column:1/-1;height:6px}
+.challenge-dash{margin:14px 0 18px;padding:18px 20px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(110deg,var(--panel2),var(--panel));display:flex;justify-content:space-between;align-items:center;gap:16px}
+.challenge-dash h3{margin:7px 0;font-size:17px}
+.challenge-dash p{font-size:12px;color:var(--muted);margin:0}
+.challenge-dash-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.challenge-dash-actions strong{font-size:24px;color:var(--mint)}
+html[data-theme="gold"] .challenge-hero{box-shadow:0 17px 45px #0005}
+html[data-theme="gold"] .challenge-controls :is(input,select),html[data-theme="gold"] .challenge-toolbar :is(input,select),html[data-theme="gold"] .challenge-status-label select{background:#120f0a;border-color:#795b30}
+@media(max-width:1050px){.challenge-layout{grid-template-columns:1fr}.challenge-block-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:660px){.challenge-hero{padding:16px}.challenge-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.challenge-import{padding:14px}.challenge-controls,.challenge-toolbar{flex-direction:column;align-items:stretch}.challenge-controls label,.challenge-controls input,.challenge-controls select,.challenge-toolbar label,.challenge-toolbar input,.challenge-toolbar select{width:100%;max-width:none}.challenge-controls button{width:100%}.challenge-layout .panel{padding:14px}.challenge-block-list{grid-template-columns:1fr}.challenge-dash{flex-direction:column;align-items:stretch}.challenge-dash-actions{justify-content:space-between}.challenge-topic-top{align-items:flex-start}.challenge-hero-score strong{font-size:28px}}
+@media(prefers-reduced-motion:reduce){.challenge-bar i{transition:none}}
+
+@media(max-width:660px){.mobile-nav{grid-template-columns:repeat(9,minmax(0,1fr))}.mobile-nav small,html[lang="bn"] .mobile-nav small{font-size:6.8px}}

@@ -18,6 +18,8 @@ jobs:
           node-version: '22'
       - name: Verify source and regression tests
         run: |
+          node --check challenge-data.js
+          node --check challenge.js
           node --check attendance.js
           node --check core.js
           node --check focus.js

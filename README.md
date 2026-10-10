@@ -208,3 +208,16 @@ The selected futuristic graduation-cap artwork is now the app icon for installab
 - **Backup and compatibility:** Attendance is stored in the **existing** `novastudy_state_v1` structure and exported in ordinary JSON backups. Old v1 backups without an attendance array continue to import. This is **not** a cloud database or official school attendance record.
 - **Privacy:** Vercel, Netlify, localhost and other devices have separate local storage. Export/import backups to move attendance with routines. Focus Timer statistics are still separate and not part of that backup.
 - **Regression tests:** `node --test tests/*.test.cjs` checks legacy migration, duplicate prevention, invalid/future dates, wrong-day schedules, manual records, percentage calculation, storage rollback, security, and previous features.
+
+
+## NovaStudy v1.8 — CSE 100 Learning Challenge
+
+- New **CSE 100 Challenge** tab on desktop/mobile/PWA, with exactly **100 topics**, ten curated learning blocks, learning concepts, and practical tasks in English and Bangla.
+- Start-date picker sets the **60-day calendar schedule**: two topics per day on block days 1–4, one topic on day 5, and the final topic + review on day 6.
+- **Import all 100**, selected block or individual topic; stable topic IDs prevent duplicates and preserve previously completed or ongoing work.
+- Per-topic **Not Started / Learning / Practiced / Completed** status, today/search/block/status filters, completion dashboard and per-block progress.
+- Optional validated \`challenge:{startDate:"",items:[]}\` extends \`novastudy_state_v1\` without resetting past tasks, exams, subjects, sessions or attendance.
+- JSON backups now include challenge progress. Old backups lacking the challenge field still import correctly, but restoring any old backup replaces the current local state, including the new challenge, so export a current backup first.
+- Language labels switch between Bangla and English; inherited Cyber/Black & Gold CSS variables keep both themes.
+- PWA offline shell includes the new scripts and styles. Local storage remains **per browser and origin**; Netlify and Vercel do not automatically share tasks or challenge progress.
+- Regression tests: \`node --test tests/*.test.cjs\`; includes idempotent import, schedule, invalid records, legacy restore and quota rollback.

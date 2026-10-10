@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./themes.css" />
   <link rel="stylesheet" href="./planner.css" />
+  <link rel="stylesheet" href="./challenge.css" />
   <title>NovaStudy — Routine OS</title>
 </head>
 <body>
@@ -37,6 +38,7 @@
         <button class="nav-btn active" data-nav="dashboard"><span class="nav-ico">▦</span><span>Dashboard</span><span class="nav-arrow">›</span></button>
         <button class="nav-btn" data-nav="schedule"><span class="nav-ico">▤</span><span>Weekly routine</span><span class="nav-arrow">›</span></button>
         <button class="nav-btn" data-nav="tasks"><span class="nav-ico">☑</span><span>Tasks & goals</span><span class="nav-arrow">›</span></button>
+        <button class="nav-btn" data-nav="challenge"><span class="nav-ico">✧</span><span>CSE 100 Challenge</span><span class="nav-arrow">›</span></button>
         <button class="nav-btn" data-nav="focus"><span class="nav-ico">◉</span><span>Focus timer</span><span class="nav-arrow">›</span></button>
         <button class="nav-btn" data-nav="exams"><span class="nav-ico">◷</span><span>Exams & revision</span><span class="nav-arrow">›</span></button>
         <button class="nav-btn" data-nav="attendance"><span class="nav-ico">▤</span><span>Attendance & analytics</span><span class="nav-arrow">›</span></button>
@@ -68,13 +70,14 @@
       <div class="reliability-actions"><button type="button" data-action="apply-update">Update and reload</button></div>
     </div>
     <div id="view" class="view"></div>
-      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>1.7.0</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
+      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>1.8.0</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
     </main>
   </div>
   <nav class="mobile-nav" aria-label="Mobile navigation">
     <button data-nav="dashboard" class="active"><span>▦</span><small>Home</small></button>
     <button data-nav="schedule"><span>▤</span><small>Routine</small></button>
     <button data-nav="tasks"><span>☑</span><small>Tasks</small></button>
+    <button data-nav="challenge"><span>✧</span><small>CSE 100</small></button>
     <button data-nav="focus"><span>◉</span><small>Focus</small></button>
     <button data-nav="exams"><span>◷</span><small>Exams</small></button>
     <button data-nav="attendance"><span>▤</span><small>Attend.</small></button>
@@ -91,6 +94,8 @@
   <script src="./exams.js" defer></script>
   <script src="./focus.js" defer></script>
   <script src="./attendance.js" defer></script>
+  <script src="./challenge-data.js" defer></script>
+  <script src="./challenge.js" defer></script>
   <script src="./app.js" defer></script>
 </body>
 </html>
