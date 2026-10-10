@@ -1,0 +1,17 @@
+/* v1.9 Google Account panel uses both Cyber and Black & Gold design tokens. */
+.google-auth-panel{grid-column:1/-1}
+.auth-state{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:10px;color:var(--muted);font-weight:800}
+.auth-state.connected{border-color:var(--mint);color:var(--mint)}
+.auth-summary{display:flex;align-items:center;gap:13px;margin:18px 0}
+.auth-monogram{display:grid;place-items:center;flex:0 0 52px;width:52px;height:52px;border-radius:15px;color:var(--text);border:1px solid var(--line);background:var(--panel2);font-size:26px;font-weight:800}
+.auth-summary-text{min-width:0;display:flex;flex-direction:column;gap:6px}
+.auth-summary-text strong{font-size:15px;overflow-wrap:anywhere}
+.auth-summary-text small{font-size:12px;color:var(--muted);line-height:1.6;overflow-wrap:anywhere}
+.google-signin-btn{display:flex;justify-content:center;align-items:center;gap:12px;background:#fff;color:#252a34;font-size:13px;font-weight:750;border:1px solid #ddd;border-radius:10px;padding:10px 20px;min-height:44px}
+.google-signin-btn:hover:not(:disabled){background:#f5f7fb}
+.google-letter{font-size:20px;font-weight:800;color:#4285f4}
+.auth-privacy{margin-top:14px;line-height:1.6}
+.auth-help{font-size:11px;line-height:1.65;color:var(--muted)}
+.auth-error{color:#ffa998;font-size:12px;overflow-wrap:anywhere}
+html[data-theme="gold"] .auth-monogram{border-color:var(--line)}
+@media(max-width:660px){.auth-summary{align-items:flex-start}.google-signin-btn{width:100%}.auth-summary-text{max-width:calc(100% - 65px)}}

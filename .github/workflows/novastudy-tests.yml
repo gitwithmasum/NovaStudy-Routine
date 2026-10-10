@@ -19,6 +19,8 @@ jobs:
       - name: Verify source and regression tests
         run: |
           node --check challenge-data.js
+          node --check auth-config.js
+          node --check auth.js
           node --check challenge.js
           node --check attendance.js
           node --check core.js

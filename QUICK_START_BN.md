@@ -108,3 +108,9 @@ Settings → Appearance-এ **Cyber** ও **Black & Gold** এর visual preview
 5. Weekly routine editor-এ **Every week** অথবা **One time** বেছে নেওয়া যায়।
 6. আগের routine, tasks, subjects এবং v1 backup অক্ষত থাকে। LocalStorage-এর পুরো data clear করবে না।
 7. Countdown device-local time অনুযায়ী; background notifications এই version-এ নেই।
+
+## v1.9 — Google Account Login
+
+Profile & Settings → Google Account-এ Google দিয়ে Login/Logout UI আছে। Google Login বাস্তবে চালু করতে NovaStudy-এর আলাদা Supabase Auth Project, Google OAuth Client, Redirect URLs এবং auth-config.js-এ Public URL/Publishable Key Configure করতে হবে।
+Setup Guide: [GOOGLE_SIGNIN_SETUP_BN.md](./GOOGLE_SIGNIN_SETUP_BN.md)
+Google Login করলে পুরোনো Routine, Tasks, Exams, Attendance বা CSE 100 Challenge Cloud-এ Sync হয় না এবং Sign Out করলেও Local Data মুছে যায় না।

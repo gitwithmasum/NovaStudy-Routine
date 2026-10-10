@@ -221,3 +221,12 @@ The selected futuristic graduation-cap artwork is now the app icon for installab
 - Language labels switch between Bangla and English; inherited Cyber/Black & Gold CSS variables keep both themes.
 - PWA offline shell includes the new scripts and styles. Local storage remains **per browser and origin**; Netlify and Vercel do not automatically share tasks or challenge progress.
 - Regression tests: \`node --test tests/*.test.cjs\`; includes idempotent import, schedule, invalid records, legacy restore and quota rollback.
+
+## NovaStudy v1.9 — Optional Google Account
+
+- The **Google Account** card in My Profile & Settings has Sign in with Google, verified name/email and Sign out.
+- OAuth uses a **dedicated NovaStudy Supabase Auth project** with PKCE. The public browser configuration is intentionally blank until the site owner enables the Google provider and supplies the project's public URL and publishable key in auth-config.js.
+- Setup guide (বাংলা): [GOOGLE_SIGNIN_SETUP_BN.md](./GOOGLE_SIGNIN_SETUP_BN.md). Never store a Google OAuth client secret, service_role or sb_secret key in the repository.
+- **Login is identity-only:** It does NOT automatically sync or upload routines, tasks, exams, attendance, challenge progress, or backups. Sign-out keeps the local study data intact.
+- Google Login needs Internet. The original offline PWA and local features continue working. The auth config script is served network-first for updated public configuration.
+- Tests: node --test tests/*.test.cjs (including auth redirect/provider checks, HTML escaping, session/data isolation, and existing regressions).
