@@ -30,15 +30,100 @@ function occursOn(session,when){
  if(session.repeat==="once")return Boolean(session.date)&&date(when)===session.date;
  return session.day===when.getDay()&&(!session.repeatUntil||date(when)<=session.repeatUntil);
 }
-function valid(s){return Boolean(s&&s.version===1&&s.profile&&C[s.profile.category]&&Array.isArray(s.subjects)&&Array.isArray(s.sessions)&&Array.isArray(s.tasks)&&s.subjects.length<=300&&s.sessions.length<=3000&&s.tasks.length<=3000&&s.subjects.every(x=>typeof x.name==="string"&&typeof x.id==="string"&&x.name.length<=120)&&s.sessions.every(x=>typeof x.id==="string"&&Number.isInteger(x.day)&&x.day>=0&&x.day<=6&&/^\d\d:\d\d$/.test(x.start)&&/^\d\d:\d\d$/.test(x.end)&&typeof x.subjectId==="string")&&s.tasks.every(x=>typeof x.id==="string"&&typeof x.title==="string"&&x.title.length<=250)&&(!("exams" in s)||(Array.isArray(s.exams)&&s.exams.length<=500&&s.exams.every(validExam))))}
-let state;try{const v=JSON.parse(localStorage.getItem(KEY));state=valid(v)?normalize(v):initial()}catch{state=initial()}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(state));return true}catch{return false}}
-function setState(x){if(!valid(x))return false;state=normalize(x);return save()}
+const validTime=x=>/^([01]\d|2[0-3]):[0-5]\d$/.test(String(x));
+const idOk=x=>typeof x==="string"&&x.length>0&&x.length<=128;
+function uniqueIds(list){return new Set(list.map(x=>x.id)).size===list.length}
+function valid(s){
+ if(!s||s.version!==1||!s.profile||!Object.prototype.hasOwnProperty.call(C,s.profile.category))return false;
+ const p=s.profile;
+ if(typeof p.name!=="string"||p.name.length>80||typeof p.level!=="string"||typeof p.track!=="string"
+   ||!Array.isArray(s.subjects)||!Array.isArray(s.sessions)||!Array.isArray(s.tasks))return false;
+ if(s.subjects.length>300||s.sessions.length>3000||s.tasks.length>3000)return false;
+ if(!s.subjects.every(x=>x&&idOk(x.id)&&typeof x.name==="string"&&x.name.length<=120
+   &&(x.color===undefined||typeof x.color==="string"))||!uniqueIds(s.subjects))return false;
+ if(!s.sessions.every(x=>x&&idOk(x.id)&&Number.isInteger(x.day)&&x.day>=0&&x.day<=6
+   &&validTime(x.start)&&validTime(x.end)&&min(x.end)>min(x.start)
+   &&typeof x.subjectId==="string"&&x.subjectId.length<=128
+   &&(x.repeat===undefined||x.repeat==="weekly"||x.repeat==="once")
+   &&(x.repeat!=="once"||(validDate(x.date)&&new Date(x.date+"T12:00:00").getDay()===x.day))
+   &&(!x.repeatUntil||(x.repeat!=="once"&&validDate(x.repeatUntil)))
+   &&(x.title===undefined||typeof x.title==="string"&&x.title.length<=100)
+   &&(x.place===undefined||typeof x.place==="string"&&x.place.length<=120)
+   &&(x.revisionFor===undefined||typeof x.revisionFor==="string"))||!uniqueIds(s.sessions))return false;
+ if(!s.tasks.every(x=>x&&idOk(x.id)&&typeof x.title==="string"&&x.title.length<=250
+   &&(x.subjectId===undefined||typeof x.subjectId==="string")
+   &&(!x.due||validDate(x.due))
+   &&(x.priority===undefined||["low","medium","high"].includes(x.priority))
+   &&(x.done===undefined||typeof x.done==="boolean")
+   &&(x.revisionFor===undefined||typeof x.revisionFor==="string"))||!uniqueIds(s.tasks))return false;
+ if("exams" in s&&(!Array.isArray(s.exams)||s.exams.length>500
+   ||!s.exams.every(validExam)||!uniqueIds(s.exams)))return false;
+ return true;
+}
+let state,persistedRaw=null,snapshot="",issue="",writeLocked=false,unreadableRaw=null;
+try{
+ persistedRaw=localStorage.getItem(KEY);
+ if(persistedRaw!==null){
+   const decoded=JSON.parse(persistedRaw);
+   if(valid(decoded))state=normalize(decoded);
+   else throw Error("Invalid stored state");
+ }
+}catch{
+ issue="Stored data could not be read safely. Your original data was not overwritten. Import a valid JSON backup in Settings to recover.";
+ writeLocked=true;unreadableRaw=persistedRaw;
+}
+if(!state)state=initial();
+snapshot=JSON.stringify(state);
+function rollback(){state=JSON.parse(snapshot)}
+function save(){
+ if(writeLocked){rollback();return false}
+ try{
+   if(!valid(state)){issue="Save prevented: invalid routine or exam data. The last saved copy was restored.";rollback();return false}
+   const current=localStorage.getItem(KEY);
+   if(current!==persistedRaw){
+     if(!acceptExternal(current))rollback();
+     issue="Another tab or browser storage changed your routine. The stale edit was not saved; review the latest data and retry.";
+     return false;
+   }
+   const next=JSON.stringify(state);
+   localStorage.setItem(KEY,next);
+   persistedRaw=next;snapshot=next;issue="";
+   return true;
+ }catch{
+   rollback();issue="Could not save to this device. Check browser storage and export a backup before making further changes.";
+   return false;
+ }
+}
+function setState(value){
+ if(!valid(value)){issue="Backup rejected. The current data is unchanged.";return false}
+ try{
+   const candidate=JSON.stringify(normalize(JSON.parse(JSON.stringify(value))));
+   localStorage.setItem(KEY,candidate);
+   state=JSON.parse(candidate);snapshot=candidate;persistedRaw=candidate;
+   writeLocked=false;unreadableRaw=null;issue="";
+   return true;
+ }catch{
+   issue="Backup restore failed because device storage is unavailable. Your existing data was not replaced.";
+   return false;
+ }
+}
+function acceptExternal(raw){
+ if(raw===null)return false;
+ try{
+   const parsed=JSON.parse(raw);
+   if(!valid(parsed))return false;
+   state=normalize(parsed);snapshot=JSON.stringify(state);persistedRaw=raw;
+   writeLocked=false;unreadableRaw=null;issue="";
+   return true;
+ }catch{return false}
+}
 const get=()=>state;
+const getIssue=()=>issue;
+const rawRecovery=()=>unreadableRaw;
 const name=id=>state.subjects.find(s=>s.id===id)?.name||"Personal";
 const color=id=>{const x=state.subjects.find(s=>s.id===id)?.color;return colors.includes(x)?x:colors[0]};
 const subjectPreset=()=>C[state.profile.category]?.tracks[state.profile.track]||[];
-function addSuggestions(){let count=0;for(const n of subjectPreset()){if(state.subjects.length>=300)break;if(!state.subjects.some(s=>s.name.toLowerCase()===n.toLowerCase())){state.subjects.push({id:uid(),name:n,color:colors[state.subjects.length%colors.length]});count++}}save();return count}
-function addStudy({days=5,blocks=2,start="16:00",length=50,breakTime=10}={}){let added=0,skipped=0;for(let i=0;i<days;i++){const target=new Date();target.setDate(target.getDate()+i);const day=target.getDay();let cursor=min(start);for(let j=0;j<blocks;j++){let attempts=0;while(attempts++<60){if(cursor+length>1439)break;const conflict=state.sessions.find(s=>occursOn(s,target)&&cursor<min(s.end)&&cursor+length>min(s.start));if(!conflict)break;cursor=min(conflict.end)+breakTime}if(cursor+length>1439||!state.subjects.length){skipped++;break}state.sessions.push({id:uid(),day,start:stamp(cursor),end:stamp(cursor+length),subjectId:state.subjects[(i*blocks+j)%state.subjects.length].id,title:"",place:"Auto study block",type:"Study"});added++;cursor+=length+breakTime}}save();return{added,skipped}}
-window.NOVA={C,colors,DAYS,$,escape,uid,date,min,stamp,hour,valid,save,setState,get,name,color,subjectPreset,addSuggestions,addStudy,validDate,occursOn};
+function addSuggestions(){let count=0;for(const n of subjectPreset()){if(state.subjects.length>=300)break;if(!state.subjects.some(s=>s.name.toLowerCase()===n.toLowerCase())){state.subjects.push({id:uid(),name:n,color:colors[state.subjects.length%colors.length]});count++}}return count}
+function addStudy({days=5,blocks=2,start="16:00",length=50,breakTime=10}={}){let added=0,skipped=0;for(let i=0;i<days;i++){const target=new Date();target.setDate(target.getDate()+i);const day=target.getDay();let cursor=min(start);for(let j=0;j<blocks;j++){let attempts=0;while(attempts++<60){if(cursor+length>1439)break;const conflict=state.sessions.find(s=>occursOn(s,target)&&cursor<min(s.end)&&cursor+length>min(s.start));if(!conflict)break;cursor=min(conflict.end)+breakTime}if(cursor+length>1439||!state.subjects.length){skipped++;break}state.sessions.push({id:uid(),day,start:stamp(cursor),end:stamp(cursor+length),subjectId:state.subjects[(i*blocks+j)%state.subjects.length].id,title:"",place:"Auto study block",type:"Study"});added++;cursor+=length+breakTime}}return{added,skipped}}
+window.NOVA={KEY,C,colors,DAYS,$,escape,uid,date,min,stamp,hour,valid,save,setState,acceptExternal,get,getIssue,rawRecovery,name,color,subjectPreset,addSuggestions,addStudy,validDate,occursOn};
 })();

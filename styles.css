@@ -7,3 +7,13 @@
 /* v1.3.1 — Graduation-cap brand icon for both desktop and mobile */
 .brand-image{display:block;width:46px;height:46px;object-fit:cover;flex-shrink:0;border-radius:12px;border:1px solid var(--line);box-shadow:0 0 22px rgba(81,155,255,.24)}
 .brand-image.mini{width:30px;height:30px;border-radius:9px}
+
+/* NovaStudy v1.4: non-destructive recovery and opt-in updates */
+.reliability-notice{display:flex;flex-direction:column;gap:9px;margin:16px 0;padding:15px 18px;border:1px solid rgba(245,185,92,.42);border-radius:16px;background:rgba(73,44,15,.20);color:inherit;line-height:1.5}
+.reliability-notice[hidden]{display:none}
+.reliability-notice strong{font-size:14px}
+.reliability-notice span{font-size:13px}
+.reliability-actions{display:flex;gap:8px;flex-wrap:wrap}
+.reliability-actions button{border:1px solid currentColor;border-radius:9px;background:transparent;color:inherit;padding:8px 10px;font:inherit;font-size:12px;cursor:pointer}
+.reliability-actions button:focus-visible{outline:3px solid #f5b95c;outline-offset:2px}
+.update-notice{border-color:rgba(58,186,191,.45);background:rgba(20,73,80,.19)}

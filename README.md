@@ -164,3 +164,14 @@ Select **Exams & revision → Add exam → Plan revision**. Check your **Weekly 
 
 ### Graduation-cap app branding (v1.3.1)
 The selected futuristic graduation-cap artwork is now the app icon for installable PWA (192px and 512px), browser favicon, Apple touch icon and sidebar/mobile navigation logo. Updated files preserve all previous routine and exam-planner features. If the old icon persists after updating, refresh/reinstall the installed app to clear old cached icons.
+
+
+## v1.4 — Smart Reliability Update
+
+- **Storage safety:** Invalid saves and storage quota failures restore the last successfully saved in-memory snapshot and show a persistent recovery notice, instead of reporting false success.
+- **Backup safety:** Validate imported dates, times, duplicate IDs and session boundaries; write to localStorage before reporting recovery success. Previously supported version-1 backups without an exams array are accepted.
+- **Corrupt storage:** Never silently overwrite an unreadable state. Download the original raw text for troubleshooting and import a known-good JSON backup from Settings.
+- **Multi-tab sync:** Adopt valid state updates from another tab and close open editors to prevent stale changes. Saving from a stale tab is rejected if another write arrived first.
+- **PWA updates:** Future updates can display an **Update and reload** prompt, which waits for user approval. The transition from v1.3.1 automatically activates the v1.4 service worker once to get past the older cache-first script loader; reload the app afterward if still on the old UI.
+- **Tests:** Run `node --test tests/reliability.test.cjs`; no npm install or build is necessary.
+- **Data:** The localStorage key, existing data format and Cyber / Black & Gold themes are unchanged. Vercel and Netlify have separate browser storage.
