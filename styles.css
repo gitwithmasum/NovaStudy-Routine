@@ -17,3 +17,32 @@
 .reliability-actions button{border:1px solid currentColor;border-radius:9px;background:transparent;color:inherit;padding:8px 10px;font:inherit;font-size:12px;cursor:pointer}
 .reliability-actions button:focus-visible{outline:3px solid #f5b95c;outline-offset:2px}
 .update-notice{border-color:rgba(58,186,191,.45);background:rgba(20,73,80,.19)}
+
+/* v1.5 — bilingual typography and accessible language selector */
+html[lang="bn"] body,html[lang="bn"] button,html[lang="bn"] input,html[lang="bn"] select{
+ font-family:"Noto Sans Bengali","Hind Siliguri","Nirmala UI","SolaimanLipi","Segoe UI",system-ui,sans-serif
+}
+html[lang="bn"] .eyebrow,html[lang="bn"] .section-caption,html[lang="bn"] .brand small,html[lang="bn"] .sidebar-caption{letter-spacing:.15px;line-height:1.65}
+html[lang="bn"] .nav-btn,html[lang="bn"] .mobile-nav small,html[lang="bn"] .field label{line-height:1.65;overflow-wrap:anywhere}
+.language-switch{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-width:66px;white-space:nowrap}
+.language-switch span:first-child{font-size:13px;opacity:.72}
+.language-options{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+.language-choice{border:1px solid var(--line);border-radius:11px;padding:10px 17px;color:var(--text);background:var(--panel2);font-weight:750}
+.language-choice.is-selected,.language-choice[aria-pressed="true"]{border-color:var(--mint);box-shadow:0 0 0 1px var(--mint);background:color-mix(in srgb,var(--mint) 12%,var(--panel))}
+.language-choice:focus-visible,.language-switch:focus-visible{outline:3px solid var(--mint);outline-offset:3px}
+html[lang="bn"] .page-head h1{line-height:1.36}
+html[lang="bn"] .subheading,html[lang="bn"] .hint-banner,html[lang="bn"] .panel-sub{line-height:1.8}
+@media(max-width:660px){
+ .topbar-actions{gap:6px}
+ .language-switch{font-size:11px;min-width:52px;padding:7px 8px}
+ html[lang="bn"] .top-install{padding:7px 8px}
+ html[lang="bn"] .view-title{font-size:clamp(20px,5vw,28px)}
+ html[lang="bn"] .mobile-nav small{font-size:10px;line-height:1.35}
+ .language-options>*{flex:1;min-width:95px}
+}
+@media(max-width:450px){
+ .topbar-actions .top-install,.topbar-actions .clock{display:none}
+ .mobile-brand{min-width:0}
+ .mobile-brand b{font-size:12px}
+ .topbar-actions{gap:5px}
+}

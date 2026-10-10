@@ -52,6 +52,7 @@
             data-action="toggle-theme" aria-label="Switch theme" aria-pressed="false">
             <span class="theme-symbol" aria-hidden="true">◐</span><span id="themeLabel">Cyber</span>
           </button>
+          <button class="outline-button language-switch" id="langToggle" type="button" data-action="toggle-language" aria-label="Switch interface language" title="Switch interface language"><span aria-hidden="true">文</span> <span id="langLabel">বাংলা</span></button>
           <button class="outline-button top-install" id="installBtn" type="button"><span>⇩</span> Install app</button>
           <button class="avatar-button" type="button" data-nav="settings" title="Profile" aria-label="Open profile">ST</button>
         </div>
@@ -65,7 +66,7 @@
       <div class="reliability-actions"><button type="button" data-action="apply-update">Update and reload</button></div>
     </div>
     <div id="view" class="view"></div>
-      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>1.4.0</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
+      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>1.5.0</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
     </main>
   </div>
   <nav class="mobile-nav" aria-label="Mobile navigation">
@@ -79,6 +80,7 @@
   <dialog id="modal" class="modal"><div id="modalBody"></div></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./presets.js" defer></script>
+  <script src="./i18n.js" defer></script>
   <script src="./core.js" defer></script>
   <script src="./views.js" defer></script>
   <script src="./editors.js" defer></script>

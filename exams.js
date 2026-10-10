@@ -1,7 +1,7 @@
 /* Exam planner — NovaStudy 1.3. Data remains in novastudy_state_v1. */
 (function(){
 "use strict";
-const N=window.NOVA,S=N.get,E=N.escape,V=window.NOVA_VIEWS;
+const N=window.NOVA,I=window.NOVA_I18N,S=N.get,E=N.escape,V=window.NOVA_VIEWS;
 const iso=()=>N.date(new Date());
 function parseLocal(day,time="00:00"){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(String(day))||!/^\d{2}:\d{2}$/.test(String(time)))return null;
@@ -40,18 +40,18 @@ function dashboardPreview(){
   const e=next();
   return '<section class="exam-dashboard"><div><span class="eyebrow">EXAM INTELLIGENCE / 06</span><h3>'+
   (e?E(e.title):'Exam calendar ready')+'</h3><p>'+
-  (e?E(N.name(e.subjectId))+' · '+E(e.date)+' · '+E(N.hour(e.start)):'Add your first exam to plan revision and watch the countdown.')+
+  (e?E(N.name(e.subjectId))+' · '+E(I.displayDate(e.date))+' · '+E(I.time(e.start)):'Add your first exam to plan revision and watch the countdown.')+
   '</p></div><div class="exam-dashboard-actions"><span class="exam-countdown"'+(e?' data-exam-countdown="'+E(e.id)+'"':'')+'>'+
-  (e?E(countdown(e)):'No upcoming exams')+
+  (e?E(I.t(countdown(e))):'No upcoming exams')+
   '</span><button class="secondary-btn" type="button" data-action="go-exams">Open exams →</button></div></section>';
 }
 function card(e){
   const linked=S().sessions.filter(s=>s.revisionFor===e.id).length;
   const complete=Boolean(e.done);
-  const label=new Date(e.date+'T12:00:00').toLocaleDateString(undefined,{month:'short'});
+  const label=new Date(e.date+'T12:00:00').toLocaleDateString(I.language==='bn'?'bn-BD':undefined,{month:'short'});
   return '<article class="exam-card'+(complete?' is-completed':'')+'"><div class="exam-card-main">'+
-    '<span class="exam-date-block"><strong>'+E(e.date.slice(8,10))+'</strong><small>'+E(label)+'</small></span>'+
-    '<div class="exam-card-info"><b>'+E(e.title)+'</b><span>'+E(N.name(e.subjectId))+' · '+E(N.hour(e.start))+'–'+E(N.hour(e.end))+'</span>'+
+    '<span class="exam-date-block"><strong>'+E(I.number(e.date.slice(8,10)))+'</strong><small>'+E(label)+'</small></span>'+
+    '<div class="exam-card-info"><b>'+E(e.title)+'</b><span>'+E(N.name(e.subjectId))+' · '+E(I.time(e.start))+'–'+E(I.time(e.end))+'</span>'+
     (e.place?'<span>⌖ '+E(e.place)+'</span>':'')+
     (e.notes?'<small class="exam-note">'+E(e.notes)+'</small>':'')+
     '</div></div><div class="exam-card-side"><span class="exam-countdown" data-exam-countdown="'+E(e.id)+'">'+E(countdown(e))+'</span>'+
@@ -67,7 +67,7 @@ function page(){
   return V.heading('EXAM INTELLIGENCE / 06','Exam & revision planner',
     'Exam dates, live countdowns and conflict-aware revision blocks.',V.button('+ Add exam','add-exam'))+
     '<div class="exam-kpis"><div class="exam-kpi"><small>UPCOMING</small><strong>'+exams.filter(e=>!e.done&&parseLocal(e.date,e.end)?.getTime()>=Date.now()).length+
-    '</strong></div><div class="exam-kpi"><small>NEXT EXAM</small><strong>'+(nextExam?E(nextExam.date):'None')+
+    '</strong></div><div class="exam-kpi"><small>NEXT EXAM</small><strong>'+(nextExam?E(I.displayDate(nextExam.date)):'None')+
     '</strong></div><div class="exam-kpi"><small>REVISION BLOCKS</small><strong>'+S().sessions.filter(x=>x.revisionFor).length+
     '</strong></div></div><div class="exam-list">'+(exams.length?exams.map(card).join(''):'<div class="empty-state">No exams added yet. Create an exam to start planning revision.</div>')+
     '</div><div class="hint-banner">Countdown uses this device’s local time. Revision planning creates one-time schedule blocks and linked tasks without removing your existing routine.</div>';
@@ -75,7 +75,7 @@ function page(){
 function refreshCountdowns(){
   document.querySelectorAll('[data-exam-countdown]').forEach(el=>{
     const e=S().exams.find(x=>x.id===el.dataset.examCountdown);
-    if(e){const t=countdown(e);if(el.textContent!==t)el.textContent=t;}
+    if(e){const t=I.t(countdown(e));if(el.textContent!==t)el.textContent=t;}
   });
 }
 function conflicts(day,start,end){

@@ -175,3 +175,12 @@ The selected futuristic graduation-cap artwork is now the app icon for installab
 - **PWA updates:** Future updates can display an **Update and reload** prompt, which waits for user approval. The transition from v1.3.1 automatically activates the v1.4 service worker once to get past the older cache-first script loader; reload the app afterward if still on the old UI.
 - **Tests:** Run `node --test tests/reliability.test.cjs`; no npm install or build is necessary.
 - **Data:** The localStorage key, existing data format and Cyber / Black & Gold themes are unchanged. Vercel and Netlify have separate browser storage.
+
+
+## NovaStudy v1.5 — Bangla & English Bilingual Experience
+
+- Switch **English / বাংলা** with the header language button or **Profile & Settings → Language preference**. The choice persists in this browser and synchronizes between same-origin tabs via a separate `novastudy_language_v1` preference.
+- English is the fallback. Bengali navigation, dashboards, routine/tasks/exams, forms, system messages, revision countdowns, accessibility labels, and selected education-category UI labels are displayed through `i18n.js`. Bengali month/day/date display uses `Intl` and local font fallbacks.
+- **Data safety:** Stored `novastudy_state_v1` state, JSON backup structure, ISO dates, subject names, notes, student-entered titles and enum/form option values are not translated or modified. `novastudy_theme_v1` remains independent.
+- **Mobile and PWA:** The header compacts on narrow devices; Install remains available under Settings. `i18n.js` is included in the v1.5 service-worker cache for offline use.
+- **Tests:** Run `node --test tests/*.test.cjs` to execute v1.4 reliability and v1.5 localization suites. Test English/Bangla switching, refresh persistence, storage synchronization, both themes, old JSON backup compatibility and offline mode in the installed PWA.

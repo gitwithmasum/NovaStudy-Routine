@@ -1,10 +1,11 @@
 window.NOVA_EDIT=(function Editors(A){
-const N=window.NOVA,V=window.NOVA_VIEWS,S=N.get,E=N.escape;
-const f=(label,name,type="text",value="",extra="")=>`<div class="field"><label>${E(label)}</label><input name="${name}" type="${type}" value="${E(value)}" ${extra}></div>`;
-const sel=(label,name,arr,value)=>`<div class="field"><label>${E(label)}</label><select name="${name}">${V.option(arr,value)}</select></div>`;
+const N=window.NOVA,V=window.NOVA_VIEWS,I=window.NOVA_I18N,S=N.get,E=N.escape;
+const confirm=message=>window.confirm(I.t(message));
+const f=(label,name,type="text",value="",extra="")=>`<div class="field"><label for="edit-${name}">${E(label)}</label><input id="edit-${name}" name="${name}" type="${type}" value="${E(value)}" ${extra}></div>`;
+const sel=(label,name,arr,value)=>`<div class="field"><label for="edit-${name}">${E(label)}</label><select id="edit-${name}" name="${name}">${V.option(arr,value)}</select></div>`;
 let submit=null;
 function close(){N.$("modal").close();submit=null}
-function open(title,fields,cb,remove){submit=cb;N.$("modalBody").innerHTML=`<div class="modal-header"><h2>${E(title)}</h2><button type="button" data-action="close" class="modal-close">×</button></div><div class="modal-content"><form id="editorForm">${fields}<div class="modal-actions">${remove?'<button type="button" id="removeItem" class="danger-btn">Delete</button>':""}<button type="button" data-action="close" class="secondary-btn">Cancel</button><button type="submit" class="primary-btn">Save</button></div></form></div>`;N.$("modal").showModal();if(remove)N.$("removeItem").onclick=remove;}
+function open(title,fields,cb,remove){submit=cb;N.$("modalBody").innerHTML=`<div class="modal-header"><h2 id="editorTitle">${E(title)}</h2><button type="button" data-action="close" class="modal-close">×</button></div><div class="modal-content"><form id="editorForm">${fields}<div class="modal-actions">${remove?'<button type="button" id="removeItem" class="danger-btn">Delete</button>':""}<button type="button" data-action="close" class="secondary-btn">Cancel</button><button type="submit" class="primary-btn">Save</button></div></form></div>`;N.$("modal").setAttribute("aria-labelledby","editorTitle");N.$("modal").showModal();I.apply(N.$("modal"));if(remove)N.$("removeItem").onclick=remove;}
 function save(form){if(submit&&submit(new FormData(form))!==false)close()}
 function subject(id){const old=S().subjects.find(x=>x.id===id),fields=f("Subject / course name","name","text",old?.name||"",'maxlength="120" required')+sel("Color","color",N.colors.map((x,i)=>[x,"Color "+(i+1)]),old?.color||N.colors[S().subjects.length%N.colors.length]);open(old?"Edit subject":"Add subject",fields,data=>{const name=String(data.get("name")||"").trim().slice(0,120);if(!name)return A.toast("Enter a subject."),false;if(S().subjects.some(x=>x.id!==id&&x.name.toLowerCase()===name.toLowerCase()))return A.toast("Duplicate subject."),false;const color=N.colors.includes(data.get("color"))?data.get("color"):N.colors[0];if(old)Object.assign(old,{name,color});else S().subjects.push({id:N.uid(),name,color});return A.changed();},old?()=>{if(!confirm("Delete subject? Current routine entries will remain unassigned."))return;S().subjects=S().subjects.filter(x=>x.id!==id);if(A.changed())close()}:null)}
 function session(id){const old=S().sessions.find(x=>x.id===id),v=old||{subjectId:S().subjects[0]?.id||"",day:A.day(),type:"Class",start:"09:00",end:"10:00",title:"",place:""};const fields=sel("Subject","subjectId",[["","Personal / None"],...S().subjects.map(x=>[x.id,x.name])],v.subjectId)+f("Custom activity title","title","text",v.title||"",'maxlength="100"')+'<div class="repeat-helper">Weekly classes repeat each week. One-time sessions need an exact date. Existing sessions remain unchanged.</div>'+sel("Repeat","repeat",[["weekly","Every week"],["once","One time"]],v.repeat||"weekly")+f("One-time date","date","date",v.date||N.date(new Date()))+f("Repeat until (optional)","repeatUntil","date",v.repeatUntil||"")+'<div class="form-grid">'+sel("Day","day",N.DAYS.map((x,i)=>[i,x]),v.day)+sel("Type","type",["Class","Study","Lab","Revision","Exam","Break","Sleep","Meal","Exercise","Prayer","Commute","Personal","Other"],v.type)+f("Start","start","time",v.start,"required")+f("End","end","time",v.end,"required")+"</div>"+f("Room / note","place","text",v.place||"",'maxlength="100"');
@@ -52,7 +53,7 @@ function revision(id){
  '<div class="form-grid">'+sel("Revision sessions","blocks",[2,3,4,5,6,7,10],5)+
  sel("Minutes per session","length",[25,30,45,50,60,75,90],60)+
  f("Preferred start","start","time","17:00","required")+'</div>';
- open("Revision plan — "+ex.title,fields,data=>{
+ open(I.t("Revision plan")+" — "+ex.title,fields,data=>{
    const result=window.NOVA_EXAMS.generateRevision(id,{
      blocks:Number(data.get("blocks")),length:Number(data.get("length")),start:String(data.get("start"))
    });

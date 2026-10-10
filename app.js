@@ -1,13 +1,14 @@
 (function boot(){
 "use strict";
-const N=window.NOVA,V=window.NOVA_VIEWS,S=N.get,$=N.$;
+const N=window.NOVA,V=window.NOVA_VIEWS,I=window.NOVA_I18N,S=N.get,$=N.$;
+const confirm=message=>window.confirm(I.t(message));
 let page=["dashboard","schedule","tasks","subjects","exams","settings"].includes(location.hash.slice(1))?location.hash.slice(1):"dashboard";
 let day=new Date().getDay(),filter="all",query="",promptInstall=null,toastTimer=null;
-function toast(s){const e=$("toast");e.textContent=s;e.classList.add("visible");clearTimeout(toastTimer);toastTimer=setTimeout(()=>e.classList.remove("visible"),3300)}
-function render(){document.querySelectorAll("[data-nav]").forEach(x=>x.classList.toggle("active",x.dataset.nav===page));$("pageLabel").textContent=page.toUpperCase();$("view").innerHTML=page==="schedule"?V.schedule(day):page==="tasks"?V.tasks(filter,query):page==="exams"?X.page():V[page]();updateThemeControls()}
+function toast(s){const e=$("toast");e.textContent=I.t(s);e.classList.add("visible");clearTimeout(toastTimer);toastTimer=setTimeout(()=>e.classList.remove("visible"),3300)}
+function render(){document.querySelectorAll("[data-nav]").forEach(x=>x.classList.toggle("active",x.dataset.nav===page));$("pageLabel").textContent=I.language==="bn"?I.t({dashboard:"Dashboard",schedule:"Weekly routine",tasks:"Tasks & goals",subjects:"Subjects",exams:"Exams & revision",settings:"Settings"}[page]):page.toUpperCase();$("view").innerHTML=page==="schedule"?V.schedule(day):page==="tasks"?V.tasks(filter,query):page==="exams"?X.page():V[page]();updateThemeControls();updateLanguageControls();I.apply(document)}
 function showRecovery(message){
  const box=$("recoveryNotice"),detail=$("recoveryMessage");
- detail.textContent=message;box.hidden=false;
+ detail.textContent=I.t(message);box.hidden=false;
 }
 function changed(){
  const saved=N.save();
@@ -48,6 +49,16 @@ function setTheme(next){
   toast(next==="gold"?"Black & Gold theme enabled.":"Futuristic Cyber theme enabled.");
 }
 function toggleTheme(){setTheme(themeName()==="gold"?"cyber":"gold")}
+function updateLanguageControls(){
+ const label=$("langLabel"),btn=$("langToggle");
+ if(label)label.textContent=I.language==="bn"?"EN":"বাংলা";
+ if(btn){btn.setAttribute("aria-label","Switch interface language");btn.title="Switch interface language"}
+}
+function switchLanguage(next){
+ if(next===I.language)return;
+ I.setLanguage(next);render();clock();X.refreshCountdowns();
+ toast(next==="bn"?"ভাষা বাংলা করা হয়েছে।":"Interface language set to English.");
+}
 
 function exportBackup(){const file=new Blob([JSON.stringify({...S(),demo:false},null,2)],{type:"application/json"}),url=URL.createObjectURL(file),a=document.createElement("a");a.href=url;a.download="NovaStudy-Backup-"+N.date(new Date())+".json";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1200);toast("Backup exported. Keep a copy.")}
 async function importBackup(file){if(!file)return;if(file.size>1000000){toast("Backups must be under 1 MB.");return}try{const v=JSON.parse(await file.text());if(!N.valid(v))throw Error("Unsupported or invalid backup.");if(!confirm("Replace all current profile, subjects, routine, tasks and exams?"))return;if(!N.setState(v)){showRecovery(N.getIssue());return}$("recoveryNotice").hidden=true;nav("dashboard");toast("Backup restored.")}catch(e){showRecovery("Backup was rejected; existing data is unchanged. "+(e.message||"Invalid file."));toast("Import failed: no data was replaced.")}}
@@ -66,6 +77,7 @@ case"delete-task":if(confirm("Delete task?")){S().tasks=S().tasks.filter(x=>x.id
 case"suggestions":{const count=N.addSuggestions();if(changed())toast(count+" suggested subjects added.");break;}
 case"day":day=Number(d);render();break;case"filter":filter=f;render();break;
 case"go-exams":nav("exams");break;case"go-schedule":nav("schedule");break;case"go-tasks":nav("tasks");break;
+case"toggle-language":switchLanguage(I.language==="bn"?"en":"bn");break;case"language-select":switchLanguage(b.dataset.lang);break;
 case"apply-update":{if(updateRegistration?.waiting&&confirm("Install the new version? Any open editor will be closed; saved data will be preserved.")){updateAccepted=true;updateRegistration.waiting.postMessage({type:"SKIP_WAITING"});}break;}case"export-recovery":exportRawRecovery();break;case"dismiss-recovery":$("recoveryNotice").hidden=true;break;case"toggle-theme":toggleTheme();break;case"theme-select":setTheme(b.dataset.themeValue);break;case"install":Ed.install();break;case"export":exportBackup();break;case"close":Ed.close();break;
 }});
 document.addEventListener("submit",e=>{if(e.target.id==="editorForm"){e.preventDefault();Ed.save(e.target)}else if(e.target.id==="profileForm"){e.preventDefault();const form=new FormData(e.target),cat=String(form.get("category")),level=String(form.get("level")),track=String(form.get("track"));if(!N.C[cat]||!N.C[cat].levels.includes(level)||!N.C[cat].tracks[track])return toast("Invalid class/department.");S().profile={...S().profile,name:String(form.get("name")||"Student").trim().slice(0,80)||"Student",institution:String(form.get("institution")||"").trim().slice(0,100),category:cat,level,track,weekStart:Number(form.get("weekStart")||0)};if(changed())toast("Profile saved. Existing routine preserved.")}});
@@ -74,6 +86,7 @@ document.addEventListener("input",e=>{if(e.target.id==="taskSearch"){query=e.tar
 $("installBtn").addEventListener("click",()=>Ed.install());
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();promptInstall=e});window.addEventListener("appinstalled",()=>{promptInstall=null;toast("NovaStudy installed!")});
 window.addEventListener("storage",e=>{
+  if(e.key===I.KEY){I.useExternal(e.newValue);render();clock();X.refreshCountdowns();return}
   if(e.key===N.KEY){
     if(!N.acceptExternal(e.newValue)){
       showRecovery("Storage changed in another tab, but the incoming data could not be verified. No changes were loaded.");
@@ -116,7 +129,7 @@ function exportRawRecovery(){
  a.href=url;a.download="NovaStudy-recovery-raw-"+N.date(new Date())+".txt";document.body.append(a);a.click();a.remove();
  setTimeout(()=>URL.revokeObjectURL(url),1200);toast("Original data snapshot downloaded. Do not import it directly.");
 }
-function clock(){const d=new Date();$("liveClock").textContent=d.toLocaleTimeString("en-BD",{hour:"numeric",minute:"2-digit",hour12:true})}
-const seen=new Set();function remind(){if(!S().profile.reminders||!("Notification" in window)||Notification.permission!=="granted"||document.hidden)return;const d=new Date(),hm=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");for(const s of S().sessions){const key=N.date(d)+s.id;if(N.occursOn(s,d)&&s.start===hm&&!seen.has(key)){seen.add(key);try{new Notification("NovaStudy · Session starting",{body:(s.title||N.name(s.subjectId))+" · "+N.hour(s.start),icon:"./assets/icon-192.png"})}catch{}}}if(seen.size>200)seen.clear()}
+function clock(){const d=new Date();$("liveClock").textContent=I.clock(d)}
+const seen=new Set();function remind(){if(!S().profile.reminders||!("Notification" in window)||Notification.permission!=="granted"||document.hidden)return;const d=new Date(),hm=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");for(const s of S().sessions){const key=N.date(d)+s.id;if(N.occursOn(s,d)&&s.start===hm&&!seen.has(key)){seen.add(key);try{new Notification(I.t("NovaStudy · Session starting"),{body:(s.title||N.name(s.subjectId))+" · "+I.time(s.start),icon:"./assets/icon-192.png"})}catch{}}}if(seen.size>200)seen.clear()}
 if(N.getIssue())showRecovery(N.getIssue());render();clock();setInterval(clock,15000);setInterval(()=>X.refreshCountdowns(),15000);setInterval(remind,25000)
 })();
