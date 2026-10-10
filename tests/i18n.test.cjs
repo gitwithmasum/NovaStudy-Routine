@@ -83,7 +83,7 @@ test('app wiring and service worker are prepared for offline bilingual use',()=>
  assert.ok(files['views.js'].includes('data-lang="bn"'));
  assert.ok(files['editors.js'].includes('aria-labelledby'));
  assert.ok(files['exams.js'].includes('I.displayDate'));
- assert.ok(files['sw.js'].includes('novastudy-v1.5.0'));
+ assert.ok(files['sw.js'].includes('novastudy-v1.6.0'));
  assert.ok(files['sw.js'].includes("'./i18n.js'"));
  for(const f of ['i18n.js','core.js','views.js','editors.js','exams.js','app.js','sw.js']){
    assert.doesNotThrow(()=>new vm.Script(readFileSync(path.join(root,f),'utf8'),{filename:f}));

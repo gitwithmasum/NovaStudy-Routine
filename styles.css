@@ -46,3 +46,55 @@ html[lang="bn"] .subheading,html[lang="bn"] .hint-banner,html[lang="bn"] .panel-
  .mobile-brand b{font-size:12px}
  .topbar-actions{gap:5px}
 }
+
+/* NovaStudy v1.6 — Focus Lab / Pomodoro; theme-aware and responsive */
+.focus-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(275px,.8fr);gap:17px;align-items:start}
+.focus-panel{display:flex;flex-direction:column;align-items:center;gap:19px;min-width:0;padding:25px}
+.focus-modes{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;width:100%}
+.focus-mode{border:1px solid var(--line);background:var(--panel2);color:var(--muted);padding:10px 13px;border-radius:99px;font-size:12px;font-weight:760}
+.focus-mode:hover,.focus-mode.selected{border-color:var(--mint);color:var(--text);background:color-mix(in srgb,var(--mint) 12%,var(--panel))}
+.focus-timer{display:grid;place-items:center;aspect-ratio:1;max-width:340px;width:min(100%,340px);border-radius:50%;
+ background:conic-gradient(var(--mint) var(--focus-progress,0deg),var(--line) var(--focus-progress,0deg));
+ padding:9px;box-shadow:0 0 48px color-mix(in srgb,var(--mint) 16%,transparent)}
+.focus-timer-inside{width:100%;height:100%;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:var(--panel);text-align:center;padding:10px}
+.focus-timer-inside>span{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.3px}
+#focusClock{font-size:clamp(35px,6vw,58px);font-weight:850;letter-spacing:1px;color:var(--text);font-variant-numeric:tabular-nums}
+#focusStatus{font-size:12px;color:var(--mint);margin:0;min-height:19px}
+.focus-controls{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:100%}
+.focus-controls button{min-width:124px;min-height:45px}
+.focus-config{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;width:100%;font-size:12px;color:var(--muted)}
+.focus-config input{width:74px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);text-align:center}
+.focus-config button{min-height:40px}
+.focus-help{font-size:12px;color:var(--muted);line-height:1.65;margin:0;text-align:center;max-width:540px}
+.focus-error{padding:12px;border:1px solid #be774b;border-radius:10px;color:#ffda9d;line-height:1.5;font-size:12px}
+.focus-stat-panel{min-width:0}
+.focus-stat-panel h2{font-size:19px;margin:0 0 20px}
+.focus-stat-panel h3{font-size:14px;margin:24px 0 12px}
+.focus-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.focus-metrics>div{padding:16px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);display:flex;flex-direction:column;gap:10px}
+.focus-metrics b{font-size:28px;color:var(--mint);font-variant-numeric:tabular-nums}
+.focus-metrics span{font-size:11px;color:var(--muted);overflow-wrap:anywhere}
+.focus-bars{height:160px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);padding:15px 8px 10px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));align-items:stretch;gap:7px}
+.focus-day{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:7px;min-width:0}
+.focus-column{background:linear-gradient(to top,var(--purple),var(--mint));width:85%;border-radius:6px 6px 3px 3px;min-height:5px;max-height:100%}
+.focus-day small{font-size:10px;color:var(--muted)}
+.focus-stat-actions{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0 12px}
+.focus-stat-actions button{font-size:12px}
+@media(max-width:1040px){.focus-layout{grid-template-columns:1fr}}
+@media(max-width:660px){
+ .mobile-nav{grid-template-columns:repeat(7,minmax(0,1fr))}
+ .mobile-nav button{padding:5px 0;min-width:0}
+ .mobile-nav small,html[lang="bn"] .mobile-nav small{font-size:8px;letter-spacing:-.15px;overflow-wrap:anywhere;line-height:1.25;text-align:center}
+ .mobile-nav span{font-size:19px}
+ .focus-layout{gap:12px}
+ .focus-panel{padding:18px 12px}
+ .focus-mode{font-size:11px;padding:9px 11px}
+ .focus-timer{max-width:290px}
+ .focus-controls button{min-width:115px}
+ .focus-stat-panel h2{font-size:17px}
+}
+@media(max-width:370px){
+ .mobile-nav span{font-size:17px}
+ .mobile-nav small,html[lang="bn"] .mobile-nav small{font-size:7px}
+ .focus-metrics b{font-size:24px}
+}

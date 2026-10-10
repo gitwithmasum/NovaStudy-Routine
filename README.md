@@ -184,3 +184,16 @@ The selected futuristic graduation-cap artwork is now the app icon for installab
 - **Data safety:** Stored `novastudy_state_v1` state, JSON backup structure, ISO dates, subject names, notes, student-entered titles and enum/form option values are not translated or modified. `novastudy_theme_v1` remains independent.
 - **Mobile and PWA:** The header compacts on narrow devices; Install remains available under Settings. `i18n.js` is included in the v1.5 service-worker cache for offline use.
 - **Tests:** Run `node --test tests/*.test.cjs` to execute v1.4 reliability and v1.5 localization suites. Test English/Bangla switching, refresh persistence, storage synchronization, both themes, old JSON backup compatibility and offline mode in the installed PWA.
+
+
+## NovaStudy v1.6 — Focus Timer & Pomodoro
+
+- **Focus Lab:** Sidebar and mobile Focus navigation, plus a Dashboard Start focus timer shortcut.
+- **Pomodoro presets:** Focus 25 minutes, Short break 5 minutes, Long break 15 minutes. Custom duration supports 1 to 180 whole minutes.
+- **Real-time countdown:** Start, pause, resume, reset and switch modes. A persisted wall-clock deadline keeps elapsed time accurate after refresh, tab switching, and PWA reopening.
+- **Sound alert:** An optional Web Audio chime at completion, unlocked by a user action. Short scheduled notes stop in less than 10 seconds. No audio file, subscription, push service or server needed.
+- **Limitations:** Closed-app and background audio alerts are not guaranteed. Browser throttling, mobile sleep, device mute, blocked autoplay or app closure may prevent a timely chime. Overdue timers complete silently on reopening; use an OS alarm for critical reminders.
+- **Study analytics:** Completed focus sessions, total focus minutes and a seven-day local chart. Breaks do not count as focused study time.
+- **Storage:** Timer and statistics use a new separate key `novastudy_focus_v1`; the original `novastudy_state_v1` model and JSON backup format remain unchanged. Focus stats are *not* included in routine backup exports. Vercel and Netlify store these independently.
+- **Safe update:** Previous timetable, subjects, tasks, exams, revision, bilingual language preference, reliability controls, both themes and offline PWA remain.
+- **Regression tests:** Run `node --test tests/*.test.cjs` locally; the GitHub Actions workflow also runs the suites on main.

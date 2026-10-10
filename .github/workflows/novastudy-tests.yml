@@ -18,6 +18,7 @@ jobs:
           node-version: '22'
       - name: Verify source and regression tests
         run: |
+          node --check focus.js
           node --check i18n.js
           node --check app.js
           node --check views.js
