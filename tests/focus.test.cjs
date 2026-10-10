@@ -96,10 +96,10 @@ test('sound preference persists and default stays on',()=>{
 test('v1.6 integration, offline cache, and bilingual hooks are included',()=>{
  const files=Object.fromEntries(['index.html','app.js','focus.js','sw.js','styles.css','i18n.js','views.js']
  .map(f=>[f,readFileSync(path.join(root,f),'utf8')]));
- assert.match(files['index.html'],/1\.9\.0/);
+ assert.match(files['index.html'],/2\.0\.0/);
  assert.match(files['index.html'],/data-nav="focus"/);
  assert.ok(files['index.html'].includes('src="./focus.js"'));
- assert.ok(files['sw.js'].includes("'./focus.js'")&&files['sw.js'].includes("novastudy-v1.9.0"));
+ assert.ok(files['sw.js'].includes("'./focus.js'")&&files['sw.js'].includes("novastudy-v2.0.0"));
  assert.ok(files['app.js'].includes('F.handle(action,b)'));
  assert.ok(files['i18n.js'].includes('Focus Timer & Pomodoro'));
  assert.ok(files['styles.css'].includes('.focus-layout'));

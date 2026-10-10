@@ -84,10 +84,10 @@ test("auth feature is integrated with local-first UI, PWA cache, bilingual and p
  assert.match(h,/src="\.\/auth-config\.js"/);
  assert.match(h,/src="\.\/auth\.js"/);
  assert.match(h,/href="\.\/auth\.css"/);
- assert.match(h,/NOVASTUDY OS <b>1\.9\.0<\/b>/);
+ assert.match(h,/NOVASTUDY OS <b>2\.0\.0<\/b>/);
  assert.match(a,/Auth\.handle\(action\)/);
  assert.match(v,/NOVA_AUTH\.panel/);
- assert.match(sw,/novastudy-v1\.9\.0/);
+ assert.match(sw,/novastudy-v2\.0\.0/);
  assert.match(sw,/'\.\/auth-config\.js'/);
  assert.match(ci,/node --check auth\.js/);
  for(const file of ["auth-config.js","auth.js","index.html","app.js","views.js"]){

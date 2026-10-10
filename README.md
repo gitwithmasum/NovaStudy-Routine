@@ -230,3 +230,13 @@ The selected futuristic graduation-cap artwork is now the app icon for installab
 - **Login is identity-only:** It does NOT automatically sync or upload routines, tasks, exams, attendance, challenge progress, or backups. Sign-out keeps the local study data intact.
 - Google Login needs Internet. The original offline PWA and local features continue working. The auth config script is served network-first for updated public configuration.
 - Tests: node --test tests/*.test.cjs (including auth redirect/provider checks, HTML escaping, session/data isolation, and existing regressions).
+
+
+## NovaStudy v2.0 — Manual Account Backup & Restore
+
+- Opt-in per-Google-account backup in Supabase `novastudy_backups`, protected by per-user Row Level Security (RLS).
+- In Profile & Settings, use **Refresh Preview**, **Back up this browser**, **Restore cloud to this browser**, or **Delete cloud backup**.
+- Backups are not uploaded automatically. Upload explicitly replaces the prior account backup after confirmation; revisions detect changes from other sessions.
+- Restore rechecks remote revision, validates data, asks confirmation, downloads local JSON first, and then restores local state. Deleting a cloud backup never deletes browser data.
+- Google Sign-In remains optional; original offline usage and legacy JSON Backup Import/Export stay available. Netlify/Vercel/browser origins remain isolated until the user manually restores.
+- No Google Client Secret or Service Role key is used in the browser. The database uses `auth.uid()` RLS and a 1 MB size constraint.

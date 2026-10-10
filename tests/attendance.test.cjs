@@ -136,9 +136,9 @@ test('subject names escape HTML while attendance UI remains keyboard operable',(
 test('offline PWA, bilingual navigation and v1.7 version wiring are present',()=>{
  const file=f=>readFileSync(path.join(root,f),'utf8');
  const html=file('index.html'),sw=file('sw.js'),app=file('app.js'),css=file('styles.css');
- assert.ok(html.includes('<b>1.9.0</b>'));
+ assert.ok(html.includes('<b>2.0.0</b>'));
  assert.ok(html.includes('src="./attendance.js"'));
- assert.ok(sw.includes("'./attendance.js'")&&sw.includes("novastudy-v1.9.0"));
+ assert.ok(sw.includes("'./attendance.js'")&&sw.includes("novastudy-v2.0.0"));
  assert.ok(app.includes('T.dateChanged')&&app.includes('T.handle(action,b)'));
  assert.ok(css.includes('.attendance-layout')||css.includes('.attendance-panel'));
  for(const path of ['attendance.js','core.js','app.js','views.js','i18n.js','sw.js','focus.js'])

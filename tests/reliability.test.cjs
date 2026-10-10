@@ -74,7 +74,7 @@ test('PWA and UI reliability integration hooks exist and parse cleanly',()=>{
  const sw=readFileSync(path.join(root,'sw.js'),'utf8');
  const app=readFileSync(path.join(root,'app.js'),'utf8');
  const html=readFileSync(path.join(root,'index.html'),'utf8');
- assert.ok(sw.includes('SKIP_WAITING')&&sw.includes('novastudy-v1.9.0'));
+ assert.ok(sw.includes('SKIP_WAITING')&&sw.includes('novastudy-v2.0.0'));
  assert.ok(app.includes('updateAccepted')&&app.includes('acceptExternal(e.newValue)'));
  assert.ok(html.includes('data-action="apply-update"')&&html.includes('id="recoveryNotice"'));
  assert.ok(html.includes('themeToggle')&&html.includes('data-nav="exams"'));

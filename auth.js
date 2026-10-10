@@ -118,5 +118,5 @@ function handle(action){
  if(action==="google-signout"){void signOut();return true}
  return false;
 }
-window.NOVA_AUTH={init,handle,panel,signIn,signOut,refreshUser,getStatus:()=>state,getUser:()=>user,configured:()=>configured};
+window.NOVA_AUTH={init,handle,panel,signIn,signOut,refreshUser,getStatus:()=>state,getUser:()=>user,getClient:()=>client,configured:()=>configured};
 })();

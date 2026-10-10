@@ -21,7 +21,7 @@ function changed(){
 function nav(p){if(!["dashboard","schedule","tasks","challenge","subjects","exams","focus","attendance","settings"].includes(p))return;page=p;history.replaceState(null,"","#"+p);render();window.scrollTo({top:0,behavior:"smooth"})}
 const A={toast,changed,day:()=>day,setDay:n=>day=n,installPrompt:()=>promptInstall,clearInstallPrompt:()=>promptInstall=null};
 const Ed=window.NOVA_EDIT(A),X=window.NOVA_EXAMS,F=window.NOVA_FOCUS,T=window.NOVA_ATTENDANCE;
-const CSE=window.NOVA_CHALLENGE,Auth=window.NOVA_AUTH;
+const CSE=window.NOVA_CHALLENGE,Auth=window.NOVA_AUTH,Cloud=window.NOVA_CLOUD;
 CSE.init({changed,toast,refresh:render});
 const THEME_KEY = "novastudy_theme_v1";
 function themeName(){return document.documentElement.dataset.theme==="gold"?"gold":"cyber"}
@@ -65,7 +65,7 @@ function switchLanguage(next){
 function exportBackup(){const file=new Blob([JSON.stringify({...S(),demo:false},null,2)],{type:"application/json"}),url=URL.createObjectURL(file),a=document.createElement("a");a.href=url;a.download="NovaStudy-Backup-"+N.date(new Date())+".json";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1200);toast("Backup exported. Keep a copy.")}
 async function importBackup(file){if(!file)return;if(file.size>1000000){toast("Backups must be under 1 MB.");return}try{const v=JSON.parse(await file.text());if(!N.valid(v))throw Error("Unsupported or invalid backup.");if(!confirm("Replace ALL current profile, subjects, routine, tasks, exams, attendance AND CSE 100 challenge progress?"))return;if(!N.setState(v)){showRecovery(N.getIssue());return}$("recoveryNotice").hidden=true;nav("dashboard");toast("Backup restored.")}catch(e){showRecovery("Backup was rejected; existing data is unchanged. "+(e.message||"Invalid file."));toast("Import failed: no data was replaced.")}}
 function refreshChoices(){const cat=$("profileCategory")?.value;if(!N.C[cat])return;const lev=$("profileLevel"),track=$("profileTrack"),oldL=lev.value,oldT=track.value;lev.innerHTML=V.option(N.C[cat].levels,N.C[cat].levels.includes(oldL)?oldL:N.C[cat].levels[0]);track.innerHTML=V.option(Object.keys(N.C[cat].tracks),N.C[cat].tracks[oldT]?oldT:Object.keys(N.C[cat].tracks)[0])}
-document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.nav){nav(b.dataset.nav);return}const {action,id,day:d,filter:f}=b.dataset;if(F.handle(action,b)||T.handle(action,b)||CSE.handle(action,b)||Auth.handle(action))return;switch(action){
+document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.nav){nav(b.dataset.nav);return}const {action,id,day:d,filter:f}=b.dataset;if(F.handle(action,b)||T.handle(action,b)||CSE.handle(action,b)||Auth.handle(action)||Cloud.handle(action))return;switch(action){
 case"add-subject":Ed.subject();break;case"edit-subject":Ed.subject(id);break;
 case"add-session":Ed.session();break;case"edit-session":Ed.session(id);break;
 case"add-exam":Ed.exam();break;case"edit-exam":Ed.exam(id);break;
@@ -137,5 +137,6 @@ const seen=new Set();function remind(){if(!S().profile.reminders||!("Notificatio
 F.init({toast,refresh:()=>{if(page==="focus")render()},onComplete:mode=>{if(page==="focus")render();toast(mode==="focus"?"Focus session completed!":"Break completed!")}});
 T.init({changed,toast,refresh:()=>{if(page==="attendance")render()}});
 Auth.init({toast,refresh:()=>{if(page==="settings")render()}});
+Cloud.init({toast,refresh:()=>{if(page==="settings")render()}});
 if(N.getIssue())showRecovery(N.getIssue());render();clock();setInterval(clock,15000);setInterval(()=>X.refreshCountdowns(),15000);setInterval(remind,25000)
 })();
