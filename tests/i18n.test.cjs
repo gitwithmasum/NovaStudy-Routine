@@ -78,12 +78,12 @@ test('translated relative dates and counters use Bangla digits',()=>{
 test('app wiring and service worker are prepared for offline bilingual use',()=>{
  const files=Object.fromEntries(['index.html','app.js','views.js','editors.js','exams.js','sw.js'].map(f=>[f,readFileSync(path.join(root,f),'utf8')]));
  assert.ok(files['index.html'].includes('src="./i18n.js"'));
- assert.ok(files['index.html'].includes('<b>1.6.0</b>'));
+ assert.ok(files['index.html'].includes('<b>1.7.0</b>'));
  assert.ok(files['app.js'].includes('I.useExternal(e.newValue)'));
  assert.ok(files['views.js'].includes('data-lang="bn"'));
  assert.ok(files['editors.js'].includes('aria-labelledby'));
  assert.ok(files['exams.js'].includes('I.displayDate'));
- assert.ok(files['sw.js'].includes('novastudy-v1.6.0'));
+ assert.ok(files['sw.js'].includes('novastudy-v1.7.0'));
  assert.ok(files['sw.js'].includes("'./i18n.js'"));
  for(const f of ['i18n.js','core.js','views.js','editors.js','exams.js','app.js','sw.js']){
    assert.doesNotThrow(()=>new vm.Script(readFileSync(path.join(root,f),'utf8'),{filename:f}));

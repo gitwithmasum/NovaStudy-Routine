@@ -10,7 +10,7 @@ const min=t=>{const x=String(t).split(":").map(Number);return x[0]*60+x[1]};
 const stamp=n=>String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0");
 const hour=t=>{const [h,m]=String(t).split(":").map(Number);return (h%12||12)+":"+String(m).padStart(2,"0")+(h>=12?" PM":" AM")};
 const profile={name:"Student",institution:"",category:"university",level:"Undergraduate — Year 1",track:"CSE / Software Engineering",weekStart:6,reminders:false};
-function initial(){return {version:1,profile:{...profile},subjects:C.university.tracks["CSE / Software Engineering"].slice(0,7).map((name,i)=>({id:uid(),name,color:colors[i%colors.length]})),sessions:[],tasks:[],exams:[],demo:false}}
+function initial(){return {version:1,profile:{...profile},subjects:C.university.tracks["CSE / Software Engineering"].slice(0,7).map((name,i)=>({id:uid(),name,color:colors[i%colors.length]})),sessions:[],tasks:[],exams:[],attendance:[],demo:false}}
 function validDate(x){
  if(!/^\d{4}-\d{2}-\d{2}$/.test(String(x)))return false;
  const [y,m,d]=x.split("-").map(Number),v=new Date(y,m-1,d);
@@ -24,7 +24,7 @@ function validExam(x){
  &&(!x.notes||typeof x.notes==="string"&&x.notes.length<=250)
  &&(x.done===undefined||typeof x.done==="boolean"));
 }
-function normalize(s){if(!Array.isArray(s.exams))s.exams=[];return s}
+function normalize(s){if(!Array.isArray(s.exams))s.exams=[];if(!Array.isArray(s.attendance))s.attendance=[];return s}
 function occursOn(session,when){
  if(!(when instanceof Date)||Number.isNaN(when.getTime()))return false;
  if(session.repeat==="once")return Boolean(session.date)&&date(when)===session.date;
@@ -58,6 +58,21 @@ function valid(s){
    &&(x.revisionFor===undefined||typeof x.revisionFor==="string"))||!uniqueIds(s.tasks))return false;
  if("exams" in s&&(!Array.isArray(s.exams)||s.exams.length>500
    ||!s.exams.every(validExam)||!uniqueIds(s.exams)))return false;
+ if("attendance" in s){
+   if(!Array.isArray(s.attendance)||s.attendance.length>3000)return false;
+   const keys=new Set();
+   for(const a of s.attendance){
+     if(!a||!idOk(a.id)||!validDate(a.date)
+       ||typeof a.subjectId!=="string"||a.subjectId.length>128
+       ||typeof a.sessionId!=="string"||a.sessionId.length>128
+       ||!["present","late","absent","excused"].includes(a.status)
+       ||(a.note!==undefined&&(typeof a.note!=="string"||a.note.length>140)))return false;
+     const key=a.date+"\0"+(a.sessionId?"s:"+a.sessionId:"m:"+a.subjectId);
+     if(keys.has(key))return false;
+     keys.add(key);
+   }
+   if(!uniqueIds(s.attendance))return false;
+ }
  return true;
 }
 let state,persistedRaw=null,snapshot="",issue="",writeLocked=false,unreadableRaw=null;

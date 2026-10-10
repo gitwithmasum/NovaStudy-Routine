@@ -197,3 +197,14 @@ The selected futuristic graduation-cap artwork is now the app icon for installab
 - **Storage:** Timer and statistics use a new separate key `novastudy_focus_v1`; the original `novastudy_state_v1` model and JSON backup format remain unchanged. Focus stats are *not* included in routine backup exports. Vercel and Netlify store these independently.
 - **Safe update:** Previous timetable, subjects, tasks, exams, revision, bilingual language preference, reliability controls, both themes and offline PWA remain.
 - **Regression tests:** Run `node --test tests/*.test.cjs` locally; the GitHub Actions workflow also runs the suites on main.
+
+
+## NovaStudy v1.7 — Attendance & Academic Analytics
+
+- **Class attendance:** On the Attendance screen, pick a past/today date to mark scheduled **Class** and **Lab** sessions as Present, Late, Absent, or Excused. Weekly and one-time schedules use the actual session occurrence date; future attendance cannot be recorded.
+- **Manual attendance:** Add one record per subject/date for classes outside the timetable. Updating the same class/date changes the existing record rather than duplicating it; records can be removed.
+- **Accuracy:** Attendance rate = (Present + Late) / (Present + Late + Absent). Excused and unmarked sessions are excluded. Empty rates display a dash rather than misleading 0%.
+- **Analytics:** Subject-wise recorded attendance rates, a seven-day attendance trend, task completion, exam completion and locally saved total Focus Timer minutes. Figures depend on user-entered data.
+- **Backup and compatibility:** Attendance is stored in the **existing** `novastudy_state_v1` structure and exported in ordinary JSON backups. Old v1 backups without an attendance array continue to import. This is **not** a cloud database or official school attendance record.
+- **Privacy:** Vercel, Netlify, localhost and other devices have separate local storage. Export/import backups to move attendance with routines. Focus Timer statistics are still separate and not part of that backup.
+- **Regression tests:** `node --test tests/*.test.cjs` checks legacy migration, duplicate prevention, invalid/future dates, wrong-day schedules, manual records, percentage calculation, storage rollback, security, and previous features.
