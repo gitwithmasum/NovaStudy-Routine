@@ -96,7 +96,7 @@ test('sound preference persists and default stays on',()=>{
 test('v1.6 integration, offline cache, and bilingual hooks are included',()=>{
  const files=Object.fromEntries(['index.html','app.js','focus.js','sw.js','styles.css','i18n.js','views.js']
  .map(f=>[f,readFileSync(path.join(root,f),'utf8')]));
- assert.match(files['index.html'],/1\.7\.0/);
+ assert.match(files['index.html'],/1\.8\.0/);
  assert.match(files['index.html'],/data-nav="focus"/);
  assert.ok(files['index.html'].includes('src="./focus.js"'));
  assert.ok(files['sw.js'].includes("'./focus.js'")&&files['sw.js'].includes("novastudy-v1.8.0"));
