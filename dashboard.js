@@ -158,7 +158,7 @@ function render(){
  tr("Jump straight into your next task","সরাসরি প্রয়োজনীয় কাজে যাও")+'</small></div></div>'+
  '<div class="insight-action-grid">'+[
  [tr("Add task","Task যোগ"),"add-task","＋"],
- [tr("Plan a session","সেশন প্ল্যান"),"add-session","◷"],
+ [tr("Smart study planner","স্মার্ট স্টাডি প্ল্যানার"),"go-planner","◷"],
  [tr("Focus mode","ফোকাস মোড"),"go-focus","◎"],
  [tr("Exam planner","পরীক্ষা প্ল্যান"),"go-exams","▣"],
  [tr("Attendance","উপস্থিতি"),"go-attendance","▤"],
