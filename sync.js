@@ -107,6 +107,7 @@ async function review(){
  busy=true;failure="";status="";notify();
  try{
   const local=copy(N.get());
+  const rawAtReview=localStorage.getItem(N.KEY);
   if(!N.valid(local))throw Error("Local data invalid. Sync blocked.");
   const remote=await fetchRemote(u);
   if(user()?.id!==u.id)throw Error("Google account changed. Sign in and retry.");
@@ -114,7 +115,7 @@ async function review(){
   // No cloud record: only a confirmed upload may create the first backup.
   const joined=remote?merge(baseline?.snapshot||null,local,remote.snapshot):{merged:local,conflicts:[]};
   preview={
-   account:u.id,local,localHash:stable(local),cloud:remote?copy(remote.snapshot):null,
+   account:u.id,local,localHash:stable(local),rawAtReview,cloud:remote?copy(remote.snapshot):null,
    revision:remote?Number(remote.revision):0,updated:remote?.updated_at||"",
    baseline:baseline?.snapshot||null,conflicts:joined.conflicts,
    pending:!remote||!eq(joined.merged,local)||!eq(joined.merged,remote.snapshot)
@@ -139,7 +140,8 @@ async function apply(choice){
  busy=true;failure="";notify();
  try{
   const current=copy(N.get());
-  if(stable(current)!==p.localHash)throw Error("Device changed since review. Refresh review first.");
+  if(stable(current)!==p.localHash||localStorage.getItem(N.KEY)!==p.rawAtReview)
+   throw Error("Device or another tab changed since review. Refresh review first.");
   const latest=await fetchRemote(u);
   if(user()?.id!==u.id)throw Error("Account changed. Sync cancelled.");
   if((latest?Number(latest.revision):0)!==p.revision||!eq(latest?.snapshot||null,p.cloud))
@@ -161,6 +163,8 @@ async function apply(choice){
    saved=res.data;
   }
   if(!saved||user()?.id!==u.id)throw Error("Account changed during sync. Downloaded JSON backup is available.");
+  if(stable(N.get())!==p.localHash||localStorage.getItem(N.KEY)!==p.rawAtReview)
+   throw Error("Local data changed during sync. Cloud may have saved; local changes were kept. Review again.");
   if(!eq(current,result.merged)&&!N.setState(result.merged))throw Error(N.getIssue()||"Local save failed. Cloud may already be updated; do not leave without exporting your data.");
   if(!acceptSnapshot(result.merged,Number(saved.revision))){
    status=text("Sync data saved but history unavailable. Next review may show extra conflicts.","Sync হয়েছে, তবে History Save হয়নি। পরের Review-তে বেশি Conflict আসতে পারে।");

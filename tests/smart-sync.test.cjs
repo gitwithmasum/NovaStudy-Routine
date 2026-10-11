@@ -30,7 +30,7 @@ function device(srv,{initial=sample(),account="person"}={}){
    };
   }
  }};
- const N={get:()=>local,valid:x=>x?.version===1&&Array.isArray(x.tasks)&&Array.isArray(x.subjects)&&x.tasks.every(t=>typeof t.id==="string"&&typeof t.title==="string"),setState:x=>{if(!N.valid(x))return false;local=clone(x);restoreCount++;return true},getIssue:()=>"",date:()=>"2026-10-11",escape:x=>String(x)};
+ const N={KEY:"novastudy_state_v1",get:()=>local,valid:x=>x?.version===1&&Array.isArray(x.tasks)&&Array.isArray(x.subjects)&&x.tasks.every(t=>typeof t.id==="string"&&typeof t.title==="string"),setState:x=>{if(!N.valid(x))return false;local=clone(x);restoreCount++;return true},getIssue:()=>"",date:()=>"2026-10-11",escape:x=>String(x)};
  const W={NOVA:N,NOVA_I18N:{language:"en"},NOVA_AUTH:{getStatus:()=>uid?"connected":"guest",getUser:()=>uid?{id:uid}:null,getClient:()=>client},confirm:()=>confirmed};
  const doc={body:{appendChild(){}},createElement:()=>({click(){downloadCount++},remove(){}})};
  const ctx={window:W,document:doc,localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,String(v)),removeItem:k=>storage.delete(k)},
@@ -108,6 +108,13 @@ test("require review and confirmation for first cloud copy",async()=>{
  d.setConfirm(false);assert.equal(await d.sync.apply(null),false);assert.equal(srv.row,null);
  d.setConfirm(true);assert.equal(await d.sync.apply(null),true);
  assert.equal(srv.row.revision,1);assert.equal(srv.row.snapshot.tasks[0].title,"My task");
+});
+test("stale another-tab browser storage blocks sync even if in-memory state is unchanged",async()=>{
+ const srv=server(),d=device(srv);
+ await d.sync.review();
+ d.storage.set("novastudy_state_v1","another-tab-updated-data");
+ assert.equal(await d.sync.apply(null),false);
+ assert.equal(srv.writes,0);
 });
 test("account changes forbid uploading and clear preview",async()=>{
  const srv=server(),d=device(srv);
