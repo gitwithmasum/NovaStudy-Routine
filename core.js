@@ -16,13 +16,31 @@ function validDate(x){
  const [y,m,d]=x.split("-").map(Number),v=new Date(y,m-1,d);
  return v.getFullYear()===y&&v.getMonth()===m-1&&v.getDate()===d;
 }
+function validExamPrep(p){
+ if(!p||typeof p!=="object"||Array.isArray(p)||!Array.isArray(p.topics)||!Array.isArray(p.mocks)
+ ||p.topics.length>60||p.mocks.length>60)return false;
+ const topicIds=new Set(),mockIds=new Set();
+ for(const t of p.topics){
+  if(!t||!idOk(t.id)||topicIds.has(t.id)||typeof t.title!=="string"||!t.title.trim()||t.title.length>120
+   ||typeof t.done!=="boolean"||typeof t.weak!=="boolean")return false;
+  topicIds.add(t.id);
+ }
+ for(const m of p.mocks){
+  if(!m||!idOk(m.id)||mockIds.has(m.id)||!validDate(m.date)
+   ||!Number.isInteger(m.score)||!Number.isInteger(m.total)||m.total<1||m.total>200||m.score<0||m.score>m.total
+   ||typeof m.notes!=="string"||m.notes.length>140)return false;
+  mockIds.add(m.id);
+ }
+ return true;
+}
 function validExam(x){
  return Boolean(x&&typeof x.id==="string"&&x.id.length>0&&typeof x.title==="string"&&x.title.length<=120
  &&typeof x.subjectId==="string"&&validDate(x.date)
  &&/^([01]\d|2[0-3]):[0-5]\d$/.test(x.start)&&/^([01]\d|2[0-3]):[0-5]\d$/.test(x.end)&&min(x.end)>min(x.start)
  &&(!x.place||typeof x.place==="string"&&x.place.length<=120)
  &&(!x.notes||typeof x.notes==="string"&&x.notes.length<=250)
- &&(x.done===undefined||typeof x.done==="boolean"));
+ &&(x.done===undefined||typeof x.done==="boolean")
+ &&(x.prep===undefined||validExamPrep(x.prep)));
 }
 function normalize(s){if(!Array.isArray(s.exams))s.exams=[];if(!Array.isArray(s.attendance))s.attendance=[];if(!Object.prototype.hasOwnProperty.call(s,"challenge"))s.challenge={startDate:"",items:[]};return s}
 function occursOn(session,when){

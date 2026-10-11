@@ -35,4 +35,5 @@ jobs:
           node --check views.js
           node --check editors.js
           node --check exams.js
+          node --check exam-prep.js
           node --test tests/*.test.cjs

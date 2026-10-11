@@ -57,6 +57,7 @@ function card(e){
     '</div></div><div class="exam-card-side"><span class="exam-countdown" data-exam-countdown="'+E(e.id)+'">'+E(countdown(e))+'</span>'+
     '<span class="exam-revision-meta">'+linked+' revision blocks</span><div class="exam-card-actions">'+
     V.button('Edit','edit-exam','tiny-btn',e.id)+
+    V.button(I.language==='bn'?'প্রস্তুতি':'Preparation','exam-prep','secondary-btn',e.id)+
     (complete?'':V.button('Plan revision','plan-revision','secondary-btn',e.id))+
     V.button(complete?'Reopen':'Mark done','toggle-exam','tiny-btn',e.id)+
     V.button('Delete','delete-exam','danger-btn',e.id)+
@@ -70,7 +71,7 @@ function page(){
     '</strong></div><div class="exam-kpi"><small>NEXT EXAM</small><strong>'+(nextExam?E(I.displayDate(nextExam.date)):'None')+
     '</strong></div><div class="exam-kpi"><small>REVISION BLOCKS</small><strong>'+S().sessions.filter(x=>x.revisionFor).length+
     '</strong></div></div><div class="exam-list">'+(exams.length?exams.map(card).join(''):'<div class="empty-state">No exams added yet. Create an exam to start planning revision.</div>')+
-    '</div><div class="hint-banner">Countdown uses this device’s local time. Revision planning creates one-time schedule blocks and linked tasks without removing your existing routine.</div>';
+    '</div>'+window.NOVA_EXAM_PREP.panel()+'<div class="hint-banner">Countdown uses this device’s local time. Revision planning creates one-time schedule blocks and linked tasks without removing your existing routine.</div>';
 }
 function refreshCountdowns(){
   document.querySelectorAll('[data-exam-countdown]').forEach(el=>{
