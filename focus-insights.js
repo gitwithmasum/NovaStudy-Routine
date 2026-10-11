@@ -98,7 +98,7 @@ function clearHistory(){
  const next=fresh();next.longBreakEvery=state.longBreakEvery;
  return persist(next,true);
 }
-function card(en,bn,value)=>'<div class="focus-insight-kpi"><small>'+tr(en,bn)+'</small><strong>'+E(I.number(value))+'</strong></div>';
+const card=(en,bn,value)=>'<div class="focus-insight-kpi"><small>'+tr(en,bn)+'</small><strong>'+E(I.number(value))+'</strong></div>';
 function panel(){
  const x=stats(),max=Math.max(1,...x.week.map(d=>d.focus));
  const rows=x.week.map(d=>{
