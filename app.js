@@ -82,7 +82,7 @@ case"suggestions":{const count=N.addSuggestions();if(changed())toast(count+" sug
 case"day":day=Number(d);render();break;case"filter":filter=f;render();break;
 case"go-challenge":nav("challenge");break;case"go-attendance":nav("attendance");break;case"go-focus":nav("focus");break;case"go-exams":nav("exams");break;case"go-schedule":nav("schedule");break;case"go-tasks":nav("tasks");break;
 case"toggle-language":switchLanguage(I.language==="bn"?"en":"bn");break;case"language-select":switchLanguage(b.dataset.lang);break;
-case"apply-update":{if(updateRegistration?.waiting&&confirm("Install the new version? Any open editor will be closed; saved data will be preserved.")){updateAccepted=true;updateRegistration.waiting.postMessage({type:"SKIP_WAITING"});}break;}case"export-recovery":exportRawRecovery();break;case"dismiss-recovery":$("recoveryNotice").hidden=true;break;case"toggle-theme":toggleTheme();break;case"theme-select":setTheme(b.dataset.themeValue);break;case"install":Ed.install();break;case"export":exportBackup();break;case"close":Ed.close();break;
+case"apply-update":applyUpdate();break;case"update-later":postponeUpdate();break;case"retry-update":retryUpdate();break;case"export-recovery":exportRawRecovery();break;case"dismiss-recovery":$("recoveryNotice").hidden=true;break;case"toggle-theme":toggleTheme();break;case"theme-select":setTheme(b.dataset.themeValue);break;case"install":Ed.install();break;case"export":exportBackup();break;case"close":Ed.close();break;
 }});
 document.addEventListener("submit",e=>{if(/^hub(?:Practice|Project|Milestone|Resource)Form$/.test(e.target.id)){e.preventDefault();Hub.submit(e.target)}else if(e.target.id==="insightsDistractionForm"){e.preventDefault();Insights.addDistraction(e.target)}else if(e.target.id==="examPrepTopicForm"){e.preventDefault();Prep.addTopic(e.target)}else if(e.target.id==="examPrepMockForm"){e.preventDefault();Prep.addMock(e.target)}else if(e.target.id==="smartPlannerForm"){e.preventDefault();Planner.review(e.target)}else if(e.target.id==="editorForm"){e.preventDefault();Ed.save(e.target)}else if(e.target.id==="profileForm"){e.preventDefault();const form=new FormData(e.target),cat=String(form.get("category")),level=String(form.get("level")),track=String(form.get("track"));if(!N.C[cat]||!N.C[cat].levels.includes(level)||!N.C[cat].tracks[track])return toast("Invalid class/department.");S().profile={...S().profile,name:String(form.get("name")||"Student").trim().slice(0,80)||"Student",institution:String(form.get("institution")||"").trim().slice(0,100),category:cat,level,track,weekStart:Number(form.get("weekStart")||0)};if(changed())toast("Profile saved. Existing routine preserved.")}});
 document.addEventListener("change",e=>{if(UI.handleChange(e.target))return;if(Reminders.handleChange(e.target))return;if(Reports.handleChange(e.target))return;if(e.target.id==="hubImportFile"){Hub.importData(e.target.files?.[0]);return}if(Hub.handleChange(e.target))return;if(Insights.handleChange(e.target))return;if(Prep.handleChange(e.target))return;if(Planner.changed(e.target))return;if(CSE.handleChange(e.target))return;if(e.target.id==="attendanceDate"){T.dateChanged(e.target.value);return}if(e.target.id==="focusMinutes"){F.handleMinutes(e.target.value);return}if(e.target.id==="profileCategory")refreshChoices();if(e.target.id==="importFile")importBackup(e.target.files?.[0]);if(e.target.dataset.taskCheck){const t=S().tasks.find(x=>x.id===e.target.dataset.taskCheck);if(t){t.done=e.target.checked;changed()}}});
@@ -114,23 +114,67 @@ window.addEventListener("storage",e=>{
   }
 });
 window.addEventListener("hashchange",()=>{const p=location.hash.slice(1);if(["dashboard","schedule","planner","tasks","challenge","learning","subjects","exams","focus","attendance","reports","notifications","settings"].includes(p)){page=p;if(p==="challenge")Hub.selectTab("challenge",true);else if(p==="learning")Hub.selectTab("overview",true);render();revealActiveNav()}});
-let updateRegistration=null,updateAccepted=false,updateReloaded=false;
+let updateRegistration=null,updateAccepted=false,updateReloaded=false,updatePostponed=false,updateAttemptTimer=null;
+function updateMessage(message,retry=false){
+ const text=$("updateNoticeText"),button=$("updateRetry");
+ if(text)text.textContent=message;
+ if(button)button.hidden=!retry;
+ $("updateNotice").hidden=false;
+}
 function offerUpdate(reg){
- if(reg.waiting&&navigator.serviceWorker.controller){updateRegistration=reg;$("updateNotice").hidden=false}
+ if(reg.waiting&&navigator.serviceWorker.controller){
+  updateRegistration=reg;
+  if(updatePostponed||updateAccepted)return;
+  updateMessage("A newer NovaStudy version is ready. Save open edits before updating.");
+ }
+}
+function postponeUpdate(){
+ updatePostponed=true;updateAccepted=false;
+ clearTimeout(updateAttemptTimer);
+ $("updateNotice").hidden=true;
+ toast("Update postponed. It will be offered again on a future visit.");
+}
+function applyUpdate(){
+ const worker=updateRegistration?.waiting;
+ if(!worker){updateMessage("The downloaded update is no longer waiting. Try checking again.",true);return false}
+ if($("modal").open){
+  if(!confirm("An editor is open. Close it without saving unfinished edits and update now?"))return false;
+  Ed.close();
+ }else if(!confirm("Reload to install the new app version? Saved routines stay on this device."))return false;
+ updateAccepted=true;updatePostponed=false;
+ updateMessage("Installing update… keep NovaStudy open until it reloads.");
+ try{worker.postMessage({type:"SKIP_WAITING"})}
+ catch{updateAccepted=false;updateMessage("Update could not be started. Retry when online.",true);return false}
+ clearTimeout(updateAttemptTimer);
+ updateAttemptTimer=setTimeout(()=>{
+  if(updateAccepted&&!updateReloaded){
+   updateAccepted=false;
+   updateMessage("Update is taking longer than expected. Your current version and saved data remain available. Retry when ready.",true);
+  }
+ },12000);
+ return true;
+}
+function retryUpdate(){
+ updatePostponed=false;updateAccepted=false;
+ if(updateRegistration?.waiting){applyUpdate();return}
+ if(updateRegistration){
+  updateMessage("Checking for an updated version…");
+  updateRegistration.update().then(reg=>offerUpdate(reg)).catch(()=>updateMessage("Cannot check for updates right now. Check your connection and retry.",true));
+ }else updateMessage("Service worker has not registered. Reload the app online and try again.",true);
 }
 if("serviceWorker" in navigator&&location.protocol!=="file:"){
  navigator.serviceWorker.addEventListener("controllerchange",()=>{
-   if(updateAccepted&&!updateReloaded){updateReloaded=true;location.reload()}
+  if(updateAccepted&&!updateReloaded){updateReloaded=true;clearTimeout(updateAttemptTimer);location.reload()}
  });
  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").then(reg=>{
-   updateRegistration=reg;offerUpdate(reg);
-   reg.addEventListener("updatefound",()=>{
-     const worker=reg.installing;
-     if(worker)worker.addEventListener("statechange",()=>{if(worker.state==="installed")offerUpdate(reg)});
-   });
-   document.addEventListener("visibilitychange",()=>{if(!document.hidden)reg.update().catch(()=>{})});
-   setInterval(()=>reg.update().catch(()=>{}),60*60*1000);
- }).catch(()=>toast("Offline caching unavailable on this browser.")));
+  updateRegistration=reg;offerUpdate(reg);
+  reg.addEventListener("updatefound",()=>{
+   const worker=reg.installing;
+   if(worker)worker.addEventListener("statechange",()=>{if(worker.state==="installed")offerUpdate(reg)});
+  });
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)reg.update().then(()=>offerUpdate(reg)).catch(()=>{})});
+  setInterval(()=>reg.update().then(()=>offerUpdate(reg)).catch(()=>{}),60*60*1000);
+ }).catch(()=>toast("Offline caching unavailable. Reopen online to retry.")));
 }
 function exportRawRecovery(){
  const raw=N.rawRecovery();

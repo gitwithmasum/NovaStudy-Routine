@@ -42,3 +42,5 @@ jobs:
           node --check exams.js
           node --check exam-prep.js
           node --test tests/*.test.cjs
+          node scripts/release-audit.cjs
+          node scripts/performance-benchmark.cjs

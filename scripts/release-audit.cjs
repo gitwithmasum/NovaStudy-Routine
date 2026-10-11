@@ -1,0 +1,57 @@
+/* Static release smoke audit. It does NOT replace browser/mobile Lighthouse or WCAG audit. */
+"use strict";
+const fs=require("node:fs"),path=require("node:path"),assert=require("node:assert/strict");
+const ROOT=path.join(__dirname,"..");
+const read=p=>fs.readFileSync(path.join(ROOT,p),"utf8");
+const exists=p=>fs.existsSync(path.join(ROOT,p));
+let checks=0;
+const check=(v,message)=>{assert.ok(v,message);checks++};
+const html=read("index.html"),sw=read("sw.js"),app=read("app.js");
+const styles=[...html.matchAll(/<link\b[^>]*rel="stylesheet"[^>]*href="(\.\/[^"]+)"/g)].map(m=>m[1].slice(2));
+const scripts=[...html.matchAll(/<script\b[^>]*src="(\.\/[^"]+)"[^>]*defer[^>]*>/g)].map(m=>m[1].slice(2));
+const appAssets=[...styles,...scripts,"manifest.webmanifest","assets/icon-192.png","assets/icon-512.png"];
+check(styles.length>=14,"Stylesheets missing");
+check(scripts.length>=18,"Application scripts missing");
+check(new Set(appAssets).size===appAssets.length,"Duplicate static app resource");
+for(const asset of appAssets){
+ check(exists(asset),"Referenced resource missing: "+asset);
+ check(sw.includes("'./"+asset+"'"),"Not pre-cached for offline PWA: "+asset);
+}
+check(/const CACHE='novastudy-v3\.2\.0'/.test(sw),"Wrong SW release cache");
+check(/failed|partially populated/i.test(sw),"Atomic install rollback documentation missing");
+check(sw.includes("await caches.delete(CACHE)")&&sw.includes("await cache.addAll(FILES)"),"Atomic install missing");
+check(sw.includes("const checks=await Promise.all(REQUIRED.map"),"Activation verification missing");
+check(sw.includes("SKIP_WAITING"),"SW manual activation message missing");
+check(sw.includes("event.request.mode==='navigate'"),"Offline navigation routing absent");
+check(html.includes('name="viewport"')&&html.includes("viewport-fit=cover"),"Mobile viewport/safe area missing");
+check(html.includes('rel="manifest"'),"PWA manifest missing");
+check(html.includes('class="mobile-nav" aria-label="Mobile navigation"'),"Mobile navigation label missing");
+check(html.includes('class="nav-list" aria-label="Pages"'),"Desktop navigation label missing");
+check(html.includes('class="skip-to-content"')&&app.includes('case"focus-content"'),"Skip-to-content control missing");
+check(html.includes('id="view" class="view" tabindex="-1"'),"Main view is not focusable");
+check(html.includes('id="toast" class="toast" role="status" aria-live="polite"'),"Toast live region absent");
+check(html.includes('id="recoveryNotice" class="reliability-notice" role="alert"'),"Recovery alert absent");
+check(html.includes('id="updateNoticeText" role="status" aria-live="polite"'),"Update status live region absent");
+check(html.includes('id="updateRetry"'),"Update retry control absent");
+const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]);
+check(ids.length===new Set(ids).size,"Duplicate static IDs");
+const imgs=[...html.matchAll(/<img\b[^>]*>/g)].map(x=>x[0]);
+check(imgs.length>=2&&imgs.every(x=>/\balt="/.test(x)),"Image alt attributes missing");
+const sidebar=html.match(/<nav class="nav-list"[\s\S]*?<\/nav>/)?.[0]||"";
+const mobile=html.match(/<nav class="mobile-nav"[\s\S]*?<\/nav>/)?.[0]||"";
+const routes=new Set([...sidebar.matchAll(/data-nav="([^"]+)"/g)].map(x=>x[1]));
+for(const route of [...mobile.matchAll(/data-nav="([^"]+)"/g)].map(x=>x[1]))
+ check(routes.has(route),"Mobile route missing on desktop: "+route);
+check(routes.size>=10,"Too few desktop routes");
+const css=read("navigation-scroll.css")+read("performance-mobile.css")+read("premium-ui.css");
+check(css.includes("overflow-x:auto")&&css.includes("overflow-y:auto"),"Responsive nav scrolling absent");
+check(css.includes("safe-area-inset-bottom"),"Mobile safe area missing");
+check(css.includes("prefers-reduced-motion:reduce"),"Reduced-motion setting absent");
+check(css.includes("focus-visible"),"Keyboard focus styling absent");
+check(css.includes("min-height:56px"),"Mobile tap target threshold absent");
+check(!html.includes('target="_blank" rel="noopener"'),"Insecure external links");
+const version=(html.match(/NOVASTUDY OS <b>([\d.]+)<\/b>/)||[])[1];
+check(version==="3.2.0","Footer release version mismatch");
+check(/version/i.test(read("README.md")),"README release information missing");
+console.log("NovaStudy v3.2 release audit: "+checks+" static checks passed.");
+console.log("Scope: static markup/PWA references/mobile CSS; not a real browser or accessibility certification.");

@@ -85,11 +85,11 @@
       <div class="reliability-actions"><button type="button" data-action="export">Export current backup</button><button type="button" data-action="export-recovery">Download raw recovery</button><button type="button" data-nav="settings">Open Settings</button><button type="button" data-action="dismiss-recovery">Dismiss</button></div>
     </div>
     <div id="updateNotice" class="reliability-notice update-notice" role="status" hidden>
-      <strong>✦ NovaStudy update ready</strong><span>A newer version is downloaded. Your saved routines and exams will be kept.</span>
-      <div class="reliability-actions"><button type="button" data-action="apply-update">Update and reload</button></div>
+      <strong>✦ NovaStudy update ready</strong><span id="updateNoticeText" role="status" aria-live="polite">A new app version is ready. Save any unfinished edits before updating.</span>
+      <div class="reliability-actions"><button type="button" data-action="apply-update">Update and reload</button><button type="button" data-action="update-later">Later</button><button type="button" data-action="retry-update" id="updateRetry" hidden>Retry update</button><button type="button" data-action="export">Export routine backup</button></div>
     </div>
     <div id="view" class="view" tabindex="-1"></div>
-      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>3.1.0</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
+      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>3.2.0</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
     </main>
   </div>
   <nav class="mobile-nav" aria-label="Mobile navigation">
