@@ -44,8 +44,9 @@ function entries(state,day,used,preferred,mode,now){
   taskEntries.push({key:"subject:"+x.id,title:"Study: "+x.name,subjectId:x.id,priority:38});
  }
  const existing=new Set((state.sessions||[]).filter(s=>s.repeat==="once"&&s.date===dayKey&&s.revisionFor?.startsWith("smart-v2:")).map(x=>x.revisionFor.slice(9)));
- return taskEntries.filter(x=>!existing.has(x.key)&&!used.has(x.key)&&(!x.subjectId||state.subjects.some(s=>s.id===x.subjectId)))
-  .map(x=>({...x,score:x.priority+(preferred&&x.subjectId===preferred?110:0)}))
+ return taskEntries.filter(x=>!existing.has(x.key)&&!used.has(x.key))
+  .map(x=>({...x,subjectId:x.subjectId&&state.subjects.some(s=>s.id===x.subjectId)?x.subjectId:"",
+   score:x.priority+(preferred&&x.subjectId===preferred?110:0)}))
   .sort((a,b)=>b.score-a.score||a.key.localeCompare(b.key));
 }
 function build(state,options,now=new Date()){
