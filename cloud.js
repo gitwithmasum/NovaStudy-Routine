@@ -50,6 +50,7 @@ async function upload(){
   if(response.error)throw response.error;
   if(identity()?.id!==u.id)throw Error("Account changed; reload and review backup.");
   cached=response.data;
+  window.NOVA_SYNC?.acceptSnapshot?.(response.data.snapshot,Number(response.data.revision));
   notice=tr("Cloud backup saved.","Cloud Backup সংরক্ষিত হয়েছে।");
   toast(notice);return true;
  }catch(e){fail(e);return false}
@@ -72,6 +73,7 @@ async function restore(){
  downloadLocal();
  if(!N.setState(latest.data.snapshot)){fail(N.getIssue()||"Restore failed, local data unchanged.");return false}
  cached={snapshot:latest.data.snapshot,revision:Number(latest.data.revision),updated_at:latest.data.updated_at};
+ window.NOVA_SYNC?.acceptSnapshot?.(latest.data.snapshot,Number(latest.data.revision));
  notice=tr("Restored locally; cloud remains unchanged.","লোকাল ডেটা Restore হয়েছে; Cloud অপরিবর্তিত।");
  toast(notice);redraw();return true;
 }
@@ -84,7 +86,7 @@ async function remove(){
   const res=await client.from(table).delete().eq("user_id",u.id).eq("revision",cached.revision).select("user_id");
   if(res.error)throw res.error;
   if(!res.data?.length)throw Error("Cloud revision changed. Refresh first.");
-  cached=null;notice=tr("Cloud backup deleted. Local data kept.","Cloud Backup মুছে গেছে। লোকাল ডেটা আছে।");toast(notice);return true;
+  cached=null;window.NOVA_SYNC?.clearBaseline?.();notice=tr("Cloud backup deleted. Local data kept.","Cloud Backup মুছে গেছে। লোকাল ডেটা আছে।");toast(notice);return true;
  }catch(e){fail(e);return false}
  finally{busy=false;redraw()}
 }

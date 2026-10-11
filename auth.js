@@ -111,7 +111,7 @@ function panel(){
  '<button type="button" class="google-signin-btn" data-action="google-signin"'+(pending||state==="initializing"||!configured?' disabled':'')+'><span aria-hidden="true" class="google-letter">G</span> '+tr("Continue with Google","Google দিয়ে চালিয়ে যাও")+'</button>')+
  (state==="unconfigured"?'<p class="auth-help">'+tr("Owner setup: add public Supabase URL and publishable key in auth-config.js, then enable Google OAuth and redirect URLs.","Owner Setup: auth-config.js-এ Public Supabase URL ও Publishable Key যোগ করো; এরপর Google OAuth ও Redirect URL Configure করো।")+'</p>':"")+
  (errorMessage?'<p class="auth-error" role="alert">'+esc(errorMessage)+'</p>':"")+
- '<div class="hint-banner auth-privacy">'+tr("Signing in does NOT upload or sync tasks, routines, exams or CSE 100 progress. Existing study data remains in this browser even after signing out.","Login করলে Tasks, Routine, Exams বা CSE 100 Progress Cloud-এ Upload/Sync হয় না। Sign Out করার পরও আগের ডেটা এই Browser-এ থাকবে।")+'</div></section>';
+ '<div class="hint-banner auth-privacy">'+tr("Google sign-in alone does not upload study data. Optional Smart Sync requires your review and confirmation. Signing out preserves local data.","শুধু Google Login করলে Study Data আপলোড হয় না। Smart Sync-এর জন্য তোমার Review ও Confirmation দরকার। Sign Out-এর পরও Local Data থাকবে।")+'</div></section>';
 }
 function handle(action){
  if(action==="google-signin"){void signIn();return true}

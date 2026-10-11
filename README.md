@@ -240,3 +240,10 @@ The selected futuristic graduation-cap artwork is now the app icon for installab
 - Restore rechecks remote revision, validates data, asks confirmation, downloads local JSON first, and then restores local state. Deleting a cloud backup never deletes browser data.
 - Google Sign-In remains optional; original offline usage and legacy JSON Backup Import/Export stay available. Netlify/Vercel/browser origins remain isolated until the user manually restores.
 - No Google Client Secret or Service Role key is used in the browser. The database uses `auth.uid()` RLS and a 1 MB size constraint.
+
+
+## NovaStudy v2.1 — Smart Sync (safe, review-first)
+
+The **Profile & Settings → Smart Sync** panel compares the current device and authenticated account backup. Click **Compare & review** first. Independent additions/edits are combined using account-scoped, locally stored baseline snapshots (three-way merge). Same-entry edits or edit-vs-delete conflicts are **not applied silently**. For conflicts, choose *Keep this device* or *Keep cloud* before explicit confirmation; the choice affects only conflicting entries. The current device's JSON backup is downloaded before applying changes. Data integrity validation and cloud revision optimistic locking reject stale changes. No background auto-sync.
+
+On the first connection without a sync baseline, entries present only on one device are preserved; distinct subject IDs with identical names may both appear. For the best result, first **Restore cloud to this browser** on a new device or use **Compare & review** and inspect the conflicts. Your cloud data is scoped to Supabase `auth.uid()` RLS. Cloud data is never shared across Google accounts. Manual backup and restore and all offline functionality remain available. Refresh the app to see footer `2.1.0` after deployment.
