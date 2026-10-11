@@ -254,3 +254,10 @@ On the first connection without a sync baseline, entries present only on one dev
 Automatic Sync is OFF by default on every browser and Google account. First complete manual Smart Sync or cloud restore on each device to establish a trusted baseline. Then enable Auto Sync in Settings. While the NovaStudy tab is visible and online, edits enqueue a local pending marker, retries occur on reconnect, and remote changes are checked every 90 seconds. There is no background service-worker sync.
 
 Automatic sync only applies conflict-free three-way merges guarded by optimistic revision checks. Conflicts pause automation until resolved manually. A recoverable local snapshot is saved before automatic writes; if it cannot be saved no auto change occurs. Cloud backup, manual Smart Sync and JSON exports remain available.
+
+
+## v2.3 — Advanced Dashboard (local-first, analytics-only)
+
+The Dashboard is upgraded without changing `novastudy_state_v1` or any identity, backup or sync code. It includes today's planned sessions and duration (never represented as completed study), pending and overdue tasks, task completion percentage, CSE 100 completion, next session, a four-exam upcoming list, accessible seven-day attendance-record progress chart, quick actions and attendance streak. Attendance streak is based only on dated `present` or `late` attendance entries (today or yesterday anchored); no unsupported task-completion timestamps or study time are fabricated. Charts compare classes marked as attended against planned classes—**they do not measure actual minutes studied**. Existing exam, challenge and attendance previews remain.
+
+Both Bangla/English display, Cyber/Black & Gold themes, mobile viewport and PWA offline cache remain supported. New files: `dashboard.js`, `dashboard.css` and regression coverage in `tests/dashboard.test.cjs`. **Sync-related code is unchanged in this release.**
