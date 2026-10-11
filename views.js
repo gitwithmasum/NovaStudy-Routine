@@ -40,7 +40,7 @@ function settings(){const p=s().profile,c=C[p.category];return heading("IDENTITY
   </div>
   <small class="theme-save-note">Your appearance preference is saved on this device, including after refresh.</small>
 </div><hr class="separator"><div class="appearance-panel language-panel"><div class="appearance-copy"><b>Language preference</b><small>The interface language is saved on this device. Your own subjects, notes and JSON backups will not be translated.</small></div><div class="language-options" role="group" aria-label="Select interface language"><button class="language-choice" type="button" data-action="language-select" data-lang="en" aria-pressed="false">English</button><button class="language-choice" type="button" data-action="language-select" data-lang="bn" aria-pressed="false">বাংলা</button></div></div><hr class="separator"><p class="panel-sub">Your routines are saved in THIS browser, not in a cloud database. Export regularly to avoid losing data.</p><div class="settings-actions">${button("⇩ Export JSON backup","export","secondary-btn")}<label class="import-label">⇧ Import backup<input type="file" id="importFile" accept=".json,application/json"></label></div><hr class="separator">
-<label class="toggle-line"><span><b>In-app reminders</b><small>Only while app is open; no background alarms</small></span><input type="checkbox" id="remindersSwitch" ${p.reminders?"checked":""}></label>
+${window.NOVA_REMINDERS.panel()}
 <div class="hint-banner">PWA works over HTTPS/localhost after first load. Installing does not create an Android APK or iOS IPA.</div></section></div>`}
 window.NOVA_VIEWS={button,heading,empty,option,session,task,dashboard,schedule,tasks,subjects,settings};
 })();

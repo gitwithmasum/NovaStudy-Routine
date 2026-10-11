@@ -296,3 +296,11 @@ The new `#reports` page includes a read-only **last 7 days** or **month to date*
 **Export CSV** downloads a locally generated spreadsheet-friendly CSV (with formula injection protection). **Print / Save as PDF** uses the browser's print dialog and a clean A4 print stylesheet: choose *Save as PDF*. Neither export modifies source data nor requests cloud permissions. Data availability varies by browser origin and installation; detailed focus history is stored separately from the study state.
 
 **Navigation:** The Desktop Sidebar now has its own vertical scroll area and visible scrollbar while branding stays fixed. Mobile bottom navigation is horizontally scrollable/swipeable instead of squeezing every item into tiny columns. Both respect theme colors, safe-area insets and keyboard access. Existing pages/links and CSE Learning Hub tabs are retained. No sync/auth/core file was changed in v2.8.
+
+
+## v2.9 — Reminder & Notification Center
+
+- Sidebar/mobile `#notifications` page, top-bar unread badge, upcoming reminders and local inbox. Tracks unfinished task deadline days (at a user-selected hour, because tasks do not have due times), future exam start times, and scheduled study sessions using existing routine data. Configurable session and exam lead times; enable/disable per category.
+- Foreground checks approximately every 60 seconds and when the page regains focus. Reminders that became due while the page was briefly inactive can appear within bounded grace windows. There are **no service-worker push notifications**, no promises of alerts while the app is closed, and no network scheduler.
+- In-app reminders are enabled by default. Optional browser pop-ups require an explicit **Enable browser pop-ups** click and a permission grant; existing `profile.reminders=true` opt-in is respected when there is no new preference record. Snooze 10 minutes, dismiss, mark read and clear history; max 120 saved inbox items. Browser Permission is never requested automatically.
+- Preference/history key: `novastudy_reminders_v1` in current browser storage, intentionally separate from routine backup and cloud/sync. Clearing site data deletes these preferences. Multi-tab storage changes are validated and stale updates are rejected. Core routine/academics, Focus Timer, Google Auth and sync source code are unchanged.

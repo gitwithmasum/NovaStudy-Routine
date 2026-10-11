@@ -35,6 +35,7 @@
   <link rel="stylesheet" href="./learning-hub.css" />
   <link rel="stylesheet" href="./academic-reports.css" />
   <link rel="stylesheet" href="./navigation-scroll.css" />
+  <link rel="stylesheet" href="./reminders.css" />
   <title>NovaStudy — Routine OS</title>
 </head>
 <body>
@@ -55,6 +56,7 @@
         <button class="nav-btn" data-nav="exams"><span class="nav-ico">◷</span><span>Exams & revision</span><span class="nav-arrow">›</span></button>
         <button class="nav-btn" data-nav="attendance"><span class="nav-ico">▤</span><span>Attendance & analytics</span><span class="nav-arrow">›</span></button>
         <button class="nav-btn" data-nav="reports"><span class="nav-ico">▥</span><span>Academic reports</span><span class="nav-arrow">›</span></button>
+        <button class="nav-btn" data-nav="notifications"><span class="nav-ico">♧</span><span>Reminders & notifications</span><span class="nav-arrow">›</span></button>
         <button class="nav-btn" data-nav="subjects"><span class="nav-ico">◈</span><span>Subjects</span><span class="nav-arrow">›</span></button>
         <button class="nav-btn" data-nav="settings"><span class="nav-ico">⚙</span><span>My profile & settings</span><span class="nav-arrow">›</span></button>
       </nav>
@@ -71,6 +73,7 @@
           </button>
           <button class="outline-button language-switch" id="langToggle" type="button" data-action="toggle-language" aria-label="Switch interface language" title="Switch interface language"><span aria-hidden="true">文</span> <span id="langLabel">বাংলা</span></button>
           <button class="outline-button top-install" id="installBtn" type="button"><span>⇩</span> Install app</button>
+          <button class="outline-button reminder-bell" type="button" data-nav="notifications" aria-label="Open reminders and notifications" title="Reminders"><span aria-hidden="true">♧</span><span class="reminder-bell-count" id="reminderBadge" hidden>0</span></button>
           <button class="avatar-button" type="button" data-nav="settings" title="Profile" aria-label="Open profile">ST</button>
         </div>
       </header>
@@ -83,7 +86,7 @@
       <div class="reliability-actions"><button type="button" data-action="apply-update">Update and reload</button></div>
     </div>
     <div id="view" class="view"></div>
-      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>2.8.0</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
+      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>2.9.0</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
     </main>
   </div>
   <nav class="mobile-nav" aria-label="Mobile navigation">
@@ -95,6 +98,7 @@
     <button data-nav="exams"><span>◷</span><small>Exams</small></button>
     <button data-nav="attendance"><span>▤</span><small>Attend.</small></button>
     <button data-nav="reports"><span>▥</span><small>Reports</small></button>
+    <button data-nav="notifications"><span>♧</span><small>Alerts</small></button>
     <button data-nav="subjects"><span>◈</span><small>Subjects</small></button>
     <button data-nav="settings"><span>⚙</span><small>Settings</small></button>
   </nav>
@@ -121,6 +125,7 @@
   <script src="./exam-prep.js" defer></script>
   <script src="./study-planner.js" defer></script>
   <script src="./academic-reports.js" defer></script>
+  <script src="./reminders.js" defer></script>
   <script src="./app.js" defer></script>
 </body>
 </html>
