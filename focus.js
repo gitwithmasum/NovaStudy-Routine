@@ -59,6 +59,8 @@ function finish(now=Date.now(),silent=false){
    const keys=Object.keys(next.days).sort();for(const key of keys.slice(0,Math.max(0,keys.length-365)))delete next.days[key];
  }
  if(!persist(next))return false;
+ // Optional local v2.6 history; timer completion is never blocked if the log cannot be stored.
+ try{window.NOVA_FOCUS_INSIGHTS?.recordCompletion?.({mode:next.mode,finishedAt:now,minutes:Math.round(mins)})}catch{}
  if(!silent){
    if(next.sound&&typeof document!=="undefined"&&!document.hidden&&now-stateDeadlineLast<=10000)ring();
    if(callbacks?.onComplete)callbacks.onComplete(next.mode);
@@ -179,7 +181,7 @@ function page(){
  '<h3>'+esc(t("Last 7 days"))+'</h3>'+weekBars()+
  '<div class="focus-stat-actions"><button type="button" class="secondary-btn" data-action="focus-clear-stats">'+esc(t("Reset statistics"))+'</button>'+
  '<button type="button" class="secondary-btn" data-nav="subjects">'+esc(t("Subject library"))+'</button></div>'+
- '<p class="focus-help">'+esc(t("Focus statistics are stored locally on this website and are not included in routine JSON backups."))+'</p></section></div>';
+ '<p class="focus-help">'+esc(t("Focus statistics are stored locally on this website and are not included in routine JSON backups."))+'</p></section></div>'+(window.NOVA_FOCUS_INSIGHTS?.panel?.()||'');
 }
 function renderClock(now=Date.now()){
  const clock=document.getElementById("focusClock");

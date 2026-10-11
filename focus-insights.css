@@ -1,0 +1,33 @@
+/* NovaStudy v2.6 Focus Insights - matches Cyber/Gold and small screens */
+.focus-insights{margin-top:18px}
+.focus-insights .panel-header h2{margin:8px 0;font-size:21px}
+.focus-insight-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin:14px 0 20px}
+.focus-insight-kpi{display:grid;align-content:center;gap:8px;padding:13px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+.focus-insight-kpi small{font-size:10px;color:var(--muted);line-height:1.5}
+.focus-insight-kpi strong{font-size:23px;color:var(--mint);font-variant-numeric:tabular-nums}
+.focus-insight-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:24px}
+.focus-insight-layout>div{min-width:0}
+.focus-insight-layout h3{font-size:15px;margin:12px 0 13px}
+.focus-insight-chart{height:172px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+.focus-insight-day{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px}
+.focus-insight-day>span{font-size:10px;color:var(--muted)}
+.focus-insight-track{height:106px;width:min(100%,38px);background:color-mix(in srgb,var(--muted) 15%,transparent);border-radius:7px;display:flex;align-items:flex-end;overflow:hidden}
+.focus-insight-track>div{width:100%;border-radius:6px 6px 0 0;background:linear-gradient(0deg,var(--purple),var(--mint))}
+.focus-insight-day small{font-size:10px;color:var(--text)}
+.focus-insight-history,.focus-insight-distractions{list-style:none;padding:0;margin:0;max-height:310px;overflow:auto}
+.focus-insight-history li,.focus-insight-distractions li{padding:10px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--muted);font-size:11px}
+.focus-insight-history strong{color:var(--text);font-weight:800}
+.focus-insight-distractions strong{font-size:12px;color:var(--text)}
+.focus-insight-distractions small{display:block;margin-top:5px;font-size:10px}
+.focus-insight-hint{font-size:12px;color:var(--text);line-height:1.7}
+.focus-insight-setting,.focus-insight-form label{font-size:11px;font-weight:800;color:var(--text);display:grid;gap:8px}
+.focus-insight-setting{margin-bottom:12px}
+.focus-insight-setting select,.focus-insight-form input,.focus-insight-form select{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:10px;min-width:0;width:100%;min-height:42px;padding:9px 11px;font:inherit}
+.focus-insight-form{display:grid;gap:10px;margin-bottom:13px}
+.focus-insight-form>button{justify-self:start;min-height:42px}
+.focus-insight-footer{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 14px}
+.focus-insights .focus-help{font-size:11px;line-height:1.65;color:var(--muted)}
+html[data-theme="gold"] .focus-insights{border-color:#78562a}
+@media(max-width:1050px){.focus-insight-layout{grid-template-columns:1fr}}
+@media(max-width:660px){.focus-insight-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.focus-insight-kpi strong{font-size:21px}.focus-insights{padding:16px}.focus-insight-chart{gap:4px}.focus-insight-history li,.focus-insight-distractions li{flex-wrap:wrap}}
+@media(max-width:370px){.focus-insight-chart{padding:8px}.focus-insight-day small{font-size:9px}.focus-insight-track{height:90px}.focus-insight-footer button{flex:1}}

@@ -144,9 +144,9 @@ test("v2.1 registered in UI, service worker and CI",()=>{
  const read=p=>fs.readFileSync(path.join(__dirname,"..",p),"utf8");
  const html=read("index.html"),views=read("views.js"),app=read("app.js"),sw=read("sw.js"),ci=read(".github/workflows/novastudy-tests.yml");
  assert.match(html,/src="\.\/sync\.js"/);assert.match(html,/href="\.\/sync\.css"/);
- assert.match(html,/NOVASTUDY OS <b>2\.5\.0<\/b>/);
+ assert.match(html,/NOVASTUDY OS <b>2\.6\.0<\/b>/);
  assert.match(views,/NOVA_SYNC\.panel/);assert.match(app,/Sync\.handle\(action\)/);
- assert.match(sw,/novastudy-v2\.5\.0/);assert.match(sw,/'\.\/sync\.js'/);
+ assert.match(sw,/novastudy-v2\.6\.0/);assert.match(sw,/'\.\/sync\.js'/);
  assert.match(ci,/node --check sync\.js/);
  for(const f of ["sync.js","app.js","auth.js","cloud.js","views.js"])
    assert.doesNotThrow(()=>new vm.Script(read(f),{filename:f}));
