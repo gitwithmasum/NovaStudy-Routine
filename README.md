@@ -313,3 +313,11 @@ User-controlled Dashboard widgets: reorder Weekly Progress, Upcoming Exams, Toda
 Keyboard accessibility: a visible-on-focus **Skip to main content** button targets the current main view. Active navigation exposes `aria-current="page"`. Mobile bottom nav retains horizontal swiping, reveals the selected tab after navigation and supports Left/Right Arrow navigation when its buttons have keyboard focus. Tablet/mobile padding, focus rings, and both Cyber/Black & Gold colors have been refined. PWA cache includes all new static assets.
 
 These UI-only settings are intentionally **not** part of academic JSON backups and do not alter stored routine/tasks/exams/CSE 100, authentication, or Sync files. On another device, customize its appearance again. Version 3.0 passes the existing regression suite alongside dedicated UI tests.
+
+
+## v3.1 — Performance Optimization & Mobile Polish
+
+- **Task Search:** A short 120 ms debounce updates **only** `#taskResults` rather than re-rendering the whole Tasks view on each keystroke; typing, selection, scroll position and active input are preserved. Pending searches are safely canceled when the full view changes. Filtering and all task IDs/notes/checkboxes reuse the existing secure render function.
+- **Notification Badge:** Reminder changes outside the Notifications page now update the unread badge in place, avoiding destructive re-rendering of a current form/editor on unrelated pages. Notifications themselves still refresh when open. Clicking the already-selected nav item does not re-render its page.
+- **Mobile & PWA styling:** Add larger touch targets, iOS-friendly >=16 px editing controls, horizontal navigation scroll hints, viewport safe-area padding and CSS offscreen paint skipping (`content-visibility:auto`) for large independent task, subject and project lists in compatible browsers. Old themes and reduced-motion preferences remain supported.
+- **Security & data safety:** all changes are presentation-only. Core academic state, backups, Login, Cloud, Sync, Notifications data and PWA offline navigation logic remain unchanged. SW cache name is bumped so installed PWAs can fetch the new static assets; users must accept the version update when prompted. No claim of measured speed-up is made without a device benchmark.
