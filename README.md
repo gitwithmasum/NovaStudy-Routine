@@ -287,3 +287,12 @@ The Focus page preserves the original timer, 10-second audio cue, saved completi
 **Modules:** learning overview and CSE 100 read-only totals; programming practice log (language, difficulty, platform, URL, notes, progress); DSA/CP, AI/ML and Full Stack roadmaps (including Review Again for weak topics); project tracker with GitHub/live URLs and milestones; resource library; rotating offline practice suggestion. Accessible bilingual Cyber/Gold mobile design. No online problem bank feed is implied.
 
 **Data safety:** new learning entries are kept under independent `novastudy_learning_hub_v1` localStorage, with schema validation, optimistic cross-tab checks and a separate **Learning Hub Export/Import JSON**. The pre-existing Routine JSON Backup covers CSE 100 progress but **does not include** newer Learning Hub practice, roadmap, project and resource records. Export both backups before clearing browser data or moving devices. Cloud sync and Google Login are unchanged in v2.7.
+
+
+## v2.8 — Academic Analytics & Reports + Scrolling Navbar
+
+The new `#reports` page includes a read-only **last 7 days** or **month to date** report. Per-day and per-subject planned session minutes, scheduled sessions, recorded attendance counts/rate, all-time task completion, and new v2.6+ completed focus session history are calculated from existing local records. It never estimates actual study hours from a timetable. Attendance rate is `(Present + Late) / (Present + Late + Absent)`; Excused is excluded. There are no per-task completion dates, so task completion is always explicitly labelled all-time.
+
+**Export CSV** downloads a locally generated spreadsheet-friendly CSV (with formula injection protection). **Print / Save as PDF** uses the browser's print dialog and a clean A4 print stylesheet: choose *Save as PDF*. Neither export modifies source data nor requests cloud permissions. Data availability varies by browser origin and installation; detailed focus history is stored separately from the study state.
+
+**Navigation:** The Desktop Sidebar now has its own vertical scroll area and visible scrollbar while branding stays fixed. Mobile bottom navigation is horizontally scrollable/swipeable instead of squeezing every item into tiny columns. Both respect theme colors, safe-area insets and keyboard access. Existing pages/links and CSE Learning Hub tabs are retained. No sync/auth/core file was changed in v2.8.

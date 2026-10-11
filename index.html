@@ -33,6 +33,8 @@
   <link rel="stylesheet" href="./dashboard.css" />
   <link rel="stylesheet" href="./study-planner.css" />
   <link rel="stylesheet" href="./learning-hub.css" />
+  <link rel="stylesheet" href="./academic-reports.css" />
+  <link rel="stylesheet" href="./navigation-scroll.css" />
   <title>NovaStudy — Routine OS</title>
 </head>
 <body>
@@ -52,6 +54,7 @@
         <button class="nav-btn" data-nav="focus"><span class="nav-ico">◉</span><span>Focus timer</span><span class="nav-arrow">›</span></button>
         <button class="nav-btn" data-nav="exams"><span class="nav-ico">◷</span><span>Exams & revision</span><span class="nav-arrow">›</span></button>
         <button class="nav-btn" data-nav="attendance"><span class="nav-ico">▤</span><span>Attendance & analytics</span><span class="nav-arrow">›</span></button>
+        <button class="nav-btn" data-nav="reports"><span class="nav-ico">▥</span><span>Academic reports</span><span class="nav-arrow">›</span></button>
         <button class="nav-btn" data-nav="subjects"><span class="nav-ico">◈</span><span>Subjects</span><span class="nav-arrow">›</span></button>
         <button class="nav-btn" data-nav="settings"><span class="nav-ico">⚙</span><span>My profile & settings</span><span class="nav-arrow">›</span></button>
       </nav>
@@ -80,7 +83,7 @@
       <div class="reliability-actions"><button type="button" data-action="apply-update">Update and reload</button></div>
     </div>
     <div id="view" class="view"></div>
-      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>2.7.0</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
+      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>2.8.0</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
     </main>
   </div>
   <nav class="mobile-nav" aria-label="Mobile navigation">
@@ -91,6 +94,7 @@
     <button data-nav="focus"><span>◉</span><small>Focus</small></button>
     <button data-nav="exams"><span>◷</span><small>Exams</small></button>
     <button data-nav="attendance"><span>▤</span><small>Attend.</small></button>
+    <button data-nav="reports"><span>▥</span><small>Reports</small></button>
     <button data-nav="subjects"><span>◈</span><small>Subjects</small></button>
     <button data-nav="settings"><span>⚙</span><small>Settings</small></button>
   </nav>
@@ -116,6 +120,7 @@
   <script src="./dashboard.js" defer></script>
   <script src="./exam-prep.js" defer></script>
   <script src="./study-planner.js" defer></script>
+  <script src="./academic-reports.js" defer></script>
   <script src="./app.js" defer></script>
 </body>
 </html>

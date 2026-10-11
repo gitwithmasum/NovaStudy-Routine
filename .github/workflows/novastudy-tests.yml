@@ -26,6 +26,7 @@ jobs:
           node --check auth.js
           node --check challenge.js
           node --check learning-hub.js
+          node --check academic-reports.js
           node --check attendance.js
           node --check core.js
           node --check focus.js
