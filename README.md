@@ -246,4 +246,11 @@ The selected futuristic graduation-cap artwork is now the app icon for installab
 
 The **Profile & Settings → Smart Sync** panel compares the current device and authenticated account backup. Click **Compare & review** first. Independent additions/edits are combined using account-scoped, locally stored baseline snapshots (three-way merge). Same-entry edits or edit-vs-delete conflicts are **not applied silently**. For conflicts, choose *Keep this device* or *Keep cloud* before explicit confirmation; the choice affects only conflicting entries. The current device's JSON backup is downloaded before applying changes. Data integrity validation and cloud revision optimistic locking reject stale changes. No background auto-sync.
 
-On the first connection without a sync baseline, entries present only on one device are preserved; distinct subject IDs with identical names may both appear. For the best result, first **Restore cloud to this browser** on a new device or use **Compare & review** and inspect the conflicts. Your cloud data is scoped to Supabase `auth.uid()` RLS. Cloud data is never shared across Google accounts. Manual backup and restore and all offline functionality remain available. Refresh the app to see footer `2.1.0` after deployment.
+On the first connection without a sync baseline, entries present only on one device are preserved; distinct subject IDs with identical names may both appear. For the best result, first **Restore cloud to this browser** on a new device or use **Compare & review** and inspect the conflicts. Your cloud data is scoped to Supabase `auth.uid()` RLS. Cloud data is never shared across Google accounts. Manual backup and restore and all offline functionality remain available. Refresh the app to see footer `2.2.0` after deployment.
+
+
+## v2.2 — Opt-in foreground Auto Sync
+
+Automatic Sync is OFF by default on every browser and Google account. First complete manual Smart Sync or cloud restore on each device to establish a trusted baseline. Then enable Auto Sync in Settings. While the NovaStudy tab is visible and online, edits enqueue a local pending marker, retries occur on reconnect, and remote changes are checked every 90 seconds. There is no background service-worker sync.
+
+Automatic sync only applies conflict-free three-way merges guarded by optimistic revision checks. Conflicts pause automation until resolved manually. A recoverable local snapshot is saved before automatic writes; if it cannot be saved no auto change occurs. Cloud backup, manual Smart Sync and JSON exports remain available.

@@ -51,6 +51,7 @@ async function upload(){
   if(identity()?.id!==u.id)throw Error("Account changed; reload and review backup.");
   cached=response.data;
   window.NOVA_SYNC?.acceptSnapshot?.(response.data.snapshot,Number(response.data.revision));
+  window.NOVA_AUTO?.markSynced?.(u.id);
   notice=tr("Cloud backup saved.","Cloud Backup সংরক্ষিত হয়েছে।");
   toast(notice);return true;
  }catch(e){fail(e);return false}
@@ -74,6 +75,7 @@ async function restore(){
  if(!N.setState(latest.data.snapshot)){fail(N.getIssue()||"Restore failed, local data unchanged.");return false}
  cached={snapshot:latest.data.snapshot,revision:Number(latest.data.revision),updated_at:latest.data.updated_at};
  window.NOVA_SYNC?.acceptSnapshot?.(latest.data.snapshot,Number(latest.data.revision));
+ window.NOVA_AUTO?.markSynced?.(u.id);
  notice=tr("Restored locally; cloud remains unchanged.","লোকাল ডেটা Restore হয়েছে; Cloud অপরিবর্তিত।");
  toast(notice);redraw();return true;
 }

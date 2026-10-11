@@ -22,6 +22,7 @@ jobs:
           node --check auth-config.js
           node --check cloud.js
           node --check sync.js
+          node --check auto-sync.js
           node --check auth.js
           node --check challenge.js
           node --check attendance.js

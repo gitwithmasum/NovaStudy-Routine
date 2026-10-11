@@ -101,9 +101,9 @@ async function fetchRemote(u){
  if(result.data&&!N.valid(result.data.snapshot))throw Error("Invalid remote backup. Sync blocked.");
  return result.data;
 }
-async function review(){
+async function review(options={}){
  const u=user();
- if(busy||!u||!client())return false;
+ if(busy||!u||!client()||(options.auto&&preview?.manual))return false;
  busy=true;failure="";status="";notify();
  try{
   const local=copy(N.get());
@@ -115,7 +115,7 @@ async function review(){
   // No cloud record: only a confirmed upload may create the first backup.
   const joined=remote?merge(baseline?.snapshot||null,local,remote.snapshot):{merged:local,conflicts:[]};
   preview={
-   account:u.id,local,localHash:stable(local),rawAtReview,cloud:remote?copy(remote.snapshot):null,
+   account:u.id,manual:options.auto!==true,local,localHash:stable(local),rawAtReview,cloud:remote?copy(remote.snapshot):null,
    revision:remote?Number(remote.revision):0,updated:remote?.updated_at||"",
    baseline:baseline?.snapshot||null,conflicts:joined.conflicts,
    pending:!remote||!eq(joined.merged,local)||!eq(joined.merged,remote.snapshot)
@@ -131,11 +131,12 @@ function saveLocalBackup(){
  const link=document.createElement("a");link.href=url;link.download="NovaStudy-before-smart-sync-"+N.date(new Date())+".json";
  document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1200);
 }
-async function apply(choice){
- const u=user(),p=preview;
+async function apply(choice,options={}){
+ const automatic=options.auto===true,u=user(),p=preview,baseline=getBaseline(u);
  if(busy||!u||!client()||!p||p.account!==u.id)return false;
+ if(automatic&&(!window.NOVA_AUTO?.enabled?.(u.id)||!baseline||p.manual||p.conflicts.length||p.revision<baseline.revision))return false;
  if(p.conflicts.length&&!["local","cloud"].includes(choice)){fail("Choose a conflict resolution before syncing.");return false}
- if(!window.confirm(text("Sync this device with the Google cloud now? A local JSON backup will download before any replacement. ","এখন Device ও Google Cloud Sync করবে? কোনো পরিবর্তনের আগে Local JSON Backup ডাউনলোড হবে। ")+
+ if(!automatic&&!window.confirm(text("Sync this device with the Google cloud now? A local JSON backup will download before any replacement. ","এখন Device ও Google Cloud Sync করবে? কোনো পরিবর্তনের আগে Local JSON Backup ডাউনলোড হবে। ")+
  (p.conflicts.length?text("Conflicts: ","Conflict: ")+p.conflicts.length+"; "+(choice==="cloud"?"Cloud wins.":"This device wins."):"No conflicts.")))return false;
  busy=true;failure="";notify();
  try{
@@ -147,10 +148,15 @@ async function apply(choice){
   if((latest?Number(latest.revision):0)!==p.revision||!eq(latest?.snapshot||null,p.cloud))
    throw Error("Cloud changed since review. Refresh to avoid overwriting.");
   const result=latest?merge(p.baseline,current,latest.snapshot,choice):{merged:current,conflicts:[]};
+  if(automatic&&(!latest||!p.baseline))throw Error("Manual sync required before automatic cloud creation or recovery.");
+  if(automatic&&result.conflicts.length)throw Error("Conflicting edits detected. Open Smart Sync and review manually.");
   if(!N.valid(result.merged))throw Error("Merged data failed validation (possibly duplicate attendance entries). No changes saved.");
   const encoded=JSON.stringify(result.merged);
   if(new Blob([encoded]).size>900000)throw Error("Merged data exceeds the safe backup limit.");
-  saveLocalBackup();
+  const dataChanged=!eq(current,result.merged)||!eq(latest?.snapshot,result.merged);
+  if(automatic){
+   if(dataChanged&&!window.NOVA_AUTO?.saveRecovery?.(current,u.id))throw Error("Could not keep local safety copy. Auto Sync stopped.");
+  }else saveLocalBackup();
   let saved=latest;
   if(!latest){
    const res=await client().from(table).insert({user_id:u.id,snapshot:result.merged,revision:1}).select("snapshot,revision,updated_at").single();
@@ -169,7 +175,10 @@ async function apply(choice){
   if(!acceptSnapshot(result.merged,Number(saved.revision))){
    status=text("Sync data saved but history unavailable. Next review may show extra conflicts.","Sync হয়েছে, তবে History Save হয়নি। পরের Review-তে বেশি Conflict আসতে পারে।");
   }else status=text("Smart Sync completed. Both copies match.","Smart Sync সফল। দুই জায়গায় একই ডেটা আছে।");
-  preview=null;toast(status);return true;
+  preview=null;
+  window.NOVA_AUTO?.markSynced?.(u.id);
+  if(!automatic||dataChanged)toast(status);
+  return true;
  }catch(e){preview=null;fail(e);return false}
  finally{busy=false;notify()}
 }
@@ -179,7 +188,7 @@ function panel(){
  if(preview?.account!==u?.id)preview=null;
  const conflict=preview?.conflicts||[];
  return '<section class="panel cloud-panel" aria-label="Smart Sync">'+
- '<div class="panel-header"><div><b class="panel-title">'+text("Smart Sync · v2.1","স্মার্ট সিঙ্ক · v2.1")+'</b>'+
+ '<div class="panel-header"><div><b class="panel-title">'+text("Smart Sync · v2.2","স্মার্ট সিঙ্ক · v2.2")+'</b>'+
  '<small class="panel-sub">'+text("Review Laptop / Mobile changes before syncing","সিঙ্কের আগে Laptop ও Mobile-এর পরিবর্তন যাচাই করো")+'</small></div></div>'+
  '<p class="panel-sub">'+(!u?text("Connect Google account to start.","শুরু করতে Google Account Connect করো।"):base?
  text("Last synchronized cloud revision: ","সর্বশেষ Sync Revision: ")+esc(base.revision):
@@ -194,7 +203,7 @@ function panel(){
  button("sync-prefer-cloud",text("Keep cloud's conflicting edits","Cloud-এর Conflict রাখো"),busy)+'</div>':'')+
  (failure?'<p class="auth-error" role="alert">'+esc(failure)+'</p>':'')+
  (status?'<p class="panel-sub" role="status">'+esc(status)+'</p>':'')+
- '<div class="hint-banner">'+text("Three-way comparison combines independent changes and detects conflicting edits/deletions. Each sync requires review and confirmation. No background overwrite; a JSON safety copy downloads first. If two devices edit the same entry, you choose which version wins.","তিন-পক্ষের তুলনায় আলাদা পরিবর্তন যুক্ত হয়, একই তথ্যের Conflict শনাক্ত হয়। প্রতিবার Review ও Confirmation দরকার। ব্যাকগ্রাউন্ডে Overwrite হয় না; আগে JSON Backup ডাউনলোড হয়। একই আইটেমে দুই Device পরিবর্তন করলে তুমি Version নির্বাচন করবে।")+'</div></section>';
+ '<div class="hint-banner">'+text("Manual sync always requires review and confirmation. If you opt in to Auto Sync, conflict-free changes can sync while the app is open. Conflicts pause automation for manual review. A local safety copy is kept before automatic changes.","ম্যানুয়াল Sync-এ Review ও Confirmation লাগে। Auto Sync চালু করলে অ্যাপ খোলা থাকাকালীন Conflict ছাড়া পরিবর্তন Sync হবে। Conflict হলে থেমে যাবে। Automatic পরিবর্তনের আগে লোকাল Safety Copy রাখা হয়।")+'</div></section>';
 }
 function handle(action){
  const actions={"sync-review":review,"sync-apply":()=>apply(null),"sync-prefer-local":()=>apply("local"),"sync-prefer-cloud":()=>apply("cloud")};
