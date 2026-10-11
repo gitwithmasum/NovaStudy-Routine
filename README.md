@@ -304,3 +304,12 @@ The new `#reports` page includes a read-only **last 7 days** or **month to date*
 - Foreground checks approximately every 60 seconds and when the page regains focus. Reminders that became due while the page was briefly inactive can appear within bounded grace windows. There are **no service-worker push notifications**, no promises of alerts while the app is closed, and no network scheduler.
 - In-app reminders are enabled by default. Optional browser pop-ups require an explicit **Enable browser pop-ups** click and a permission grant; existing `profile.reminders=true` opt-in is respected when there is no new preference record. Snooze 10 minutes, dismiss, mark read and clear history; max 120 saved inbox items. Browser Permission is never requested automatically.
 - Preference/history key: `novastudy_reminders_v1` in current browser storage, intentionally separate from routine backup and cloud/sync. Clearing site data deletes these preferences. Multi-tab storage changes are validated and stale updates are rejected. Core routine/academics, Focus Timer, Google Auth and sync source code are unchanged.
+
+
+## v3.0 — Premium UI/UX and Mobile PWA
+
+User-controlled Dashboard widgets: reorder Weekly Progress, Upcoming Exams, Today's Timeline, Priority Tasks and Quick Actions using accessible **Move up/Move down** buttons; show or hide individual widgets (at least one remains visible). UI preferences are saved separately under `novastudy_ui_v3_v1` in this browser with validation, safe storage failure handling, and cross-tab change checks. The defaults show all widgets in the original order. Appearance preferences in Settings include Compact Spacing, High-Contrast Controls and Reduced Interface Motion. System-level reduced-motion preferences are also respected; animations never convey essential data.
+
+Keyboard accessibility: a visible-on-focus **Skip to main content** button targets the current main view. Active navigation exposes `aria-current="page"`. Mobile bottom nav retains horizontal swiping, reveals the selected tab after navigation and supports Left/Right Arrow navigation when its buttons have keyboard focus. Tablet/mobile padding, focus rings, and both Cyber/Black & Gold colors have been refined. PWA cache includes all new static assets.
+
+These UI-only settings are intentionally **not** part of academic JSON backups and do not alter stored routine/tasks/exams/CSE 100, authentication, or Sync files. On another device, customize its appearance again. Version 3.0 passes the existing regression suite alongside dedicated UI tests.

@@ -36,9 +36,11 @@
   <link rel="stylesheet" href="./academic-reports.css" />
   <link rel="stylesheet" href="./navigation-scroll.css" />
   <link rel="stylesheet" href="./reminders.css" />
+  <link rel="stylesheet" href="./premium-ui.css" />
   <title>NovaStudy — Routine OS</title>
 </head>
 <body>
+  <button type="button" class="skip-to-content" data-action="focus-content">Skip to main content</button>
   <div class="app-shell" id="appShell">
     <aside class="sidebar" id="sidebar" aria-label="Main navigation">
       <a class="brand" href="#dashboard" aria-label="NovaStudy home">
@@ -85,8 +87,8 @@
       <strong>✦ NovaStudy update ready</strong><span>A newer version is downloaded. Your saved routines and exams will be kept.</span>
       <div class="reliability-actions"><button type="button" data-action="apply-update">Update and reload</button></div>
     </div>
-    <div id="view" class="view"></div>
-      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>2.9.0</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
+    <div id="view" class="view" tabindex="-1"></div>
+      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>3.0.0</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
     </main>
   </div>
   <nav class="mobile-nav" aria-label="Mobile navigation">
@@ -126,6 +128,7 @@
   <script src="./study-planner.js" defer></script>
   <script src="./academic-reports.js" defer></script>
   <script src="./reminders.js" defer></script>
+  <script src="./ui-personalization.js" defer></script>
   <script src="./app.js" defer></script>
 </body>
 </html>

@@ -173,8 +173,11 @@ function render(){
  '</p></div><div class="exam-dashboard-actions"><span class="exam-countdown">'+esc(rate)+'</span>'+
  V.button(tr("Open attendance →","উপস্থিতি দেখো →"),"go-attendance","secondary-btn")+
  '</div></section>'})();
- return top+hero+stats+'<div class="insight-dashboard-grid">'+
-  progressChart(m)+exams+timeline+tasks+quick+'</div>'+
+ const widgets=[{id:'weekly',html:progressChart(m)},{id:'exams',html:exams},
+  {id:'today',html:timeline},{id:'tasks',html:tasks},{id:'actions',html:quick}];
+ const panels=window.NOVA_UI?.widgets?.(widgets)||widgets.map(x=>x.html).join('');
+ const controls=window.NOVA_UI?.toolbar?.()||'';
+ return top+hero+stats+controls+'<div class="insight-dashboard-grid">'+panels+'</div>'+
  window.NOVA_EXAMS.dashboardPreview()+window.NOVA_CHALLENGE.dashboardPreview()+attendance;
 }
 window.NOVA_DASHBOARD={summarize,attendanceStreak,daysUntil,weekDays,render};
