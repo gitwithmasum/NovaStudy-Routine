@@ -1,0 +1,56 @@
+/* NovaStudy v2.7 CSE Learning Hub · Cyber + Black Gold, laptop + mobile */
+.hub-root{display:grid;gap:16px}
+.hub-tabs{display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding:2px 0 10px;white-space:nowrap}
+.hub-tab{flex:0 0 auto;min-height:42px;padding:10px 14px;background:var(--panel2);border:1px solid var(--line);border-radius:11px;font:inherit;font-weight:750;font-size:12px;cursor:pointer;color:var(--text)}
+.hub-tab:hover,.hub-tab:focus-visible{border-color:var(--mint);outline-offset:2px}
+.hub-tab.is-active{color:var(--mint);border-color:var(--mint);background:color-mix(in srgb,var(--mint) 11%,var(--panel2))}
+.hub-content{display:grid;gap:16px;min-width:0}
+.hub-content>.panel{min-width:0}
+.hub-content .challenge-layout,.hub-content .challenge-stats{min-width:0}
+.hub-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.hub-metric{display:grid;gap:7px;min-height:115px;padding:17px}
+.hub-metric strong{font-size:clamp(22px,2.5vw,31px);color:var(--mint)}
+.hub-metric small{color:var(--muted);font-size:11px;line-height:1.4}
+.hub-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;min-width:0}
+.hub-grid>.panel{min-width:0}
+.hub-roadmap-snapshot{margin:13px 0;display:grid;gap:9px}
+.hub-roadmap-snapshot>div{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px}
+.hub-roadmap-snapshot span{color:var(--mint)}
+.hub-progress{display:block;height:9px;background:color-mix(in srgb,var(--muted) 16%,transparent);border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.hub-progress>span{display:block;height:100%;background:linear-gradient(90deg,var(--purple),var(--mint));border-radius:99px;min-width:0}
+.hub-note{font-size:11px;color:var(--muted);line-height:1.75}
+.hub-backup{display:block}
+.hub-backup .secondary-btn,.hub-backup .danger-btn{margin:5px 8px 5px 0}
+.hub-import-label{position:relative;display:inline-flex;align-items:center;min-height:42px;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 12px;border-radius:10px;font-size:12px;cursor:pointer}
+.hub-import-label input{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer}
+.hub-topic-list{display:grid;gap:0;margin:10px 0}
+.hub-topic{display:grid;grid-template-columns:30px minmax(0,1fr) minmax(140px,190px);align-items:center;gap:13px;border-bottom:1px solid var(--line);padding:13px 3px}
+.hub-topic b{font-size:12px;line-height:1.5;color:var(--text)}
+.hub-num{color:var(--mint);font-weight:800;font-size:12px}
+.hub-topic select,.hub-record select{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px;border-radius:9px;font:inherit;font-size:12px;width:100%;min-height:42px;min-width:0}
+.hub-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.hub-form>label{display:grid;gap:7px;color:var(--text);font-size:12px;font-weight:750;min-width:0}
+.hub-form input,.hub-form select{border:1px solid var(--line);background:var(--panel2);color:var(--text);font:inherit;padding:10px 12px;min-width:0;width:100%;min-height:43px;border-radius:10px}
+.hub-form .hub-wide{grid-column:1/-1}
+.hub-form button{justify-self:start;min-height:42px}
+.hub-record-list{display:grid;gap:12px;margin-top:14px}
+.hub-record{border:1px solid var(--line);border-radius:12px;padding:15px;display:flex;justify-content:space-between;align-items:start;gap:14px}
+.hub-record>div{min-width:0}
+.hub-record b,.hub-record h3{font-size:13px;color:var(--text);margin:0 0 6px;display:block;overflow-wrap:anywhere}
+.hub-record small{font-size:11px;color:var(--muted);display:block;margin:5px 0}
+.hub-record p{font-size:11px;color:var(--muted);overflow-wrap:anywhere}
+.hub-record a{font-size:11px;color:var(--mint);display:inline-block;margin-top:7px;overflow-wrap:anywhere}
+.hub-record-actions{min-width:150px;max-width:195px;display:grid;gap:8px;justify-items:end}
+.hub-record-actions button{justify-self:end}
+.hub-project{display:grid;gap:12px}
+.hub-project-top{display:flex;justify-content:space-between;gap:10px}
+.hub-project-top select{width:150px;flex:0 0 auto}
+.hub-project .hub-milestones{display:grid;gap:10px}
+.hub-milestones label{display:flex;gap:10px;align-items:center;font-size:12px}
+.hub-milestones input{accent-color:var(--mint);width:17px;height:17px}
+.hub-links{display:flex;gap:12px}
+.hub-alert{border:1px solid #bd626b;background:#5a293133;border-radius:10px;color:#ffd1d2;padding:11px 13px;font-size:12px;overflow-wrap:anywhere}
+html[data-theme="gold"] .hub-tab.is-active{border-color:var(--mint);color:var(--mint)}
+@media(max-width:980px){.hub-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.hub-grid{grid-template-columns:1fr}}
+@media(max-width:640px){.hub-form{grid-template-columns:1fr}.hub-form .hub-wide{grid-column:auto}.hub-topic{grid-template-columns:22px minmax(0,1fr);gap:9px}.hub-topic label{grid-column:2}.hub-topic select{width:100%}.hub-metrics{gap:8px}.hub-metric{padding:12px;min-height:100px}.hub-tab{font-size:11px;padding:10px 12px}.hub-record{flex-wrap:wrap}.hub-record-actions{min-width:0;width:100%;max-width:none;grid-template-columns:minmax(0,1fr) auto;align-items:center}.hub-project-top{flex-wrap:wrap}}
+@media(max-width:380px){.hub-metric strong{font-size:22px}.hub-import-label{width:100%;margin-bottom:8px}.hub-backup .secondary-btn{width:100%}}

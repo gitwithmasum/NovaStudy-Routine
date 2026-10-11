@@ -132,11 +132,13 @@ test("Bangla and English views render statuses, tasks and safe controls",()=>{
 });
 test("PWA shell, sidebar, mobile nav and GitHub Actions include challenge",()=>{
  const html=read("index.html"),sw=read("sw.js"),app=read("app.js"),ci=read(".github/workflows/novastudy-tests.yml");
- assert.match(html,/data-nav="challenge"/);
+ assert.match(html,/data-nav="learning"/);
+ assert.doesNotMatch(html,/data-nav="challenge"/);
+ assert.match(html,/src="\.\/learning-hub\.js"/);
  assert.match(html,/src="\.\/challenge-data\.js"/);
  assert.match(html,/src="\.\/challenge\.js"/);
  assert.match(html,/href="\.\/challenge\.css"/);
- assert.match(sw,/novastudy-v2\.6\.0/);
+ assert.match(sw,/novastudy-v2\.7\.0/);
  assert.match(sw,/'\.\/challenge-data\.js'/);
  assert.match(app,/CSE\.handleChange/);
  assert.match(ci,/node --check challenge\.js/);

@@ -278,3 +278,12 @@ Each existing exam now has a **Preparation** button that opens its own revision 
 ## v2.6 — Focus & Productivity 2.0
 
 The Focus page preserves the original timer, 10-second audio cue, saved completion totals and old 7-day statistics. A separate local-only `focus-insights.js` module adds session history for **new** completions (max 180), daily and 7-day focus time analytics, manual distraction logging (max 120), and recommended short/long breaks. Older aggregate focus totals remain unchanged; no fabricated older sessions are shown. The recommended break uses the existing timer and starts only when selected by the user; configurable long-break cycle 2–6 (default 4). Focus Insights can be exported as JSON separately from routine backups. Resetting v2.6 history requires confirmation and leaves original timer counters and study records intact. The independent key `novastudy_focus_insights_v1` protects concurrent-tab updates and validates stored data. No auth/cloud/sync/database modules changed.
+
+
+## v2.7 — CSE Learning Hub
+
+**Navigation:** one CSE Learning Hub entry replaces the standalone CSE 100 sidebar and mobile button. Legacy `#challenge` bookmarks and dashboard **Open challenge** open the Hub's **original CSE 100 Challenge** tab. Original topic catalog, imported items, start date and statuses stay in unchanged `novastudy_state_v1`.
+
+**Modules:** learning overview and CSE 100 read-only totals; programming practice log (language, difficulty, platform, URL, notes, progress); DSA/CP, AI/ML and Full Stack roadmaps (including Review Again for weak topics); project tracker with GitHub/live URLs and milestones; resource library; rotating offline practice suggestion. Accessible bilingual Cyber/Gold mobile design. No online problem bank feed is implied.
+
+**Data safety:** new learning entries are kept under independent `novastudy_learning_hub_v1` localStorage, with schema validation, optimistic cross-tab checks and a separate **Learning Hub Export/Import JSON**. The pre-existing Routine JSON Backup covers CSE 100 progress but **does not include** newer Learning Hub practice, roadmap, project and resource records. Export both backups before clearing browser data or moving devices. Cloud sync and Google Login are unchanged in v2.7.
