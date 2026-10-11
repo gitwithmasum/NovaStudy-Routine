@@ -143,6 +143,7 @@ test("in-app reminders can be turned off without changing the student's old pref
 });
 test("center and settings render English and Bengali and escape untrusted titles",()=>{
  const b=boot();b.S.tasks[0].title="<img onerror=alert(1)>";
+ b.reminders.tick(time(9,0));
  const html=b.reminders.page();
  assert.match(html,/Reminder & Notification Center/);
  assert.match(html,/data-reminder-pref="sessionLead"/);
