@@ -35,7 +35,7 @@ const samples=fn=>{
 for(let i=0;i<4;i++){V.tasks("all","python");V.taskResults("all","python")}
 const all=samples(()=>V.tasks("all","python"));
 const filtered=samples(()=>V.taskResults("all","python"));
-console.log("NovaStudy v3.2 Node markup microbenchmark | tasks=1200 | iterations=25 | med/p95 ms");
+console.log("NovaStudy v3.3 Node markup microbenchmark | tasks=1200 | iterations=25 | med/p95 ms");
 console.log("Full task page: "+all.medianMs.toFixed(2)+" / "+all.p95Ms.toFixed(2));
 console.log("Results-only update: "+filtered.medianMs.toFixed(2)+" / "+filtered.p95Ms.toFixed(2));
 console.log("Indicative Node string-rendering numbers only; not mobile FPS, Web Vitals, or a guaranteed speed-up.");
