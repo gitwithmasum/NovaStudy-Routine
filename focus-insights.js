@@ -153,6 +153,6 @@ function handleChange(target){
  return true;
 }
 function init(opts={}){toast=opts.toast||(()=>{});refresh=opts.refresh||(()=>{})}
-window.NOVA_FOCUS_INSIGHTS={KEY,init,handle,handleChange,addDistraction,recordCompletion,stats,panel,adopt,
+window.NOVA_FOCUS_INSIGHTS={KEY,valid,init,handle,handleChange,addDistraction,recordCompletion,stats,panel,adopt,
  get:()=>copy(state),getIssue:()=>issue,download,clearHistory,recommendedBreak,startRecommendedBreak,setLongBreakEvery};
 })();

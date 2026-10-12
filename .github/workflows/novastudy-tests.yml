@@ -30,6 +30,7 @@ jobs:
           node --check reminders.js
           node --check ui-personalization.js
           node --check diagnostics.js
+          node --check portability.js
           node --check attendance.js
           node --check core.js
           node --check focus.js

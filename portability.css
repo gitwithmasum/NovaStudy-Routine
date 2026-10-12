@@ -1,0 +1,22 @@
+/* NovaStudy v3.4 · local backup manager */
+.port-root{display:grid;gap:16px;min-width:0}
+.port-root .page-head{margin-bottom:0}
+.port-help{color:var(--muted);font-size:12px;line-height:1.75}
+.port-status{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:15px 0}
+.port-status>div{display:flex;justify-content:space-between;gap:9px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);padding:11px;font-size:11px}
+.port-status span{font-weight:750;color:var(--text)}
+.port-status small{font-weight:700;color:var(--muted);white-space:nowrap}
+.port-file{display:grid;gap:9px;font-weight:800;color:var(--text);font-size:12px;margin:15px 0}
+.port-file input{border:1px solid var(--line);background:var(--panel2);padding:12px;border-radius:11px;max-width:100%;color:var(--text);font:inherit}
+.port-preview{border:1px solid var(--mint);padding:16px;border-radius:13px;margin-top:15px}
+.port-preview h3{margin:0 0 9px;font-size:15px}
+.port-preview>small{color:var(--muted)}
+.port-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:14px 0}
+.port-choices label{display:flex;gap:9px;align-items:center;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:12px;font-weight:700}
+.port-choices label:has(input:disabled){opacity:.55}
+.port-choices input{accent-color:var(--mint);width:18px;height:18px;flex-shrink:0}
+.port-actions{display:flex;flex-wrap:wrap;gap:10px}
+.port-error{font-size:12px;color:#ffd3d9;border:1px solid #bb7380;border-radius:10px;padding:12px}
+.port-note{font-size:12px;color:var(--mint);border:1px solid var(--line);border-radius:10px;padding:12px}
+.port-root :is(button,input):focus-visible{outline:3px solid var(--mint);outline-offset:3px}
+@media(max-width:660px){.port-status,.port-choices{grid-template-columns:1fr}.port-root .panel{padding:15px}.port-actions>*{flex:1 1 100%}.port-file input{font-size:16px}}

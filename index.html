@@ -39,6 +39,7 @@
   <link rel="stylesheet" href="./premium-ui.css" />
   <link rel="stylesheet" href="./performance-mobile.css" />
   <link rel="stylesheet" href="./diagnostics.css" />
+  <link rel="stylesheet" href="./portability.css" />
   <title>NovaStudy — Routine OS</title>
 </head>
 <body>
@@ -63,6 +64,7 @@
         <button class="nav-btn" data-nav="notifications"><span class="nav-ico">♧</span><span>Reminders & notifications</span><span class="nav-arrow">›</span></button>
         <button class="nav-btn" data-nav="subjects"><span class="nav-ico">◈</span><span>Subjects</span><span class="nav-arrow">›</span></button>
         <button class="nav-btn" data-nav="diagnostics"><span class="nav-ico">⌁</span><span>App diagnostics</span><span class="nav-arrow">›</span></button>
+        <button class="nav-btn" data-nav="portability"><span class="nav-ico">⇩</span><span>Backup & data portability</span><span class="nav-arrow">›</span></button>
         <button class="nav-btn" data-nav="settings"><span class="nav-ico">⚙</span><span>My profile & settings</span><span class="nav-arrow">›</span></button>
       </nav>
     </aside>
@@ -91,7 +93,7 @@
       <div class="reliability-actions"><button type="button" data-action="apply-update">Update and reload</button><button type="button" data-action="update-later">Later</button><button type="button" data-action="retry-update" id="updateRetry" hidden>Retry update</button><button type="button" data-action="export">Export routine backup</button></div>
     </div>
     <div id="view" class="view" tabindex="-1"></div>
-      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>3.3.0</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
+      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>3.4.0</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
     </main>
   </div>
   <nav class="mobile-nav" aria-label="Mobile navigation">
@@ -106,6 +108,7 @@
     <button data-nav="notifications"><span>♧</span><small>Alerts</small></button>
     <button data-nav="subjects"><span>◈</span><small>Subjects</small></button>
     <button data-nav="diagnostics"><span>⌁</span><small>Health</small></button>
+    <button data-nav="portability"><span>⇩</span><small>Backup</small></button>
     <button data-nav="settings"><span>⚙</span><small>Settings</small></button>
   </nav>
   <dialog id="modal" class="modal"><div id="modalBody"></div></dialog>
@@ -134,6 +137,7 @@
   <script src="./reminders.js" defer></script>
   <script src="./ui-personalization.js" defer></script>
   <script src="./diagnostics.js" defer></script>
+  <script src="./portability.js" defer></script>
   <script src="./app.js" defer></script>
 </body>
 </html>

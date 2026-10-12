@@ -4,7 +4,7 @@
 "use strict";
 const I=window.NOVA_I18N,E=window.NOVA.escape;
 const tr=(en,bn)=>I.language==="bn"?bn:en;
-const VERSION="3.3.0";
+const VERSION="3.4.0";
 let results=null,checking=false,issueDraft="",message="",refresh=()=>{};
 const small=(x)=>String(x).slice(0,500);
 const status=(id,label,level,detail)=>({id,label,level,detail});
@@ -96,7 +96,7 @@ function download(){
  const r=report();if(!r){message=tr("Run diagnostics before exporting.","Export-এর আগে Diagnostics চালাও।");renderRefresh();return false}
  try{
   const blob=new Blob([JSON.stringify(r,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob);
-  const a=document.createElement("a");a.href=url;a.download="NovaStudy-Diagnostics-v3.3.0.json";
+  const a=document.createElement("a");a.href=url;a.download="NovaStudy-Diagnostics-v3.4.0.json";
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1200);
   message=tr("Report downloaded. Review it before sharing.","রিপোর্ট ডাউনলোড হয়েছে। Share করার আগে দেখে নাও।");renderRefresh();return true;
@@ -117,7 +117,7 @@ function page(){
   (x.level==="pass"?"✓":x.level==="warn"?"!":"i")+'</span><div><b>'+E(x.label)+'</b>'+
   '<small>'+E(x.detail)+'</small></div><strong>'+E(x.level.toUpperCase())+'</strong></li>').join("");
  return '<div class="diag-root"><div class="page-head"><div><span class="eyebrow">'+
- tr("APP HEALTH / 3.3","অ্যাপ হেলথ / ৩.৩")+'</span><h1 class="view-title">'+
+ tr("APP HEALTH / 3.4","অ্যাপ হেলথ / ৩.৩")+'</span><h1 class="view-title">'+
  tr("Diagnostics & Accessibility","ডায়াগনস্টিকস ও অ্যাক্সেসিবিলিটি")+'</h1><p class="subheading">'+
  tr("Inspect device-level app readiness without sharing your study records.","পড়াশোনার তথ্য না দিয়েই App-এর অবস্থা যাচাই করো।")+'</p></div></div>'+
  '<section class="panel"><div class="panel-header"><b class="panel-title">'+

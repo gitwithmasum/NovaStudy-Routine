@@ -333,3 +333,12 @@ These UI-only settings are intentionally **not** part of academic JSON backups a
 ### v3.3 manual release tests
 
 After updating the installed PWA, open **App diagnostics** (mobile **Health**), click **Run diagnostics**, verify status and permission wording, then use **Copy report** or **Download JSON**. Review exported files before sharing. Test both languages, themes, offline mode and keyboard dialog focus using `docs/diagnostics-qa-v3.3.md`. A successful static/Node suite does not verify real mobile rendering or screen-reader accessibility.
+
+
+## v3.4 — Final Release: Complete Backup & Data Portability
+
+**Backup & data portability** (mobile **Backup**) exports one local JSON containing the currently saved **Routine/Tasks/Exams/CSE 100**, CSE Learning Hub, Focus Insights/Distractions, Reminders/Preferences, Dashboard Widget preferences, Theme and Language. Absent optional modules stay explicitly `null`, not invented. All present records are schema-checked. Google Login credentials, tokens, authentication, cloud and sync storage are excluded and never inspected.
+
+**Validate before Restore:** import an exported combined backup (up to 3.5 MB). Each module is validated before a review/selection panel appears. Check/uncheck exactly which modules to replace and confirm. Unselected or absent modules remain unchanged. The restore keeps pre-write copies and attempts to rollback on failure; if rollback fails, an explicit warning asks for manual recovery. A successful restore reloads the app to read new local records. Close unsaved editors and export any current destination-device data before replacing it.
+
+This is local offline browser storage only. Different deployments/origins and browser profiles maintain different local data. Existing individual Routine, Learning Hub and Focus Insights export functions remain available; the old single-module JSON files are not directly compatible with this combined restore. No new sync feature, account integration, or automatic upload is included. **No additional development phases are planned after v3.4.**
