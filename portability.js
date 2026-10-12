@@ -175,5 +175,5 @@ function page(){
  return html;
 }
 function init(opts={}){refresh=opts.refresh||(()=>{})}
-window.NOVA_PORTABILITY={FORMAT,VERSION,KEYS:K,ORDER,init,page,action,change,readCurrent,makeBackup,validateBundle,prepare,preview,select,replaceSelection,cancel,currentStatus,getPending:()=>pending?copy(pending):null};
+window.NOVA_PORTABILITY={FORMAT,VERSION,KEYS:K,ORDER,download,init,page,action,change,readCurrent,makeBackup,validateBundle,prepare,preview,select,replaceSelection,cancel,currentStatus,getPending:()=>pending?copy(pending):null};
 })();
