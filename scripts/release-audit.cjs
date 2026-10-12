@@ -57,5 +57,5 @@ check(!html.includes('target="_blank" rel="noopener"'),"Insecure external links"
 const version=(html.match(/NOVASTUDY OS <b>([\d.]+)<\/b>/)||[])[1];
 check(version==="3.3.0","Footer release version mismatch");
 check(/version/i.test(read("README.md")),"README release information missing");
-console.log("NovaStudy v3.2 release audit: "+checks+" static checks passed.");
+console.log("NovaStudy v3.3 release audit: "+checks+" static checks passed.");
 console.log("Scope: static markup/PWA references/mobile CSS; not a real browser or accessibility certification.");
