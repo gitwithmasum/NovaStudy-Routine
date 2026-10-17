@@ -71,3 +71,30 @@
 .cm-file-actions .danger-btn{background:rgba(220,60,73,.12);color:#f8a5a5;border:1px solid rgba(224,89,94,.6);border-radius:10px}
 .cm-file-actions .danger-btn:hover{background:rgba(220,60,73,.22)}
 @media(max-width:620px){.cm-file-item .cm-file{align-items:stretch}.cm-file-actions{justify-content:flex-start;width:100%}.cm-file-actions button{flex:1 0 auto}.cm-asset-editor,.cm-delete-confirm{padding:13px}}
+
+/* Chapter, topic and written-note owner actions */
+.cm-section-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.cm-section-heading b{overflow-wrap:anywhere;min-width:0}
+.cm-section-actions{display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:8px;margin:10px 0}
+.cm-section-actions button{min-height:36px;padding:8px 13px;border-radius:9px;white-space:normal;line-height:1.3;text-align:center}
+.cm-section-actions .danger-btn{background:rgba(220,60,73,.12);color:#f8a5a5;border:1px solid rgba(224,89,94,.6)}
+.cm-section-actions .danger-btn:hover{background:rgba(220,60,73,.22)}
+.cm-chapter-inner>.cm-section-actions{margin:0 0 15px}
+.cm-inline-editor{max-width:750px!important;margin:12px 0 20px;padding:15px;border-radius:11px;border:1px solid var(--line,#344);background:var(--panel2,#1d2a3c)}
+.cm-inline-editor label,.cm-note-editor label{display:block;width:100%;font-size:13px}
+.cm-inline-editor .cm-section-actions,.cm-note-editor .cm-section-actions{margin:0}
+.cm-chapter-inner>h3{margin:16px 0 12px}
+.cm-note-block{margin:14px 0 8px;padding:13px 15px;border-radius:10px;border:1px solid var(--line,#344);background:var(--panel2,#172839)}
+.cm-note-block>strong{display:block;font-size:13px;margin-bottom:9px}
+.cm-note-block .cm-note-text{white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 12px;line-height:1.6}
+.cm-note-block .cm-note-editor{display:grid;gap:13px;margin:8px 0 0}
+.cm-note-block .cm-note-editor textarea{min-height:140px;resize:vertical}
+.cm-topic>.cm-section-heading .cm-section-actions{margin:0}
+.cm-delete-confirm .cm-section-actions{margin:0}
+@media(max-width:600px){
+ .cm-section-heading{align-items:flex-start;flex-direction:column}
+ .cm-section-heading .cm-section-actions{width:100%}
+ .cm-section-actions button{flex:1 1 auto;min-height:40px}
+ .cm-note-block{padding:12px}
+ .cm-inline-editor{padding:12px}
+}
