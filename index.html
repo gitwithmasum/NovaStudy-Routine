@@ -15,7 +15,7 @@
     // Keep the user's appearance preference independent from routine and task data.
     try {
       document.documentElement.dataset.theme =
-        localStorage.getItem("novastudy_theme_v1") === "gold" ? "gold" : "cyber";
+        ["cyber","gold","halftone"].includes(localStorage.getItem("novastudy_theme_v1")) ? localStorage.getItem("novastudy_theme_v1") : "cyber";
     } catch {
       document.documentElement.dataset.theme = "cyber";
     }
@@ -42,6 +42,7 @@
   <link rel="stylesheet" href="./diagnostics.css" />
   <link rel="stylesheet" href="./portability.css" />
   <link rel="stylesheet" href="./settings-tools.css" />
+  <link rel="stylesheet" href="./halftone-theme.css" />
   <title>NovaStudy — Routine OS</title>
 </head>
 <body>
