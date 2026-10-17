@@ -107,14 +107,14 @@ test("session and distraction arrays reject invalid input and are size-limited",
 });
 test("all new component scripts, PWA and bilingual theme layout are wired",()=>{
  const files=Object.fromEntries(["index.html","focus.js","focus-insights.js","focus-insights.css","app.js","sw.js",".github/workflows/novastudy-tests.yml"].map(x=>[x,read(x)]));
- assert.match(files["index.html"],/NOVASTUDY OS <b>3\.5\.12<\/b>/);
+ assert.match(files["index.html"],/NOVASTUDY OS <b>3\.5\.13<\/b>/);
  assert.match(files["index.html"],/src="\.\/focus-insights\.js"/);
  assert.match(files["index.html"],/href="\.\/focus-insights\.css"/);
  assert.match(files["focus.js"],/NOVA_FOCUS_INSIGHTS\?\.recordCompletion/);
  assert.match(files["focus.js"],/NOVA_FOCUS_INSIGHTS\?\.panel/);
  assert.match(files["app.js"],/Insights\.handle\(action,b\)/);
  assert.match(files["app.js"],/Insights\.addDistraction/);
- assert.match(files["sw.js"],/novastudy-v3\.5\.12/);
+ assert.match(files["sw.js"],/novastudy-v3\.5\.13/);
  assert.match(files["sw.js"],/'\.\/focus-insights\.js'/);
  assert.match(files["focus-insights.css"],/html\[data-theme="gold"\]/);
  assert.match(files["focus-insights.css"],/@media\(max-width:660px\)/);

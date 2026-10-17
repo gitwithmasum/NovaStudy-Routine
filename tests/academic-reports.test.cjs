@@ -120,12 +120,12 @@ test("v2.8 nav scrollbar loaded after legacy CSS with desktop and mobile scrolli
  assert.match(nav,/\.sidebar \.nav-list\{[\s\S]*overflow-y:auto/);
  assert.match(nav,/\.mobile-nav\{[\s\S]*overflow-x:auto/);
  assert.match(nav,/scrollbar-width:thin/);
- assert.match(sw,/novastudy-v3\.5\.12/);
+ assert.match(sw,/novastudy-v3\.5\.13/);
  assert.match(sw,/'\.\/navigation-scroll\.css'/);
  assert.match(app,/page==="reports"\?Reports\.page/);
  assert.match(app,/Reports\.handleChange/);
  assert.match(ci,/node --check academic-reports\.js/);
- assert.match(html,/NOVASTUDY OS <b>3\.5\.12<\/b>/);
+ assert.match(html,/NOVASTUDY OS <b>3\.5\.13<\/b>/);
  for(const file of ["academic-reports.js","app.js","sw.js"])
   assert.doesNotThrow(()=>new vm.Script(read(file),{filename:file}));
 });
