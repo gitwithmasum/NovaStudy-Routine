@@ -105,7 +105,7 @@ test("v3.3 integration keeps original data modules, adds diagnostics navigation 
  const html=read("index.html"),app=read("app.js"),views=read("views.js"),editors=read("editors.js"),
  sw=read("sw.js"),css=read("diagnostics.css"),audit=read("scripts/release-audit.cjs");
  assert.doesNotMatch(html,/data-nav="diagnostics"/);
- assert.match(views,/data-nav="diagnostics"/);
+ assert.match(views,/route:"diagnostics"/);
  assert.match(html,/src="\.\/diagnostics\.js"/);
  assert.match(html,/href="\.\/diagnostics\.css"/);
  assert.match(html,/NOVASTUDY OS <b>3\.5\.5<\/b>/);
