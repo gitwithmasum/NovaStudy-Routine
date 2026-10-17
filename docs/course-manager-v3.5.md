@@ -46,3 +46,9 @@ This release is additive. **It does not migrate or replace** `novastudy_state_v1
 - Deleting only written notes clears the \`body\` field; it **does not** delete the topic, chapter, or uploaded files.
 - Only the course owner can modify this content; students can read it.
 - Existing routine, tasks, exams, homework, enrollment, and personal backup are preserved.
+
+## v3.5.3 — Compact contextual title-row controls
+- Chapter **Edit** and **Delete** buttons now live at the far right of the chapter title, outside the native disclosure summary, preserving independent click and keyboard behavior.
+- Topic and written-note headings place short **Edit** and **Delete** buttons at the right, with spacing and compact responsive sizing.
+- Button names include longer, screen-reader-only contextual labels; no database schemas or student files are changed.
+- When notes are empty, the only note action is **Add**.

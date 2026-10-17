@@ -2,7 +2,7 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const source=fs.readFileSync(path.join(__dirname,'..','sw.js'),'utf8');
-const CACHE='novastudy-v3.5.2';
+const CACHE='novastudy-v3.5.3';
 const LEGACY='novastudy-v3.2.0';
 function fixture({failAdd=false,active=true,offline=false,partial=false}={}){
  const handlers={},maps=new Map(),events=[];
