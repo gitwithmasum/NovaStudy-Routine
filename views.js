@@ -81,6 +81,10 @@ settingsTools()+
       <span class="theme-preview theme-preview-gold" aria-hidden="true"><span class="preview-top"></span><span class="preview-main"><i></i><b></b><em></em></span></span>
       <span class="theme-option-bottom"><span class="theme-option-name"><strong>Black & Gold</strong><small>Midnight + gold</small></span><span class="theme-check" aria-hidden="true">✓</span></span>
     </button>
+    <button type="button" class="theme-option" data-action="theme-select" data-theme-value="halftone" aria-pressed="false" aria-label="Use Mint Halftone theme">
+      <span class="theme-preview theme-preview-halftone" aria-hidden="true"><span class="preview-top"></span><span class="preview-main"><i></i><b></b><em></em></span></span>
+      <span class="theme-option-bottom"><span class="theme-option-name"><strong>Mint Halftone</strong><small>White + mint wave</small></span><span class="theme-check" aria-hidden="true">✓</span></span>
+    </button>
   </div>
   <small class="theme-save-note">Your appearance preference is saved on this device, including after refresh.</small>
 </div><hr class="separator"><div class="appearance-panel language-panel"><div class="appearance-copy"><b>Language preference</b><small>The interface language is saved on this device. Your own subjects, notes and JSON backups will not be translated.</small></div><div class="language-options" role="group" aria-label="Select interface language"><button class="language-choice" type="button" data-action="language-select" data-lang="en" aria-pressed="false">English</button><button class="language-choice" type="button" data-action="language-select" data-lang="bn" aria-pressed="false">বাংলা</button></div></div><hr class="separator"><p class="panel-sub">Your routines are saved in THIS browser, not in a cloud database. Export regularly to avoid losing data.</p><div class="settings-actions">${button("⇩ Export JSON backup","export","secondary-btn")}<label class="import-label">⇧ Import backup<input type="file" id="importFile" accept=".json,application/json"></label></div><hr class="separator">
