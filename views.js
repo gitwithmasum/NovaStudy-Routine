@@ -23,7 +23,7 @@ function toggleDataNotifications(){
  return dataNotificationsOpen;
 }
 function dataNotificationsPanel(){
- return `<section class="panel settings-data-panel" aria-label="Data & notifications"><div class="panel-header"><b class="panel-title">Data & notifications</b><span class="chip">LOCAL FIRST</span></div><div class="appearance-panel appearance-panel-v12">
+ return `<section class="panel settings-data-panel" aria-label="Personalization"><div class="panel-header"><b class="panel-title">Personalization</b><span class="chip">LOCAL FIRST</span></div><div class="appearance-panel appearance-panel-v12">
   <div class="appearance-copy">
     <b>Choose your theme</b>
     <small>Choose an interface style without changing your saved routine, tasks, or subjects.</small>
@@ -44,7 +44,6 @@ function dataNotificationsPanel(){
   </div>
   <small class="theme-save-note">Your appearance preference is saved on this device, including after refresh.</small>
 </div><hr class="separator"><div class="appearance-panel language-panel"><div class="appearance-copy"><b>Language preference</b><small>The interface language is saved on this device. Your own subjects, notes and JSON backups will not be translated.</small></div><div class="language-options" role="group" aria-label="Select interface language"><button class="language-choice" type="button" data-action="language-select" data-lang="en" aria-pressed="false">English</button><button class="language-choice" type="button" data-action="language-select" data-lang="bn" aria-pressed="false">বাংলা</button></div></div><hr class="separator"><p class="panel-sub">Your routines are saved in THIS browser, not in a cloud database. Export regularly to avoid losing data.</p><div class="settings-actions">${button("⇩ Export JSON backup","export","secondary-btn")}<label class="import-label">⇧ Import backup<input type="file" id="importFile" accept=".json,application/json"></label></div><hr class="separator">
-${window.NOVA_REMINDERS.panel()}
 ${window.NOVA_UI?.settingsPanel?.()||""}
 <div class="hint-banner">PWA works over HTTPS/localhost after first load. Installing does not create an Android APK or iOS IPA.</div></section>`;
 }
@@ -53,7 +52,7 @@ function settingsTools(){
   {route:"notifications",icon:"♧",title:"Reminders & notifications",description:"Manage study alerts, deadlines and notification history.",bn:"পড়াশোনার রিমাইন্ডার, ডেডলাইন এবং নোটিফিকেশন দেখো।"},
   {route:"diagnostics",icon:"⌁",title:"App diagnostics",description:"Check app health, storage, PWA and troubleshooting.",bn:"অ্যাপের অবস্থা, স্টোরেজ, PWA ও সমস্যা যাচাই করো।"},
   {route:"portability",icon:"⇩",title:"Backup & data portability",description:"Export, import and recover your study data.",bn:"পড়াশোনার ডেটা এক্সপোর্ট, ইমপোর্ট ও রিকভার করো।"},
-  {route:"data",icon:"◈",title:"Data & notifications",description:"Appearance, language, local data and notification preferences.",bn:"থিম, ভাষা, লোকাল ডেটা ও নোটিফিকেশন সেটিংস।"}
+  {route:"data",icon:"◈",title:"Personalization",description:"Themes, language, local backups and display preferences.",bn:"থিম, ভাষা, লোকাল ব্যাকআপ ও ডিসপ্লে সেটিংস।"}
  ];
  return '<section class="panel settings-tools" aria-labelledby="settingsToolsTitle">'+
  '<div class="panel-header"><div><b id="settingsToolsTitle" class="panel-title">'+I.t("Tools & utilities")+'</b>'+
@@ -65,7 +64,7 @@ function settingsTools(){
  '<span class="settings-tool-copy"><strong>'+I.t(x.title)+'</strong><small>'+(I.language==="bn"?x.bn:x.description)+'</small></span>'+
  '<span class="settings-tool-arrow" aria-hidden="true">›</span></button>').join("")+'</div>'+
  '<div class="settings-data-content" id="settingsDataNotifications"'+(dataNotificationsOpen?'':' hidden')+'>'+
- dataNotificationsPanel()+'</div></section>';
+ (dataNotificationsOpen?dataNotificationsPanel():'')+'</div></section>';
 }
 function academicProfilePanel(){const p=s().profile,c=C[p.category];return `<section class="panel"><div class="panel-header"><b class="panel-title">Academic profile</b><span class="chip">STUDENT ID</span></div><form id="profileForm" class="form-grid">
 <div class="field"><label>Your name</label><input name="name" required maxlength="80" value="${E(p.name)}"></div><div class="field"><label>Institution (optional)</label><input name="institution" maxlength="100" value="${E(p.institution||"")}"></div>
