@@ -20,7 +20,7 @@ function boot(language="en"){
 }
 test("Tools & utilities has four visible cards in requested order; Personalization is initially closed",()=>{
  const {html}=boot(),markup=html();
- const tools=markup.slice(markup.indexOf('class="settings-tool-grid"'),markup.indexOf('class="settings-data-content"'));
+ const tools=markup.slice(markup.indexOf('class="settings-tool-grid"'),markup.indexOf('class="settings-data-content settings-utility-content"'));
  const entries=['data-settings-utility="notifications"','data-settings-utility="diagnostics"','data-settings-utility="portability"','data-action="settings-data-toggle"'];
  let last=-1;
  for(const entry of entries){
@@ -39,7 +39,7 @@ test("clicking fourth card opens/closes original theme, language, backup and dis
  const {views,html}=boot();
  assert.equal(views.toggleDataNotifications(),true);
  const open=html();
- assert.match(open,/data-action="settings-data-toggle" aria-expanded="true"/);
+ assert.match(open,/data-action="settings-data-toggle" data-settings-utility="data" aria-expanded="true"/);
  assert.match(open,/class="settings-data-content settings-utility-content" id="settingsUtilityContent" role="region" aria-label="Personalization"><section class="panel settings-data-panel"/);
  for(const name of ["cyber","gold","halftone"])
   assert.match(open,new RegExp('data-theme-value="'+name+'"'));
