@@ -4,7 +4,7 @@
 "use strict";
 const I=window.NOVA_I18N,E=window.NOVA.escape;
 const tr=(en,bn)=>I.language==="bn"?bn:en;
-const VERSION="3.5.0";
+const VERSION="3.5.1";
 let results=null,checking=false,issueDraft="",message="",refresh=()=>{};
 const small=(x)=>String(x).slice(0,500);
 const status=(id,label,level,detail)=>({id,label,level,detail});
