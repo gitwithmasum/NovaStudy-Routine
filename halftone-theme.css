@@ -1,0 +1,279 @@
+/* NovaStudy v3.5.9 — Mint Halftone / reference-inspired full-viewport background
+   Independent third appearance theme; Cyber and Black & Gold remain unchanged. */
+html[data-theme="halftone"]{
+ color-scheme:light;
+ --bg:#f8fffc;
+ --panel:#ffffffea;
+ --panel2:#e8f8f3;
+ --line:#add7cd;
+ --text:#153b36;
+ --muted:#476e67;
+ --mint:#087f73;
+ --purple:#067e83;
+ --gold:#c88f3a;
+ --gold-strong:#bf8c38;
+ --gold-soft:#dbaa62;
+ --gold-dark:#7c572a;
+}
+html[data-theme="halftone"] body{
+ background-color:#f8fffc;
+ background-image:linear-gradient(120deg,#ffffff55,#ffffff0c 45%,#fff6),url("./assets/mint-halftone-waves.svg");
+ background-position:center center;
+ background-repeat:no-repeat;
+ background-size:cover;
+ background-attachment:fixed;
+ color:var(--text);
+}
+html[data-theme="halftone"] .app-shell{background:transparent}
+html[data-theme="halftone"] .content{background:transparent}
+html[data-theme="halftone"] .sidebar{
+ background:#fffffff0;
+ border-right:1px solid #8bc9b9;
+ box-shadow:9px 0 24px #00745d0a;
+ backdrop-filter:blur(13px);
+}
+html[data-theme="halftone"] .topbar{
+ background:#ffffffdd;
+ border-bottom:1px solid #a0d7c9;
+ backdrop-filter:blur(15px);
+}
+html[data-theme="halftone"] .mobile-nav{
+ background:#fffffff2;
+ border-top:1px solid #8cc9bb;
+ backdrop-filter:blur(14px);
+ box-shadow:0 -8px 30px #0a8a6d1d;
+}
+html[data-theme="halftone"] .mobile-nav button{color:#356c62}
+html[data-theme="halftone"] .mobile-nav button.active{color:#057769;background:#d2f6eb}
+html[data-theme="halftone"] .brand strong,
+html[data-theme="halftone"] .view-title,
+html[data-theme="halftone"] .panel-title,
+html[data-theme="halftone"] .stat-value{color:#163f37}
+html[data-theme="halftone"] .brand small,
+html[data-theme="halftone"] .sidebar-caption,
+html[data-theme="halftone"] .sidebar-footer,
+html[data-theme="halftone"] .breadcrumb-muted,
+html[data-theme="halftone"] .app-footer,
+html[data-theme="halftone"] .nav-arrow{color:#4f8176}
+html[data-theme="halftone"] .brand-symbol,
+html[data-theme="halftone"] .avatar-button{
+ color:#ffffff;
+ background:linear-gradient(130deg,#059a84,#69dbc4);
+ border:1px solid #158a7b;
+ box-shadow:0 8px 20px #17a58b40;
+}
+html[data-theme="halftone"] .nav-btn{color:#315f58}
+html[data-theme="halftone"] .nav-btn:hover,
+html[data-theme="halftone"] .nav-btn.active{
+ color:#064c42;
+ background:linear-gradient(100deg,#d6f9ed,#c4ecdfb8);
+ border-color:#82cdbb;
+}
+html[data-theme="halftone"] .nav-ico,
+html[data-theme="halftone"] .eyebrow,
+html[data-theme="halftone"] .section-caption,
+html[data-theme="halftone"] .stat-icon,
+html[data-theme="halftone"] .theme-symbol{color:#087e71}
+html[data-theme="halftone"] .clock,
+html[data-theme="halftone"] .breadcrumb{color:#265e54}
+html[data-theme="halftone"] .status-pill,
+html[data-theme="halftone"] .chip{
+ background:#dff8ec;
+ color:#126556;
+ border:1px solid #8acfb8;
+}
+html[data-theme="halftone"] .live-dot{background:#13a685;box-shadow:0 0 9px #42d8b3}
+html[data-theme="halftone"] .hero,
+html[data-theme="halftone"] .insight-hero{
+ background:linear-gradient(115deg,#ffffffed,#eefcf6dd);
+ color:#163f37;
+ border:1px solid #89cdbd;
+ box-shadow:0 16px 36px #087a6220;
+}
+html[data-theme="halftone"] .hero p{color:#3c7064}
+html[data-theme="halftone"] .orbit{
+ border-color:#2bb59a;
+ box-shadow:0 0 0 19px #b1efdf92,0 0 0 40px #c6f7ec66,0 0 40px #7adbc559;
+}
+html[data-theme="halftone"] .orbit-core{color:#0b8b79;text-shadow:0 0 20px #66d5bd}
+html[data-theme="halftone"] .orbit-core small{color:#177969}
+html[data-theme="halftone"] .panel,
+html[data-theme="halftone"] .cm-panel{
+ background:#fffffff0;
+ border-color:#9dcfc3;
+ color:#173a35;
+ box-shadow:0 12px 28px #08796119;
+ backdrop-filter:blur(7px);
+}
+html[data-theme="halftone"] .subject-card,
+html[data-theme="halftone"] .insight-stat,
+html[data-theme="halftone"] .insight-action,
+html[data-theme="halftone"] .hub-topic,
+html[data-theme="halftone"] .hub-metric,
+html[data-theme="halftone"] .hub-record,
+html[data-theme="halftone"] .hub-project,
+html[data-theme="halftone"] .study-planner-card,
+html[data-theme="halftone"] .study-preview-day{
+ background:#f5fffb;
+ border-color:#a4d9cc;
+ color:#1d463d;
+}
+html[data-theme="halftone"] .primary-btn{
+ background:linear-gradient(130deg,#0a9c84,#067d72);
+ color:#fff;
+ border-color:#117c6f;
+ box-shadow:0 8px 20px #13a28b30;
+}
+html[data-theme="halftone"] .secondary-btn,
+html[data-theme="halftone"] .outline-button,
+html[data-theme="halftone"] .tiny-btn,
+html[data-theme="halftone"] .modal-close,
+html[data-theme="halftone"] .import-label{
+ background:#eafbf4;
+ color:#205e52;
+ border-color:#8fcfbe;
+}
+html[data-theme="halftone"] .secondary-btn:hover,
+html[data-theme="halftone"] .outline-button:hover,
+html[data-theme="halftone"] .tiny-btn:hover{background:#c6f1e3;border-color:#43af98}
+html[data-theme="halftone"] .danger-btn{background:#fff0f0;color:#9d303d;border-color:#e0b2b7}
+html[data-theme="halftone"] .chip,
+html[data-theme="halftone"] .day-pill,
+html[data-theme="halftone"] .filter-chip,
+html[data-theme="halftone"] .hub-tab{
+ background:#e6f9f2;
+ color:#27685b;
+ border-color:#a0d7c6;
+}
+html[data-theme="halftone"] .day-pill.active,
+html[data-theme="halftone"] .filter-chip.active,
+html[data-theme="halftone"] .hub-tab.is-active{
+ background:#b6ecda;
+ color:#075c50;
+ border-color:#43a991;
+}
+html[data-theme="halftone"] .time-label,
+html[data-theme="halftone"] .priority.low{color:#107e6c}
+html[data-theme="halftone"] .task-main small,
+html[data-theme="halftone"] .session-text small,
+html[data-theme="halftone"] .time-label small,
+html[data-theme="halftone"] .day-pill small{color:#50776d}
+html[data-theme="halftone"] .task-row,
+html[data-theme="halftone"] .timeline-card,
+html[data-theme="halftone"] .separator{border-color:#b6dace}
+html[data-theme="halftone"] input,
+html[data-theme="halftone"] select,
+html[data-theme="halftone"] textarea{
+ background:#fffefa;
+ border:1px solid #94cabd;
+ color:#143f34;
+ accent-color:#0b947e;
+}
+html[data-theme="halftone"] input::placeholder,
+html[data-theme="halftone"] textarea::placeholder{color:#6a9085}
+html[data-theme="halftone"] button:focus-visible,
+html[data-theme="halftone"] input:focus-visible,
+html[data-theme="halftone"] select:focus-visible,
+html[data-theme="halftone"] textarea:focus-visible{
+ outline:3px solid #059b86;
+ outline-offset:2px;
+}
+html[data-theme="halftone"] .field label,
+html[data-theme="halftone"] .form-grid label{color:#285d50}
+html[data-theme="halftone"] .hint-banner,
+html[data-theme="halftone"] .cm-message,
+html[data-theme="halftone"] .hub-note,
+html[data-theme="halftone"] .reminder-disclaimer{
+ background:#e1f8f0;
+ color:#236454;
+ border-color:#a0d8c7;
+}
+html[data-theme="halftone"] .modal,
+html[data-theme="halftone"] dialog{
+ background:#f7fffc;
+ color:#133b32;
+ border-color:#8ccbbb;
+}
+html[data-theme="halftone"] .modal::backdrop{background:#17453c66}
+html[data-theme="halftone"] .toast{
+ background:#f4fffa;
+ color:#1e5a4b;
+ border-color:#6cbea9;
+}
+html[data-theme="halftone"] .theme-switch{
+ background:#e3f9f1;
+ border-color:#69bda8;
+ color:#0c6256;
+ box-shadow:0 3px 12px #08735e18;
+}
+html[data-theme="halftone"] .appearance-panel,
+html[data-theme="halftone"] .appearance-panel-v12{
+ background:#f7fffc;
+ border-color:#a3d6c8;
+}
+html[data-theme="halftone"] .theme-option{
+ background:#fff;
+ color:#173f34;
+ border-color:#a8d6ca;
+}
+html[data-theme="halftone"] .theme-option.is-selected{border-color:#07846f;box-shadow:0 0 0 1px #058973,0 8px 18px #12695722}
+html[data-theme="halftone"] .theme-preview-halftone{
+ --preview-line:#8ed9c4;
+ --preview-bg:#fafffd;
+ --preview-accent:#27baa0;
+ --preview-light:#bff6e3;
+ background:#ffffff url("./assets/mint-halftone-waves.svg") center / cover no-repeat;
+}
+html[data-theme="halftone"] .theme-preview-halftone .preview-top{background:#eafaf4cc}
+html[data-theme="halftone"] .theme-preview-halftone .preview-main b{background:linear-gradient(90deg,#92e3cc,#fffffff0)}
+/* The third theme's gallery preview also appears while another theme is active. */
+.theme-preview-halftone{
+ --preview-line:#8ed9c4;
+ --preview-bg:#fafffd;
+ --preview-accent:#27baa0;
+ --preview-light:#bff6e3;
+ background:#ffffff url("./assets/mint-halftone-waves.svg") center / cover no-repeat;
+}
+html[data-theme="halftone"] .settings-tool-link,
+html[data-theme="halftone"] .cm-chapter-shell,
+html[data-theme="halftone"] .cm-chapter,
+html[data-theme="halftone"] .cm-topic,
+html[data-theme="halftone"] .cm-file-item,
+html[data-theme="halftone"] .cm-file,
+html[data-theme="halftone"] .cm-assignment,
+html[data-theme="halftone"] .cm-note-block,
+html[data-theme="halftone"] .cm-owner-panel,
+html[data-theme="halftone"] .cm-stats>span,
+html[data-theme="halftone"] .settings-account-option{
+ background:#f2fdf8;
+ color:#22574b;
+ border-color:#9bcebf;
+}
+html[data-theme="halftone"] .cm-chapter-heading,
+html[data-theme="halftone"] .cm-chapter-toggle{color:#16493c}
+html[data-theme="halftone"] .cm-chapter-inner{border-color:#a6d6c6}
+html[data-theme="halftone"] .cm-panel input,
+html[data-theme="halftone"] .cm-panel textarea{background:#fffefa;color:#19473b;border-color:#8fcabb}
+html[data-theme="halftone"] .cm-upload{color:#097969;border-color:#28ad94}
+html[data-theme="halftone"] .cm-delete-confirm{background:#fff3f2;color:#8f3941}
+html[data-theme="halftone"] .auth-monogram,
+html[data-theme="halftone"] .google-signin-btn{color:#255749}
+html[data-theme="halftone"] .auth-state,
+html[data-theme="halftone"] .cloud-counts,
+html[data-theme="halftone"] .auth-summary{
+ background:#eefbf5;
+ border-color:#a1d5c7;
+ color:#225d50;
+}
+html[data-theme="halftone"] .reminder-bell{color:#096d5d}
+html[data-theme="halftone"] .app-footer{background:#ffffffe0;border-color:#afdcce}
+html[data-theme="halftone"] .cm-legacy{border-color:#add7cd}
+@media(max-width:660px){
+ html[data-theme="halftone"] body{background-attachment:scroll;background-size:auto 100%;background-position:50% 50%}
+ html[data-theme="halftone"] .sidebar{backdrop-filter:none}
+ html[data-theme="halftone"] .topbar{background:#fffffff2}
+ html[data-theme="halftone"] .mobile-nav{background:#fffffff3}
+}
+@media(prefers-reduced-motion:reduce){
+ html[data-theme="halftone"] *{scroll-behavior:auto}
+}
