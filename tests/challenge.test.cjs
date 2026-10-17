@@ -138,7 +138,7 @@ test("PWA shell, sidebar, mobile nav and GitHub Actions include challenge",()=>{
  assert.match(html,/src="\.\/challenge-data\.js"/);
  assert.match(html,/src="\.\/challenge\.js"/);
  assert.match(html,/href="\.\/challenge\.css"/);
- assert.match(sw,/novastudy-v3\.5\.13/);
+ assert.match(sw,/novastudy-v3\.5\.14/);
  assert.match(sw,/'\.\/challenge-data\.js'/);
  assert.match(app,/CSE\.handleChange/);
  assert.match(ci,/node --check challenge\.js/);
