@@ -277,3 +277,18 @@ html[data-theme="halftone"] .cm-legacy{border-color:#add7cd}
 @media(prefers-reduced-motion:reduce){
  html[data-theme="halftone"] *{scroll-behavior:auto}
 }
+
+/* Gallery always displays all three choices, regardless of active theme. */
+.theme-gallery{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:740px){.theme-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.theme-gallery{grid-template-columns:1fr}}
+html[data-theme="halftone"] .settings-tool-link:hover,
+html[data-theme="halftone"] .settings-account-option.selected{background:#d8f7eb;border-color:#56b8a1;color:#115e50}
+html[data-theme="halftone"] .hub-alert,
+html[data-theme="halftone"] .reminder-error,
+html[data-theme="halftone"] .auth-error{color:#8b303a}
+html[data-theme="halftone"] .cm-root .cm-file-actions .danger-btn,
+html[data-theme="halftone"] .cm-root .cm-section-actions .danger-btn{color:#963847;background:#fff3f2;border-color:#e2a5af}
+html[data-theme="halftone"] .settings-account-suite .settings-account-modules>.panel{background:transparent!important;box-shadow:none!important;border-color:#acd7c9!important}
+html[data-theme="halftone"] .hub-num,
+html[data-theme="halftone"] .subject-initial{color:#126e60}
