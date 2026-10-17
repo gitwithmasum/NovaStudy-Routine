@@ -113,7 +113,7 @@ test("v3.3 integration keeps original data modules, adds diagnostics navigation 
  assert.match(app,/Diagnostics\.init/);
  assert.match(app,/Diagnostics\.setIssue/);
  assert.match(app,/Diagnostics\.onAction/);
- assert.match(views,/data-nav="diagnostics"/);
+ assert.match(views,/route:"diagnostics"/);
  assert.match(editors,/aria-label="Close editor"/);
  assert.match(editors,/previousFocus/);
  assert.match(editors,/\.focus\(\{preventScroll:true\}\)/);
