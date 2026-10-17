@@ -18,16 +18,18 @@ function boot(lang="en"){
  vm.runInNewContext(read("views.js"),{window:win},{filename:"views.js"});
  return {views:win.NOVA_VIEWS,markup:()=>win.NOVA_VIEWS.settings()};
 }
-test("Account & Cloud Services shows four side-by-side selectable cards like Tools & utilities",()=>{
+test("Account & Cloud Services shows five side-by-side selectable cards including Academic Profile",()=>{
  const {markup}=boot();
  const html=markup();
  assert.equal((html.match(/class="panel settings-account-suite"/g)||[]).length,1);
  assert.match(html,/id="settingsAccountTitle" class="panel-title">Account & Cloud Services/);
  assert.match(html,/class="settings-account-menu" role="group"/);
- const ids=["auth","cloud","sync","auto"];
+ const ids=["auth","cloud","sync","auto","profile"];
  for(const id of ids)
   assert.equal((html.match(new RegExp('data-action="account-service-select" data-account-service="'+id+'"','g'))||[]).length,1);
- assert.equal((html.match(/class="settings-tool-link settings-account-option/g)||[]).length,4);
+ assert.equal((html.match(/class="settings-tool-link settings-account-option/g)||[]).length,5);
+ assert.match(html,/5 services/);
+ assert.match(html,/data-account-service="profile"/);
  const positions=ids.map(id=>html.indexOf('data-account-service="'+id+'"'));
  assert.ok(positions.every((pos,i)=>i===0||pos>positions[i-1]));
  assert.match(html,/data-account-service="auth" aria-pressed="true"/);
@@ -39,23 +41,24 @@ test("only selected module details render below cards while all original action 
   ["auth","google-signin"],
   ["cloud","cloud-refresh"],
   ["sync","sync-review"],
-  ["auto","auto-toggle"]
+  ["auto","auto-toggle"],
+  ["profile","profileForm"]
  ];
  for(const [name,action] of specs){
   assert.equal(views.selectAccountService(name),true);
   const html=markup();
   assert.match(html,new RegExp('data-account-service="'+name+'" aria-pressed="true"'));
-  assert.match(html,new RegExp('data-action="'+action+'"'));
+  assert.match(html,name==="profile"?/id="profileForm"/:new RegExp('data-action="'+action+'"'));
   for(const other of specs.filter(v=>v[0]!==name))
-   assert.doesNotMatch(html,new RegExp('data-action="'+other[1]+'"'));
+   assert.doesNotMatch(html,other[0]==="profile"?/id="profileForm"/:new RegExp('data-action="'+other[1]+'"'));
   assert.match(html,/id="accountServiceContent" role="region"/);
  }
  assert.equal(views.selectAccountService("unknown"),false);
- assert.match(markup(),/data-account-service="auto" aria-pressed="true"/);
+ assert.match(markup(),/data-account-service="profile" aria-pressed="true"/);
 });
 test("cards use true 4/2/1-column grid and active state styling; original four panel functions are untouched",()=>{
  const css=read("settings-tools.css"),html=read("index.html"),views=read("views.js"),app=read("app.js");
- assert.match(css,/\.settings-account-menu\{\s*display:grid;grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+ assert.match(css,/\.settings-account-menu\{\s*grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
  assert.match(css,/@media\(max-width:1150px\)[\s\S]*?grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
  assert.match(css,/@media\(max-width:620px\)[\s\S]*?grid-template-columns:1fr/);
  assert.match(css,/settings-account-option\.selected/);
@@ -72,4 +75,32 @@ test("Bangla header and other settings sections remain intact with no storage wr
  assert.match(html,/Appearance preferences preserved/);
  assert.match(read("i18n.js"),/"Google Account Cloud Backup":"গুগল অ্যাকাউন্ট ক্লাউড ব্যাকআপ"/);
  assert.doesNotMatch(read("views.js"),/localStorage\.setItem|sessionStorage\.setItem/);
+});
+
+test("Academic Profile card exposes original editable form fields exactly once",()=>{
+ const {views,markup}=boot();
+ assert.equal(views.selectAccountService("profile"),true);
+ const html=markup();
+ assert.match(html,/data-account-service="profile" aria-pressed="true"/);
+ assert.equal((html.match(/id="profileForm"/g)||[]).length,1);
+ for(const field of [
+  'name="name"','name="institution"','id="profileCategory"',
+  'id="profileLevel"','id="profileTrack"','name="weekStart"'
+ ])assert.match(html,new RegExp(field));
+ assert.match(html,/Save profile →/);
+ assert.match(html,/Changing class or subject group never deletes existing routines/);
+ assert.doesNotMatch(html,/data-action="google-signin"/);
+});
+test("profile data remains visible in its own service card after in-app re-render",()=>{
+ const {views,markup}=boot();
+ views.selectAccountService("profile");
+ const first=markup();
+ assert.match(first,/name="name" required maxlength="80" value="Student"/);
+ assert.match(first,/name="institution" maxlength="100"/);
+ assert.match(first,/data-account-service="profile" aria-pressed="true"/);
+ assert.match(markup(),/id="profileForm"/);
+ const app=read("app.js");
+ assert.match(app,/e.target.id==="profileForm"/);
+ assert.match(app,/id==="profileCategory"/);
+ assert.match(app,/Profile saved\. Existing routine preserved\./);
 });
