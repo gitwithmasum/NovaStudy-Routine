@@ -70,3 +70,34 @@
   display:flex;flex-wrap:wrap;gap:8px;
  }
 }
+
+/* v3.5.8 — four service cards side by side, like Tools & utilities */
+.settings-account-suite .settings-account-menu{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;
+ margin-top:18px;
+}
+.settings-account-suite .settings-account-option{
+ min-width:0;min-height:98px;align-items:center;
+}
+.settings-account-suite .settings-account-option.selected,
+.settings-account-suite .settings-account-option[aria-pressed="true"]{
+ border-color:var(--mint,#58d6ce);
+ background:color-mix(in srgb,var(--panel2,#17273c) 88%,var(--mint,#58d6ce));
+}
+.settings-account-suite .settings-account-option.selected .settings-tool-arrow{
+ transform:rotate(90deg);
+}
+.settings-account-suite #accountServiceContent{
+ margin-top:17px;border-top:1px solid var(--line,#344a64);
+ min-width:0;
+}
+.settings-account-suite #accountServiceContent>.panel{
+ padding-top:17px!important;
+}
+@media(max-width:1150px){
+ .settings-account-suite .settings-account-menu{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:620px){
+ .settings-account-suite .settings-account-menu{grid-template-columns:1fr}
+ .settings-account-suite .settings-account-option{min-height:72px}
+}
