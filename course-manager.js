@@ -5,7 +5,7 @@ const N=window.NOVA,Auth=window.NOVA_AUTH;
 const e=value=>N.escape(String(value??""));
 const tr=(en,bn)=>window.NOVA_I18N?.language==="bn"?bn:en;
 const empty=()=>({courses:[],enrollments:[],chapters:[],topics:[],assets:[],assignments:[],submissions:[]});
-let data=empty(),selected="",tab="courses",busy=false,loading=false,loadedUser="",message="",refresh=()=>{},toast=()=>{};
+let data=empty(),selected="",tab="courses",busy=false,loading=false,loadedUser="",message="",refresh=()=>{},toast=()=>{},editingAsset="",deletingAsset="";
 const TABLES={courses:"ns_courses",enrollments:"ns_enrollments",chapters:"ns_chapters",topics:"ns_topics",assets:"ns_assets",assignments:"ns_assignments",submissions:"ns_submissions"};
 const bucket="novastudy-learning";
 const user=()=>Auth.getStatus()==="connected"?Auth.getUser():null;
@@ -60,18 +60,43 @@ function renderCourses(){
  const membersBox=isOwner?'<details class="cm-members"><summary>'+tr("Enrolled Students","ভর্তিকৃত শিক্ষার্থী")+' ('+members.length+')</summary>'+ (members.length?members.map(m=>'<div class="cm-member"><span>'+e(m.display_name||"Student")+'</span>'+button(tr("Remove","সরাও"),"remove-student",'data-id="'+c.id+'" data-student="'+m.student_id+'"')+'</div>').join(""):'<p class="cm-muted">'+tr("No students have joined yet.","এখনো শিক্ষার্থী যোগ দেয়নি।")+'</p>')+'</details>':"";
  return coursePicker()+'<section class="panel cm-panel"><div class="cm-flex"><div><span class="eyebrow">'+(isOwner?"TEACHER / OWNER":"STUDENT / ENROLLED")+'</span><h2>'+e(c.title)+'</h2><p class="cm-muted">'+e(c.description)+'</p></div>'+button(tr("Refresh","রিফ্রেশ"),"reload")+'</div>'+invite+membersBox+'<h3>'+tr("Chapters & Topics","অধ্যায় ও টপিক")+'</h3>'+add+(chapters.length?chapters.map((ch,i)=>renderChapter(c,ch,i+1,isOwner)).join(""):'<p class="cm-muted">'+tr("No chapters yet. Add the first chapter.","কোনো অধ্যায় নেই। প্রথম অধ্যায় যোগ করো।")+'</p>')+'</section>';
 }
-function fileList(courseId,chapterId,topicId){
+function fileList(courseId,chapterId,topicId,isOwner=false){
  const attachments=by("assets",courseId).filter(a=>topicId?a.topic_id===topicId:!!chapterId&&a.chapter_id===chapterId&&!a.topic_id);
- return '<div class="cm-files">'+attachments.map(a=>'<div class="cm-file"><span>'+(a.mime_type==="application/pdf"?"▤":"▧")+' '+e(a.file_name)+'</span>'+button(tr("Open","খুলো"),"open-file",'data-path="'+e(a.file_path)+'"')+'</div>').join("")+'</div>';
+ return '<div class="cm-files">'+attachments.map(a=>{
+  const id=e(a.id),editing=isOwner&&editingAsset===a.id,deleting=isOwner&&deletingAsset===a.id;
+  const actions='<div class="cm-file-actions">'+
+   button(tr("Open","খুলো"),"open-file",'data-path="'+e(a.file_path)+'"')+
+   (isOwner?button(tr("Edit","এডিট"),"edit-file",'data-id="'+id+'" aria-expanded="'+editing+'"')+
+   button(tr("Delete","ডিলিট"),"request-delete-file",'data-id="'+id+'"', "danger-btn"):"")+'</div>';
+  const editor=editing?'<form class="cm-asset-editor cm-form" data-cm-form="asset-edit" data-asset="'+id+'">'+
+   '<label>'+tr("Display file name","ফাইলের নাম")+
+   '<input name="file_name" maxlength="250" required value="'+e(a.file_name)+'"></label>'+
+   '<label>'+tr("Replace file (optional · PDF or image, max 10 MB)","ফাইল পরিবর্তন (ঐচ্ছিক · PDF বা ছবি, সর্বোচ্চ ১০ MB)")+
+   '<input type="file" name="replacement" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"></label>'+
+   '<div class="cm-file-actions"><button type="submit" class="primary-btn">'+tr("Save Changes","পরিবর্তন সেভ")+'</button>'+
+   button(tr("Cancel","বাতিল"),"cancel-file")+'</div></form>':"";
+  const confirmDelete=deleting?'<div class="cm-delete-confirm" role="group" aria-label="'+tr("Confirm file deletion","ফাইল মুছতে নিশ্চিত করো")+'">'+
+   '<p>'+tr("Delete this file permanently? Students will no longer be able to open it.","ফাইলটি স্থায়ীভাবে মুছবে? শিক্ষার্থীরা আর এটি খুলতে পারবে না।")+'</p>'+
+   '<div class="cm-file-actions">'+button(tr("Yes, Delete","হ্যাঁ, মুছো"),"confirm-delete-file",'data-id="'+id+'"',"danger-btn")+
+   button(tr("Cancel","বাতিল"),"cancel-file")+'</div></div>':"";
+  return '<div class="cm-file-item"><div class="cm-file"><span class="cm-file-title">'+
+   '<span aria-hidden="true">'+(a.mime_type==="application/pdf"?"▤":"▧")+'</span> '+e(a.file_name)+
+   '</span>'+actions+'</div>'+editor+confirmDelete+'</div>';
+ }).join("")+'</div>';
 }
 function fileUpload(courseId,chapterId,topicId=""){
  return '<label class="cm-upload">'+tr("⇧ Upload PDF / Image (max 10 MB)","⇧ PDF / ছবি আপলোড (সর্বোচ্চ ১০ MB)")+'<input type="file" data-cm-upload data-course="'+courseId+'" data-chapter="'+chapterId+'" data-topic="'+topicId+'" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"></label>';
 }
 function renderChapter(c,ch,index,isOwner){
  const topics=by("topics",c.id).filter(t=>t.chapter_id===ch.id).sort((a,b)=>a.position-b.position||a.created_at.localeCompare(b.created_at));
- const chfiles=fileList(c.id,ch.id,null);
- const tools=isOwner?fileUpload(c.id,ch.id)+'<form class="cm-inline" data-cm-form="topic" data-course="'+c.id+'" data-chapter="'+ch.id+'"><input name="title" maxlength="150" required placeholder="'+tr("New topic","নতুন টপিক")+'"><button class="secondary-btn" type="submit">+ '+tr("Add Topic","টপিক যোগ")+'</button></form>':"";
- return '<details class="cm-chapter" '+(index===1?'open':'')+'><summary><strong>'+tr("Chapter","অধ্যায়")+' '+index+' — '+e(ch.title)+'</strong><span>'+topics.length+' '+tr("Topics","টপিক")+'</span></summary><div class="cm-chapter-inner"><b>'+tr("Chapter Notes & Files","অধ্যায়ের নোটস ও ফাইল")+'</b>'+chfiles+(isOwner?fileUpload(c.id,ch.id):"")+tools+'<div class="cm-topic-list">'+(topics.length?topics.map((t,i)=>'<article class="cm-topic"><b>'+tr("Topic","টপিক")+' '+(i+1)+': '+e(t.title)+'</b>'+(isOwner?'<form class="cm-form" data-cm-form="topic-body" data-topic="'+t.id+'"><textarea name="body" maxlength="20000" rows="3" placeholder="'+tr("Type your notes here…","এখানে নোটস লিখো…")+'">'+e(t.body)+'</textarea><button class="secondary-btn" type="submit">'+tr("Save Notes","নোটস সেভ")+'</button></form>':'<p class="cm-body">'+e(t.body||tr("No notes yet.","এখনো নোট নেই।"))+'</p>')+fileList(c.id,ch.id,t.id)+(isOwner?fileUpload(c.id,ch.id,t.id):"")+'</article>').join(""):'<p class="cm-muted">'+tr("Add a topic to begin.","শুরু করতে টপিক যোগ করো।")+'</p>')+'</div></div></details>';
+ const chfiles=fileList(c.id,ch.id,null,isOwner);
+ const tools=isOwner?'<form class="cm-inline" data-cm-form="topic" data-course="'+c.id+'" data-chapter="'+ch.id+'"><input name="title" maxlength="150" required placeholder="'+tr("New topic","নতুন টপিক")+'"><button class="secondary-btn" type="submit">+ '+tr("Add Topic","টপিক যোগ")+'</button></form>':"";
+ return '<details class="cm-chapter" '+(index===1?'open':'')+'><summary><strong>'+tr("Chapter","অধ্যায়")+' '+index+' — '+e(ch.title)+'</strong><span>'+topics.length+' '+tr("Topics","টপিক")+'</span></summary><div class="cm-chapter-inner"><b>'+tr("Chapter Notes & Files","অধ্যায়ের নোটস ও ফাইল")+'</b>'+
+ chfiles+(isOwner?fileUpload(c.id,ch.id):"")+tools+
+ '<div class="cm-topic-list">'+(topics.length?topics.map((t,i)=>'<article class="cm-topic"><b>'+tr("Topic","টপিক")+' '+(i+1)+': '+e(t.title)+'</b>'+
+ (isOwner?'<form class="cm-form" data-cm-form="topic-body" data-topic="'+t.id+'"><textarea name="body" maxlength="20000" rows="3" placeholder="'+tr("Type your notes here…","এখানে নোটস লিখো…")+'">'+e(t.body)+'</textarea><button class="secondary-btn" type="submit">'+tr("Save Notes","নোটস সেভ")+'</button></form>':
+ '<p class="cm-body">'+e(t.body||tr("No notes yet.","এখনো নোট নেই।"))+'</p>')+
+ fileList(c.id,ch.id,t.id,isOwner)+(isOwner?fileUpload(c.id,ch.id,t.id):"")+'</article>').join(""):'<p class="cm-muted">'+tr("Add a topic to begin.","শুরু করতে টপিক যোগ করো।")+'</p>')+'</div></div></details>';
 }
 function renderHomework(){
  if(!data.courses.length)return noCourses();
@@ -123,6 +148,33 @@ async function submit(form){
    const {error}=await sb.from(table).insert(payload);if(error)throw error;
   } else if(type==="topic-body"){
    const {error}=await sb.from(TABLES.topics).update({body:String(fd.get("body")||"").slice(0,20000)}).eq("id",form.dataset.topic);if(error)throw error;
+  } else if(type==="asset-edit"){
+   const asset=data.assets.find(a=>a.id===form.dataset.asset);
+   if(!asset||!owner(data.courses.find(c=>c.id===asset.course_id)))throw Error(tr("You cannot edit this file.","এই ফাইল পরিবর্তনের অনুমতি নেই।"));
+   const file=fd.get("replacement"),hasReplacement=file instanceof File&&file.size>0;
+   const name=String(fd.get("file_name")||"").trim();
+   if(!name||name.length>250)throw Error(tr("Enter a file name (max 250 characters).","সঠিক ফাইলের নাম লেখো (সর্বোচ্চ ২৫০ অক্ষর)।"));
+   const changes={file_name:name};
+   let uploadedPath="";
+   try{
+    if(hasReplacement){
+     uploadedPath=await storageUpload(file,asset.course_id,"notes");
+     Object.assign(changes,{file_path:uploadedPath,mime_type:file.type,byte_size:file.size});
+    }
+    const {data:updated,error}=await sb.from(TABLES.assets).update(changes)
+     .eq("id",asset.id).eq("course_id",asset.course_id).select("id").maybeSingle();
+    if(error)throw error;
+    if(!updated)throw Error(tr("File was changed by another session; refresh and try again.","অন্য সেশনে ফাইলটি পরিবর্তিত হয়েছে; রিফ্রেশ করে আবার চেষ্টা করো।"));
+   }catch(err){
+    if(uploadedPath)await sb.storage.from(bucket).remove([uploadedPath]).catch(()=>{});
+    throw err;
+   }
+   if(uploadedPath&&uploadedPath!==asset.file_path){
+    const {error:cleanupError}=await sb.storage.from(bucket).remove([asset.file_path]);
+    if(cleanupError)console.warn("NovaStudy: old file cleanup failed",cleanupError);
+   }
+   editingAsset="";
+   deletingAsset="";
   } else if(type==="homework"){
    const due=String(fd.get("due_at")||"");
    const {error}=await sb.from(TABLES.assignments).insert({course_id:selected,title:String(fd.get("title")||"").trim(),instructions:String(fd.get("instructions")||"").trim(),due_at:due?new Date(due).toISOString():null});if(error)throw error;
@@ -171,6 +223,34 @@ function action(act,btn){
  if(type==="login"){void Auth.signIn();return true}
  if(type==="copy"){if(navigator.clipboard?.writeText){void navigator.clipboard.writeText(id).then(()=>msg(tr("Join code copied.","Join Code কপি হয়েছে।"))).catch(()=>msg(id))}else msg(id);return true}
  if(type==="reload"){void reload();return true}
+ if(type==="edit-file"||type==="request-delete-file"){
+  const asset=data.assets.find(x=>x.id===id);
+  if(!asset||!owner(data.courses.find(c=>c.id===asset.course_id)))return true;
+  if(type==="edit-file"){editingAsset=editingAsset===id?"":id;deletingAsset="";}
+  else {deletingAsset=deletingAsset===id?"":id;editingAsset="";}
+  refresh();return true;
+ }
+ if(type==="cancel-file"){editingAsset="";deletingAsset="";refresh();return true}
+ if(type==="confirm-delete-file"){
+  const asset=data.assets.find(x=>x.id===id);
+  if(!asset||deletingAsset!==id||!owner(data.courses.find(c=>c.id===asset.course_id))||busy)return true;
+  void (async()=>{
+   busy=true;
+   try{
+    const {data:removed,error}=await client().from(TABLES.assets).delete()
+      .eq("id",asset.id).eq("course_id",asset.course_id).select("id").maybeSingle();
+    if(error)throw error;
+    if(!removed)throw Error(tr("File no longer exists or you do not have permission.","ফাইল পাওয়া যায়নি অথবা মুছে ফেলার অনুমতি নেই।"));
+    editingAsset="";deletingAsset="";
+    const {error:storageError}=await client().storage.from(bucket).remove([asset.file_path]);
+    await reload();
+    msg(storageError?tr("File removed from the course, but stored-file cleanup needs attention.","কোর্স থেকে ফাইল মুছেছে, তবে Storage cleanup যাচাই করা দরকার।"):
+      tr("File deleted.","ফাইল মুছে ফেলা হয়েছে।"),Boolean(storageError));
+   }catch(err){msg(tr("Delete failed: ","মুছতে সমস্যা: ")+String(err.message||err).slice(0,160),true)}
+   finally{busy=false}
+  })();
+  return true;
+ }
  if(type==="open-file"){void openFile(btn.dataset.path).catch(err=>msg(String(err.message||err),true));return true}
  if(type==="remove-student"&&owner(currentCourse())){
   if(window.confirm(tr("Remove this student from the course?","শিক্ষার্থীকে কোর্স থেকে সরাতে চাও?")))void (async()=>{const {error}=await client().from(TABLES.enrollments).delete().eq("course_id",id).eq("student_id",btn.dataset.student);if(error)msg(String(error.message),true);else await reload()})();
