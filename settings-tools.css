@@ -29,3 +29,44 @@
  .settings-tool-link{min-height:70px;padding:12px}
 }
 @media(prefers-reduced-motion:reduce){.settings-tool-link{transition:none}}
+
+/* v3.5.7 — one container for the four existing Google & Sync modules */
+.settings-grid>.settings-account-suite{
+ grid-column:1/-1;
+ padding:19px 22px;
+ min-width:0;
+}
+.settings-account-suite>.panel-header{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;
+ padding-bottom:16px;margin-bottom:0;
+ border-bottom:1px solid var(--line,#344a64);
+}
+.settings-account-suite .settings-account-modules{
+ display:grid;grid-template-columns:minmax(0,1fr);
+ min-width:0;
+}
+.settings-account-suite .settings-account-modules>.panel{
+ display:block;min-width:0;
+ margin:0!important;padding:19px 0!important;
+ background:transparent!important;
+ box-shadow:none!important;
+ border:0!important;border-radius:0!important;
+}
+.settings-account-suite .settings-account-modules>.panel+.panel{
+ border-top:1px solid var(--line,#344a64)!important;
+}
+.settings-account-suite .settings-account-modules>.panel:last-child{
+ padding-bottom:0!important;
+}
+.settings-account-suite .settings-account-modules>.panel-header{
+ margin-bottom:13px;
+}
+.settings-account-suite .settings-account-modules .hint-banner{margin-bottom:0}
+@media(max-width:660px){
+ .settings-grid>.settings-account-suite{padding:15px}
+ .settings-account-suite>.panel-header{align-items:start;flex-wrap:wrap;gap:8px}
+ .settings-account-suite .settings-account-modules>.panel{padding:15px 0!important}
+ .settings-account-suite .settings-account-modules .cloud-actions{
+  display:flex;flex-wrap:wrap;gap:8px;
+ }
+}
