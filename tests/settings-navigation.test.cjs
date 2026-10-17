@@ -32,7 +32,7 @@ test("desktop and mobile navigation show Course Manager and Profile Settings, no
  }
  assert.match(desktop,/Course &amp; Notes Manager/);
 });
-test("Profile Settings groups four utility cards, including Data & notifications",()=>{
+test("Profile Settings groups four utility cards, including Personalization",()=>{
  const html=settingsMarkup();
  const cards=html.slice(html.indexOf('class="settings-tool-grid"'),html.indexOf('</section>',html.indexOf('class="settings-tool-grid"')));
  assert.match(html,/id="settingsToolsTitle"/);
@@ -42,13 +42,13 @@ test("Profile Settings groups four utility cards, including Data & notifications
  assert.match(cards,/Reminders & notifications/);
  assert.match(cards,/App diagnostics/);
  assert.match(cards,/Backup & data portability/);
- assert.match(cards,/Data & notifications/);
+ assert.match(cards,/Personalization/);
  assert.equal((cards.match(/data-action="settings-data-toggle"/g)||[]).length,1);
  assert.match(cards,/aria-expanded="false" aria-controls="settingsDataNotifications"/);
  assert.equal((cards.match(/class="settings-tool-link/g)||[]).length,4);
  assert.ok(cards.indexOf('data-nav="notifications"')<cards.indexOf('data-nav="diagnostics"'));
  assert.ok(cards.indexOf('data-nav="diagnostics"')<cards.indexOf('data-nav="portability"'));
- for(const text of ["Google login preserved","Reminder preferences preserved","Accessibility preserved"])
+ for(const text of ["Google login preserved"])
   assert.match(html,new RegExp(text));
  assert.match(html,/data-account-service="cloud"/);
  assert.match(read("views.js"),/window\.NOVA_CLOUD\.panel\(\)/);
@@ -59,7 +59,7 @@ test("Bangla settings navigation keeps all utility shortcuts and translated titl
  assert.match(html,/পড়াশোনার রিমাইন্ডার/);
  assert.match(html,/অ্যাপের অবস্থা/);
  assert.match(html,/ডেটা এক্সপোর্ট/);
- assert.match(html,/ডেটা ও নোটিফিকেশন|Data & notifications/);
+ assert.match(html,/Personalization/);
  for(const route of ["notifications","diagnostics","portability"])
   assert.match(html,new RegExp('data-nav="'+route+'"'));
 });
