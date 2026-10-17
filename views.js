@@ -31,9 +31,36 @@ function settingsTools(){
  '<span class="settings-tool-copy"><strong>'+I.t(x.title)+'</strong><small>'+(I.language==="bn"?x.bn:x.description)+'</small></span>'+
  '<span class="settings-tool-arrow" aria-hidden="true">›</span></button>').join("")+'</div></section>';
 }
+const accountServices=[
+ {id:"auth",icon:"G",title:"Google Account",detail:"Google sign-in and identity",panel:()=>window.NOVA_AUTH.panel()},
+ {id:"cloud",icon:"☁",title:"Google Account Cloud Backup",detail:"Manual backup & restore",panel:()=>window.NOVA_CLOUD.panel()},
+ {id:"sync",icon:"⇄",title:"Smart Sync · v2.2",detail:"Compare & review changes",panel:()=>window.NOVA_SYNC.panel()},
+ {id:"auto",icon:"⚙",title:"Automatic Sync · v2.2",detail:"Opt-in sync settings",panel:()=>window.NOVA_AUTO.panel()}
+];
+let selectedAccountService="auth";
+function selectAccountService(id){
+ if(!accountServices.some(item=>item.id===id))return false;
+ selectedAccountService=id;return true;
+}
+function accountServicePanel(){
+ const active=accountServices.find(item=>item.id===selectedAccountService)||accountServices[0];
+ return '<section class="panel settings-account-suite" aria-labelledby="settingsAccountTitle">'+
+ '<div class="panel-header"><div><b id="settingsAccountTitle" class="panel-title">'+I.t("Account & Cloud Services")+'</b>'+
+ '<small class="panel-sub">'+I.t("Google sign-in, cloud backups and sync settings in one place.")+'</small></div>'+
+ '<span class="chip">'+I.t("4 services")+'</span></div>'+
+ '<div class="settings-account-menu" role="group" aria-label="'+I.t("Account & Cloud Services")+'">'+
+ accountServices.map(item=>'<button type="button" class="settings-tool-link settings-account-option'+
+ (active.id===item.id?' selected':'')+'" data-action="account-service-select" data-account-service="'+item.id+
+ '" aria-pressed="'+(active.id===item.id)+'" aria-controls="accountServiceContent">'+
+ '<span class="settings-tool-icon" aria-hidden="true">'+item.icon+'</span>'+
+ '<span class="settings-tool-copy"><strong>'+I.t(item.title)+'</strong><small>'+I.t(item.detail)+'</small></span>'+
+ '<span class="settings-tool-arrow" aria-hidden="true">›</span></button>').join("")+'</div>'+
+ '<div class="settings-account-modules" id="accountServiceContent" role="region" aria-label="'+I.t(active.title)+'">'+
+ active.panel()+'</div></section>';
+}
 function settings(){const p=s().profile,c=C[p.category];return heading("IDENTITY SYSTEM / 05","Profile & settings","Your class, category, group, preferences and local backups.",button("⇩ Install app","install","secondary-btn"))+
 settingsTools()+
-`<div class="settings-grid"><section class="panel settings-account-suite" aria-labelledby="settingsAccountTitle"><div class="panel-header"><div><b id="settingsAccountTitle" class="panel-title">${I.t("Account & Cloud Services")}</b><small class="panel-sub">${I.t("Google sign-in, cloud backups and sync settings in one place.")}</small></div><span class="chip">${I.t("4 services")}</span></div><div class="settings-account-modules">${window.NOVA_AUTH.panel()}${window.NOVA_CLOUD.panel()}${window.NOVA_SYNC.panel()}${window.NOVA_AUTO.panel()}</div></section><section class="panel"><div class="panel-header"><b class="panel-title">Academic profile</b><span class="chip">STUDENT ID</span></div><form id="profileForm" class="form-grid">
+`<div class="settings-grid">${accountServicePanel()}<section class="panel"><div class="panel-header"><b class="panel-title">Academic profile</b><span class="chip">STUDENT ID</span></div><form id="profileForm" class="form-grid">
 <div class="field"><label>Your name</label><input name="name" required maxlength="80" value="${E(p.name)}"></div><div class="field"><label>Institution (optional)</label><input name="institution" maxlength="100" value="${E(p.institution||"")}"></div>
 <div class="field"><label>Education category</label><select id="profileCategory" name="category">${option(Object.entries(C).map(([k,v])=>[k,v.name]),p.category)}</select></div>
 <div class="field"><label>Class / academic year</label><select id="profileLevel" name="level">${option(c.levels,p.level)}</select></div>
@@ -60,5 +87,5 @@ settingsTools()+
 ${window.NOVA_REMINDERS.panel()}
 ${window.NOVA_UI?.settingsPanel?.()||""}
 <div class="hint-banner">PWA works over HTTPS/localhost after first load. Installing does not create an Android APK or iOS IPA.</div></section></div>`}
-window.NOVA_VIEWS={button,heading,empty,option,session,task,dashboard,schedule,tasks,taskResults,subjects,settings};
+window.NOVA_VIEWS={button,heading,empty,option,session,task,dashboard,schedule,tasks,taskResults,subjects,settings,selectAccountService};
 })();
