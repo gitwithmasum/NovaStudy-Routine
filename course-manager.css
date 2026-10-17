@@ -222,7 +222,7 @@
 @media(max-width:660px){
  .cm-root .cm-course-header{gap:12px}
  .cm-root .cm-course-title{flex-basis:100%}
- .cm-root .cm-course-actions{width:100%;justify-content:flex-start;gap:9px}
+ .cm-root .cm-course-actions{width:100%;justify-content:flex-end;gap:9px}
  .cm-root .cm-course-actions button{font-size:11px;padding:9px 10px}
  .cm-root .cm-owner-panel{padding:12px}
 }
