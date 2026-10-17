@@ -35,7 +35,7 @@ test("Tools & utilities has four visible cards in requested order; Personalizati
  assert.doesNotMatch(markup,/<b class="panel-title">Personalization<\/b>/);
  assert.ok(markup.indexOf('id="settingsUtilityContent"')<markup.indexOf('class="settings-grid"'));
 });
-test("clicking fourth card opens/closes original theme, language, backup and display settings without duplication",()=>{
+test("clicking Personalization reveals theme, language and display settings without duplicate backup controls",()=>{
  const {views,html}=boot();
  assert.equal(views.toggleDataNotifications(),true);
  const open=html();
@@ -44,9 +44,11 @@ test("clicking fourth card opens/closes original theme, language, backup and dis
  for(const name of ["cyber","gold","halftone"])
   assert.match(open,new RegExp('data-theme-value="'+name+'"'));
  assert.match(open,/data-action="language-select" data-lang="bn"/);
- assert.match(open,/data-action="export"/);
- assert.match(open,/id="importFile"/);
+ assert.doesNotMatch(open,/data-action="export"/);
+ assert.doesNotMatch(open,/id="importFile"/);
  assert.doesNotMatch(open,/Reminder preferences retained|Reminder preferences/i);
+ assert.doesNotMatch(open,/Your routines are saved in THIS browser/);
+ assert.doesNotMatch(open,/Export JSON backup|Import backup/);
  assert.match(open,/Accessibility preferences retained/);
  assert.equal((open.match(/<b class="panel-title">Personalization<\/b>/g)||[]).length,1);
  assert.equal(views.toggleDataNotifications(),false);
