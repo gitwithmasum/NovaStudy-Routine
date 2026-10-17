@@ -1,5 +1,5 @@
 /* NovaStudy v3.2 — atomic offline shell install, user-confirmed upgrades. */
-const CACHE='novastudy-v3.5.5';
+const CACHE='novastudy-v3.5.6';
 const FILES=['./','./index.html','./styles.css','./themes.css','./planner.css','./exam-prep.js','./exam-prep.css','./presets.js','./i18n.js','./core.js','./views.js','./editors.js','./exams.js','./focus.js','./focus-insights.js','./focus-insights.css','./attendance.js','./challenge-data.js','./challenge.js','./challenge.css','./learning-hub.js','./learning-hub.css','./academic-reports.js','./academic-reports.css','./navigation-scroll.css','./reminders.js','./reminders.css','./ui-personalization.js','./premium-ui.css','./performance-mobile.css','./diagnostics.js','./diagnostics.css','./portability.js','./portability.css','./settings-tools.css','./auth-config.js','./auth.js','./auth.css','./cloud.js','./cloud.css','./sync.js','./sync.css','./auto-sync.js','./auto-sync.css','./dashboard.js','./dashboard.css','./study-planner.js','./study-planner.css','./course-manager.js','./course-manager.css','./app.js','./manifest.webmanifest','./assets/icon-192.png','./assets/icon-512.png','./assets/icon.svg'];
 const REQUIRED=['./index.html','./app.js','./core.js','./styles.css'];
 self.addEventListener('install',event=>{

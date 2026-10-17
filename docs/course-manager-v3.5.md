@@ -64,3 +64,9 @@ This release is additive. **It does not migrate or replace** `novastudy_state_v1
 - The first two buttons are visible only to the course owner. Join Code opens a copyable invite code. Enrolled Students opens the enrolled list and Remove action.
 - Only one information panel is expanded at a time; they are hidden by default. The former always-visible code box and native members disclosure are removed.
 - The owner-only controls never appear for signed-in enrolled students; all RLS permissions remain unchanged.
+
+## v3.5.6 — Profile Settings utility consolidation
+- Desktop sidebar and mobile navigation show **Course & Notes Manager** and **My Profile & Settings** as before, but no longer list Reminders, App Diagnostics, or Backup & Data Portability as primary routes.
+- **My Profile & Settings** has a responsive **Tools & utilities** card group with exactly those three options. Each opens its existing full-featured utility page; direct hash routes stay supported for bookmarks and recovery.
+- Profile Settings is highlighted in navigation when a utility route is open. The notification bell in the topbar remains an alert shortcut.
+- Existing reminder preferences, academic profile, UI settings, backup and restore, exams, routines, course data and Cloud backups are preserved.
