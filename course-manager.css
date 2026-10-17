@@ -230,3 +230,68 @@
  .cm-root .cm-course-actions{gap:8px}
  .cm-root .cm-course-actions button{white-space:normal}
 }
+
+
+/* Per-course owner controls — edit/delete in the existing course header (v3.5.17). */
+.cm-root .cm-course-actions .danger-btn{
+ color:#ffd8df;
+ background:color-mix(in srgb,var(--panel,#19152d) 78%,#9e2d4d);
+ border:1px solid #d7647c;
+}
+.cm-root .cm-course-actions .danger-btn:hover{
+ background:#82334d;
+ border-color:#ff879e;
+}
+.cm-root .cm-course-utility{
+ margin:16px 0;
+ padding:18px;
+ border:1px solid var(--line,#66568a);
+ border-radius:14px;
+ background:var(--panel2,#19152d);
+}
+.cm-root .cm-course-utility h3{margin:0 0 12px}
+.cm-root .cm-course-utility label{display:grid;gap:7px;font-weight:700;min-width:0}
+.cm-root .cm-course-utility input,
+.cm-root .cm-course-utility textarea{
+ max-width:100%;
+ width:100%;
+}
+.cm-root .cm-course-form-actions{
+ display:flex;
+ align-items:center;
+ flex-wrap:wrap;
+ gap:10px;
+ margin-top:10px;
+}
+.cm-root .cm-course-form-actions button{min-height:40px}
+.cm-root .cm-course-delete{
+ border-color:#c85f79;
+ background:color-mix(in srgb,var(--panel2,#19152d) 88%,#842d49);
+}
+.cm-root .cm-course-delete p{
+ line-height:1.7;
+ color:var(--text,#f1f4ff);
+ max-width:75ch;
+}
+.cm-root .cm-course-delete label strong{
+ overflow-wrap:anywhere;
+}
+.cm-root .cm-course-delete .danger-btn{
+ background:#92344b;
+ color:#fff;
+ border-color:#e37d96;
+}
+.cm-root .cm-course-utility :is(input,textarea,button):focus-visible{
+ outline:2px solid var(--mint,#5fd6e2);
+ outline-offset:2px;
+}
+@media(max-width:660px){
+ .cm-root .cm-course-actions button{
+  min-height:40px;
+  flex:0 1 auto;
+ }
+ .cm-root .cm-course-utility{padding:13px}
+ .cm-root .cm-course-form-actions button{
+  flex:1 1 125px;
+ }
+}
