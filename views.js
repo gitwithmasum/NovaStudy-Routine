@@ -67,11 +67,19 @@ function settingsTools(){
  '<div class="settings-data-content" id="settingsDataNotifications"'+(dataNotificationsOpen?'':' hidden')+'>'+
  dataNotificationsPanel()+'</div></section>';
 }
+function academicProfilePanel(){const p=s().profile,c=C[p.category];return `<section class="panel"><div class="panel-header"><b class="panel-title">Academic profile</b><span class="chip">STUDENT ID</span></div><form id="profileForm" class="form-grid">
+<div class="field"><label>Your name</label><input name="name" required maxlength="80" value="${E(p.name)}"></div><div class="field"><label>Institution (optional)</label><input name="institution" maxlength="100" value="${E(p.institution||"")}"></div>
+<div class="field"><label>Education category</label><select id="profileCategory" name="category">${option(Object.entries(C).map(([k,v])=>[k,v.name]),p.category)}</select></div>
+<div class="field"><label>Class / academic year</label><select id="profileLevel" name="level">${option(c.levels,p.level)}</select></div>
+<div class="field wide"><label>Group / department</label><select id="profileTrack" name="track">${option(Object.keys(c.tracks),p.track)}</select></div>
+<div class="field wide"><label>Week begins</label><select name="weekStart">${option([[6,"Saturday"],[0,"Sunday"],[1,"Monday"]],p.weekStart)}</select></div><div class="wide"><button class="primary-btn" type="submit">Save profile →</button></div></form>
+<div class="hint-banner">Changing class or subject group never deletes existing routines, subjects or missions.</div></section>`;}
 const accountServices=[
  {id:"auth",icon:"G",title:"Google Account",detail:"Google sign-in and identity",panel:()=>window.NOVA_AUTH.panel()},
  {id:"cloud",icon:"☁",title:"Google Account Cloud Backup",detail:"Manual backup & restore",panel:()=>window.NOVA_CLOUD.panel()},
  {id:"sync",icon:"⇄",title:"Smart Sync · v2.2",detail:"Compare & review changes",panel:()=>window.NOVA_SYNC.panel()},
- {id:"auto",icon:"⚙",title:"Automatic Sync · v2.2",detail:"Opt-in sync settings",panel:()=>window.NOVA_AUTO.panel()}
+ {id:"auto",icon:"⚙",title:"Automatic Sync · v2.2",detail:"Opt-in sync settings",panel:()=>window.NOVA_AUTO.panel()},
+ {id:"profile",icon:"▣",title:"Academic profile",detail:"Student details, class and department",panel:()=>academicProfilePanel()}
 ];
 let selectedAccountService="auth";
 function selectAccountService(id){
@@ -83,7 +91,7 @@ function accountServicePanel(){
  return '<section class="panel settings-account-suite" aria-labelledby="settingsAccountTitle">'+
  '<div class="panel-header"><div><b id="settingsAccountTitle" class="panel-title">'+I.t("Account & Cloud Services")+'</b>'+
  '<small class="panel-sub">'+I.t("Google sign-in, cloud backups and sync settings in one place.")+'</small></div>'+
- '<span class="chip">'+I.t("4 services")+'</span></div>'+
+ '<span class="chip">'+I.t("5 services")+'</span></div>'+
  '<div class="settings-account-menu" role="group" aria-label="'+I.t("Account & Cloud Services")+'">'+
  accountServices.map(item=>'<button type="button" class="settings-tool-link settings-account-option'+
  (active.id===item.id?' selected':'')+'" data-action="account-service-select" data-account-service="'+item.id+
@@ -94,15 +102,8 @@ function accountServicePanel(){
  '<div class="settings-account-modules" id="accountServiceContent" role="region" aria-label="'+I.t(active.title)+'">'+
  active.panel()+'</div></section>';
 }
-function settings(){const p=s().profile,c=C[p.category];return heading("IDENTITY SYSTEM / 05","Profile & settings","Your class, category, group, preferences and local backups.",button("⇩ Install app","install","secondary-btn"))+
+function settings(){return heading("IDENTITY SYSTEM / 05","Profile & settings","Your class, category, group, preferences and local backups.",button("⇩ Install app","install","secondary-btn"))+
 settingsTools()+
-`<div class="settings-grid">${accountServicePanel()}<section class="panel"><div class="panel-header"><b class="panel-title">Academic profile</b><span class="chip">STUDENT ID</span></div><form id="profileForm" class="form-grid">
-<div class="field"><label>Your name</label><input name="name" required maxlength="80" value="${E(p.name)}"></div><div class="field"><label>Institution (optional)</label><input name="institution" maxlength="100" value="${E(p.institution||"")}"></div>
-<div class="field"><label>Education category</label><select id="profileCategory" name="category">${option(Object.entries(C).map(([k,v])=>[k,v.name]),p.category)}</select></div>
-<div class="field"><label>Class / academic year</label><select id="profileLevel" name="level">${option(c.levels,p.level)}</select></div>
-<div class="field wide"><label>Group / department</label><select id="profileTrack" name="track">${option(Object.keys(c.tracks),p.track)}</select></div>
-<div class="field wide"><label>Week begins</label><select name="weekStart">${option([[6,"Saturday"],[0,"Sunday"],[1,"Monday"]],p.weekStart)}</select></div><div class="wide"><button class="primary-btn" type="submit">Save profile →</button></div></form>
-<div class="hint-banner">Changing class or subject group never deletes existing routines, subjects or missions.</div></section>
-</div>`}
+`<div class="settings-grid">${accountServicePanel()}</div>`}
 window.NOVA_VIEWS={button,heading,empty,option,session,task,dashboard,schedule,tasks,taskResults,subjects,settings,selectAccountService,toggleDataNotifications};
 })();
