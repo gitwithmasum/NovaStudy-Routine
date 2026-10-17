@@ -46,7 +46,7 @@ check(routes.size>=10,"Too few desktop routes");
 check(!routes.has("notifications")&&!routes.has("diagnostics")&&!routes.has("portability"),"Utility routes must be removed from sidebar");
 check(!mobile.includes('data-nav="notifications"')&&!mobile.includes('data-nav="diagnostics"')&&!mobile.includes('data-nav="portability"'),"Utility routes must be removed from mobile nav");
 const settingsView=read("views.js");
-for(const route of ["notifications","diagnostics","portability"])check(settingsView.includes('data-nav="'+route+'"'),"Utility must remain accessible from Profile Settings: "+route);
+for(const route of ["notifications","diagnostics","portability"])check(settingsView.includes('route:"'+route+'"'),"Utility must remain accessible from Profile Settings: "+route);
 check(routes.has("subjects")&&routes.has("settings"),"Courses and Profile Settings navigation must be preserved");
 check(html.includes('src="./portability.js"')&&html.includes('href="./portability.css"'),"Backup Center assets missing");
 check(html.includes('src="./course-manager.js"')&&html.includes('href="./course-manager.css"'),"Course Manager assets missing");
