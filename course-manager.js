@@ -98,9 +98,6 @@ function chapterControls(c,ch,topics,isOwner){
  if(!isOwner)return "";
  const chapterId=e(ch.id),isEditing=editingChapter===ch.id,isDeleting=deletingChapter===ch.id;
  const files=by("assets",c.id).filter(a=>a.chapter_id===ch.id).length;
- const toolbar='<div class="cm-section-actions" role="group" aria-label="'+tr("Chapter actions","অধ্যায়ের অপশন")+'">'+
- button(tr("Edit Chapter","অধ্যায় এডিট"),"edit-chapter",'data-id="'+chapterId+'" aria-expanded="'+isEditing+'"')+
- button(tr("Delete Chapter","অধ্যায় ডিলিট"),"request-delete-chapter",'data-id="'+chapterId+'"',"danger-btn")+'</div>';
  const edit=isEditing?'<form class="cm-form cm-inline-editor" data-cm-form="chapter-edit" data-chapter="'+chapterId+'" data-course="'+e(c.id)+'">'+
  '<label>'+tr("Chapter title","অধ্যায়ের নাম")+'<input name="title" maxlength="150" required value="'+e(ch.title)+'"></label>'+
  '<div class="cm-section-actions"><button class="primary-btn" type="submit">'+tr("Save Chapter","অধ্যায় সেভ")+'</button>'+button(tr("Cancel","বাতিল"),"cancel-entity")+'</div></form>':"";
@@ -109,15 +106,23 @@ function chapterControls(c,ch,topics,isOwner){
  topics.length+" "+tr("topics and ","টি টপিক এবং ")+files+" "+tr("attached files, including topic notes. Other chapters and homework remain.","টি সংযুক্ত ফাইলসহ টপিকের লিখিত নোটস। অন্য অধ্যায় ও হোমওয়ার্ক অক্ষত থাকবে।")+'</p>'+
  '<div class="cm-section-actions">'+button(tr("Yes, Delete Chapter","হ্যাঁ, অধ্যায় মুছো"),"confirm-delete-chapter",'data-id="'+chapterId+'"',"danger-btn")+
  button(tr("Cancel","বাতিল"),"cancel-entity")+'</div></div>':"";
- return toolbar+edit+del;
+ return edit+del;
+}
+function chapterHeaderActions(ch,isOwner){
+ if(!isOwner)return "";
+ const id=e(ch.id),title=e(ch.title);
+ return '<div class="cm-chapter-header-actions cm-compact-actions" role="group" aria-label="'+tr("Chapter actions","অধ্যায়ের অপশন")+'">'+
+ button(tr("Edit","এডিট"),"edit-chapter",'data-id="'+id+'" aria-label="'+tr("Edit chapter: ","অধ্যায় এডিট: ")+title+'" aria-expanded="'+(editingChapter===ch.id)+'"')+
+ button(tr("Delete","ডিলিট"),"request-delete-chapter",'data-id="'+id+'" aria-label="'+tr("Delete chapter: ","অধ্যায় ডিলিট: ")+title+'"',"danger-btn")+
+ '</div>';
 }
 function renderTopic(c,ch,t,index,isOwner){
  const topicId=e(t.id),topicTitle=e(t.title),isEditing=isOwner&&editingTopic===t.id,isDeleting=isOwner&&deletingTopic===t.id;
  const noteEditing=isOwner&&editingNote===t.id,noteDeleting=isOwner&&deletingNote===t.id;
  const fileCount=by("assets",c.id).filter(a=>a.topic_id===t.id).length;
- const buttons=isOwner?'<div class="cm-section-actions" role="group" aria-label="'+tr("Topic actions","টপিকের অপশন")+'">'+
- button(tr("Edit Topic","টপিক এডিট"),"edit-topic",'data-id="'+topicId+'"')+
- button(tr("Delete Topic","টপিক ডিলিট"),"request-delete-topic",'data-id="'+topicId+'"',"danger-btn")+'</div>':"";
+ const buttons=isOwner?'<div class="cm-section-actions cm-compact-actions" role="group" aria-label="'+tr("Topic actions","টপিকের অপশন")+'">'+
+ button(tr("Edit","এডিট"),"edit-topic",'data-id="'+topicId+'" aria-label="'+tr("Edit topic: ","টপিক এডিট: ")+topicTitle+'"')+
+ button(tr("Delete","ডিলিট"),"request-delete-topic",'data-id="'+topicId+'" aria-label="'+tr("Delete topic: ","টপিক ডিলিট: ")+topicTitle+'"',"danger-btn")+'</div>':"";
  const edit=isEditing?'<form class="cm-form cm-inline-editor" data-cm-form="topic-edit" data-topic="'+topicId+'" data-chapter="'+e(ch.id)+'" data-course="'+e(c.id)+'">'+
  '<label>'+tr("Topic title","টপিকের নাম")+'<input name="title" maxlength="150" required value="'+topicTitle+'"></label>'+
  '<div class="cm-section-actions"><button class="primary-btn" type="submit">'+tr("Save Topic","টপিক সেভ")+'</button>'+button(tr("Cancel","বাতিল"),"cancel-entity")+'</div></form>':"";
@@ -127,9 +132,9 @@ function renderTopic(c,ch,t,index,isOwner){
  '<div class="cm-section-actions">'+button(tr("Yes, Delete Topic","হ্যাঁ, টপিক মুছো"),"confirm-delete-topic",'data-id="'+topicId+'"',"danger-btn")+
  button(tr("Cancel","বাতিল"),"cancel-entity")+'</div></div>':"";
  const noteText='<p class="cm-body cm-note-text">'+e(t.body||tr("No written notes yet.","এখনো লিখিত নোটস নেই।"))+'</p>';
- const noteButtons=isOwner?'<div class="cm-section-actions" role="group" aria-label="'+tr("Written note actions","লিখিত নোটসের অপশন")+'">'+
- button(t.body?tr("Edit Notes","নোটস এডিট"):tr("Add Notes","নোটস যোগ"),"edit-note",'data-id="'+topicId+'"')+
- (t.body?button(tr("Delete Notes","নোটস ডিলিট"),"request-delete-note",'data-id="'+topicId+'"',"danger-btn"):"")+
+ const noteButtons=isOwner?'<div class="cm-section-actions cm-compact-actions" role="group" aria-label="'+tr("Written note actions","লিখিত নোটসের অপশন")+'">'+
+ button(t.body?tr("Edit","এডিট"):tr("Add","যোগ"),"edit-note",'data-id="'+topicId+'" aria-label="'+tr("Edit notes for topic: ","টপিকের নোটস এডিট: ")+topicTitle+'"')+
+ (t.body?button(tr("Delete","ডিলিট"),"request-delete-note",'data-id="'+topicId+'" aria-label="'+tr("Delete notes for topic: ","টপিকের নোটস ডিলিট: ")+topicTitle+'"',"danger-btn"):"")+
  '</div>':"";
  const noteEditor=noteEditing?'<form class="cm-form cm-note-editor" data-cm-form="topic-body" data-topic="'+topicId+'" data-course="'+e(c.id)+'">'+
  '<label>'+tr("Written notes","লিখিত নোটস")+'<textarea name="body" maxlength="20000" rows="5" placeholder="'+tr("Write notes here…","এখানে নোটস লেখো…")+'">'+e(t.body)+'</textarea></label>'+
@@ -140,21 +145,21 @@ function renderTopic(c,ch,t,index,isOwner){
  button(tr("Cancel","বাতিল"),"cancel-entity")+'</div></div>':"";
  return '<article class="cm-topic" data-topic-id="'+topicId+'"><div class="cm-section-heading"><b>'+
  tr("Topic","টপিক")+" "+index+": "+topicTitle+'</b>'+buttons+'</div>'+edit+del+
- '<div class="cm-note-block"><strong>'+tr("Written Notes","লিখিত নোটস")+'</strong>'+
- (noteEditing?noteEditor:noteText+noteButtons+noteDel)+'</div>'+
+ '<div class="cm-note-block"><div class="cm-section-heading cm-note-heading"><strong>'+tr("Written Notes","লিখিত নোটস")+'</strong>'+noteButtons+'</div>'+
+ (noteEditing?noteEditor:noteText+noteDel)+'</div>'+
  fileList(c.id,ch.id,t.id,isOwner)+(isOwner?fileUpload(c.id,ch.id,t.id):"")+'</article>';
 }
 function renderChapter(c,ch,index,isOwner){
  const topics=by("topics",c.id).filter(t=>t.chapter_id===ch.id).sort((a,b)=>a.position-b.position||a.created_at.localeCompare(b.created_at));
  const chfiles=fileList(c.id,ch.id,null,isOwner);
  const tools=isOwner?'<form class="cm-inline" data-cm-form="topic" data-course="'+e(c.id)+'" data-chapter="'+e(ch.id)+'"><input name="title" maxlength="150" required placeholder="'+tr("New topic","নতুন টপিক")+'"><button class="secondary-btn" type="submit">+ '+tr("Add Topic","টপিক যোগ")+'</button></form>':"";
- return '<details class="cm-chapter" data-chapter-id="'+e(ch.id)+'" '+((openedChapters?openedChapters.has(ch.id):index===1)?'open':'')+
+ return '<div class="cm-chapter-shell"><details class="cm-chapter" data-chapter-id="'+e(ch.id)+'" '+((openedChapters?openedChapters.has(ch.id):index===1)?'open':'')+
  '><summary><strong>'+tr("Chapter","অধ্যায়")+' '+index+' — '+e(ch.title)+'</strong><span>'+topics.length+' '+tr("Topics","টপিক")+'</span></summary>'+
  '<div class="cm-chapter-inner">'+chapterControls(c,ch,topics,isOwner)+
  '<h3>'+tr("Chapter Notes & Files","অধ্যায়ের নোটস ও ফাইল")+'</h3>'+
  chfiles+(isOwner?fileUpload(c.id,ch.id):"")+tools+
  '<div class="cm-topic-list">'+(topics.length?topics.map((t,i)=>renderTopic(c,ch,t,i+1,isOwner)).join(""):'<p class="cm-muted">'+tr("Add a topic to begin.","শুরু করতে টপিক যোগ করো।")+'</p>')+
- '</div></div></details>';
+ '</div></div></details>'+chapterHeaderActions(ch,isOwner)+'</div>';
 }
 function renderHomework(){
  if(!data.courses.length)return noCourses();
@@ -357,6 +362,10 @@ function action(act,btn){
   const item=data[key].find(x=>x.id===id);
   if(!item||!owner(data.courses.find(c=>c.id===item.course_id))||busy)return true;
   rememberOpenChapters();
+  if(type==="edit-chapter"||type==="request-delete-chapter"){
+   if(!openedChapters)openedChapters=new Set();
+   openedChapters.add(id);
+  }
   const prop={"edit-chapter":"editingChapter","request-delete-chapter":"deletingChapter",
    "edit-topic":"editingTopic","request-delete-topic":"deletingTopic",
    "edit-note":"editingNote","request-delete-note":"deletingNote"}[type];
