@@ -17,11 +17,14 @@ function tasks(filter,search){
 return heading("MISSION TRACKER / 03","Tasks & goals","Assignments, exam prep and personal to-dos.",button("+ New task","add-task"))+`<div class="toolbar"><div class="filter-row">${["all","pending","done"].map(x=>`<button class="filter-chip ${filter===x?"active":""}" data-action="filter" data-filter="${x}">${x.toUpperCase()}</button>`).join("")}</div><input type="search" placeholder="Search tasks…" id="taskSearch" aria-label="Search tasks" value="${E(search)}"></div><section class="panel" id="taskResults" aria-live="polite" aria-relevant="additions text">${taskResults(filter,search)}</section>`}
 function subjects(){const suggestions=N.subjectPreset().filter(x=>!s().subjects.some(z=>z.name.toLowerCase()===x.toLowerCase()));return heading("KNOWLEDGE LIBRARY / 04","Subject library","Choose subjects for your own academic level and curriculum.",button("+ Add subject","add-subject")+button("Import suggestions ("+suggestions.length+")","suggestions","secondary-btn"))+
 `<div class="flex-between"><b class="section-caption">MY SUBJECTS / ${s().subjects.length}</b><span class="chip">${E(I.t(C[s().profile.category].name))} • ${E(I.t(s().profile.track))}</span></div><div class="subject-grid">${s().subjects.length?s().subjects.map(x=>`<div class="subject-card" style="--subject-color:${E(N.colors.includes(x.color)?x.color:N.colors[0])}"><div class="subject-card-head"><div class="subject-initial">${E(x.name.slice(0,1))}</div>${button("Edit","edit-subject","tiny-btn",x.id)}</div><b>${E(x.name)}</b><small>${s().sessions.filter(t=>t.subjectId===x.id).length} weekly sessions</small></div>`).join(""):empty("Add your first course or import suggestions.")}</div><div class="hint-banner">Suggestions are customizable examples, not the official syllabus of any education board or university.</div>`}
-let dataNotificationsOpen=false;
-function toggleDataNotifications(){
- dataNotificationsOpen=!dataNotificationsOpen;
- return dataNotificationsOpen;
+const SETTINGS_UTILITY_IDS=["notifications","diagnostics","portability","data"];
+let selectedSettingsUtility="";
+function toggleSettingsUtility(id){
+ if(!SETTINGS_UTILITY_IDS.includes(id))return false;
+ selectedSettingsUtility=selectedSettingsUtility===id?"":id;
+ return selectedSettingsUtility===id;
 }
+function toggleDataNotifications(){return toggleSettingsUtility("data")}
 function dataNotificationsPanel(){
  return `<section class="panel settings-data-panel" aria-label="Personalization"><div class="panel-header"><b class="panel-title">Personalization</b><span class="chip">LOCAL FIRST</span></div><div class="appearance-panel appearance-panel-v12">
   <div class="appearance-copy">
@@ -47,6 +50,13 @@ function dataNotificationsPanel(){
 ${window.NOVA_UI?.settingsPanel?.()||""}
 <div class="hint-banner">PWA works over HTTPS/localhost after first load. Installing does not create an Android APK or iOS IPA.</div></section>`;
 }
+function settingsUtilityBody(id){
+ if(id==="data")return dataNotificationsPanel();
+ if(id==="notifications")return window.NOVA_REMINDERS.page();
+ if(id==="diagnostics")return window.NOVA_DIAGNOSTICS.page();
+ if(id==="portability")return window.NOVA_PORTABILITY.page();
+ return "";
+}
 function settingsTools(){
  const items=[
   {route:"notifications",icon:"♧",title:"Reminders & notifications",description:"Manage study alerts, deadlines and notification history.",bn:"পড়াশোনার রিমাইন্ডার, ডেডলাইন এবং নোটিফিকেশন দেখো।"},
@@ -54,17 +64,22 @@ function settingsTools(){
   {route:"portability",icon:"⇩",title:"Backup & data portability",description:"Export, import and recover your study data.",bn:"পড়াশোনার ডেটা এক্সপোর্ট, ইমপোর্ট ও রিকভার করো।"},
   {route:"data",icon:"◈",title:"Personalization",description:"Themes, language, local backups and display preferences.",bn:"থিম, ভাষা, লোকাল ব্যাকআপ ও ডিসপ্লে সেটিংস।"}
  ];
+ const active=items.find(item=>item.route===selectedSettingsUtility);
  return '<section class="panel settings-tools" aria-labelledby="settingsToolsTitle">'+
  '<div class="panel-header"><div><b id="settingsToolsTitle" class="panel-title">'+I.t("Tools & utilities")+'</b>'+
  '<small class="panel-sub">'+I.t("Manage reminders, app health and data backups from your profile settings.")+'</small></div></div>'+
- '<div class="settings-tool-grid">'+items.map(x=>'<button type="button" class="settings-tool-link'+
- (x.route==="data"&&dataNotificationsOpen?' is-selected':'')+'" '+
- (x.route==="data"?'data-action="settings-data-toggle" aria-expanded="'+dataNotificationsOpen+'" aria-controls="settingsDataNotifications"':'data-nav="'+x.route+'"')+'>'+
- '<span class="settings-tool-icon" aria-hidden="true">'+x.icon+'</span>'+
- '<span class="settings-tool-copy"><strong>'+I.t(x.title)+'</strong><small>'+(I.language==="bn"?x.bn:x.description)+'</small></span>'+
- '<span class="settings-tool-arrow" aria-hidden="true">›</span></button>').join("")+'</div>'+
- '<div class="settings-data-content" id="settingsDataNotifications"'+(dataNotificationsOpen?'':' hidden')+'>'+
- (dataNotificationsOpen?dataNotificationsPanel():'')+'</div></section>';
+ '<div class="settings-tool-grid">'+items.map(item=>{
+  const isOpen=selectedSettingsUtility===item.route;
+  return '<button type="button" class="settings-tool-link'+(isOpen?' is-selected':'')+'" '+
+  'data-action="'+(item.route==="data"?'settings-data-toggle':'settings-utility-toggle')+'" '+
+  'data-settings-utility="'+item.route+'" aria-expanded="'+isOpen+'" aria-controls="settingsUtilityContent">'+
+  '<span class="settings-tool-icon" aria-hidden="true">'+item.icon+'</span>'+
+  '<span class="settings-tool-copy"><strong>'+I.t(item.title)+'</strong><small>'+(I.language==="bn"?item.bn:item.description)+'</small></span>'+
+  '<span class="settings-tool-arrow" aria-hidden="true">›</span></button>';
+ }).join("")+'</div>'+
+ '<div class="settings-data-content settings-utility-content" id="settingsUtilityContent" role="region" '+
+ 'aria-label="'+(active?I.t(active.title):I.t("Tools & utilities"))+'"'+(active?'':' hidden')+'>'+
+ (active?settingsUtilityBody(active.route):'')+'</div></section>';
 }
 function academicProfilePanel(){const p=s().profile,c=C[p.category];return `<section class="panel"><div class="panel-header"><b class="panel-title">Academic profile</b><span class="chip">STUDENT ID</span></div><form id="profileForm" class="form-grid">
 <div class="field"><label>Your name</label><input name="name" required maxlength="80" value="${E(p.name)}"></div><div class="field"><label>Institution (optional)</label><input name="institution" maxlength="100" value="${E(p.institution||"")}"></div>
@@ -104,5 +119,5 @@ function accountServicePanel(){
 function settings(){return heading("IDENTITY SYSTEM / 05","Profile & settings","Your class, category, group, preferences and local backups.",button("⇩ Install app","install","secondary-btn"))+
 settingsTools()+
 `<div class="settings-grid">${accountServicePanel()}</div>`}
-window.NOVA_VIEWS={button,heading,empty,option,session,task,dashboard,schedule,tasks,taskResults,subjects,settings,selectAccountService,toggleDataNotifications};
+window.NOVA_VIEWS={button,heading,empty,option,session,task,dashboard,schedule,tasks,taskResults,subjects,settings,settingsTools,selectAccountService,toggleSettingsUtility,toggleDataNotifications};
 })();
