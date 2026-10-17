@@ -98,3 +98,52 @@
  .cm-note-block{padding:12px}
  .cm-inline-editor{padding:12px}
 }
+
+/* v3.5.3 — compact contextual actions on the same heading row */
+.cm-chapter-shell{position:relative;min-width:0;margin:12px 0}
+.cm-chapter-shell>.cm-chapter{margin:0}
+.cm-chapter-shell>.cm-chapter>summary{
+  min-height:53px;justify-content:flex-start;gap:12px;padding-right:174px
+}
+.cm-chapter-shell>.cm-chapter>summary>strong{
+  min-width:0;overflow-wrap:anywhere;flex:0 1 auto
+}
+.cm-chapter-shell>.cm-chapter>summary>span{
+  flex:0 0 auto;white-space:nowrap;font-size:11px
+}
+.cm-chapter-header-actions{
+  position:absolute;z-index:2;top:8px;right:12px;
+  display:flex;align-items:center;gap:12px
+}
+.cm-section-actions.cm-compact-actions{
+  display:flex;align-items:center;justify-content:flex-end;
+  width:auto;gap:12px;margin:0;flex-wrap:nowrap
+}
+.cm-compact-actions button,
+.cm-section-actions.cm-compact-actions button{
+  flex:0 0 auto;white-space:nowrap;min-height:35px;
+  padding:7px 12px;font-size:12px;border-radius:9px
+}
+.cm-topic>.cm-section-heading,
+.cm-note-block>.cm-note-heading{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;
+  gap:12px;align-items:center;justify-content:stretch
+}
+.cm-topic>.cm-section-heading .cm-compact-actions{width:auto}
+.cm-note-block>.cm-note-heading{margin-bottom:13px}
+.cm-note-block>.cm-note-heading>strong{margin:0}
+@media(max-width:600px){
+ .cm-chapter-shell>.cm-chapter>summary{
+  padding:10px 145px 10px 12px;min-height:56px;
+  align-items:flex-start;flex-direction:column;gap:3px
+ }
+ .cm-chapter-header-actions{top:8px;right:10px;gap:8px}
+ .cm-compact-actions button,.cm-section-actions.cm-compact-actions button{
+  flex:0 0 auto;min-height:33px;padding:7px 9px;font-size:11px
+ }
+ .cm-topic>.cm-section-heading,.cm-note-block>.cm-note-heading{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;gap:8px
+ }
+ .cm-section-heading .cm-compact-actions{width:auto}
+}
