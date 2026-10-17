@@ -31,11 +31,15 @@ test("new wallpaper is text-free, fully SVG, and applied to entire view with acc
  assert.match(art,/^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg"/);
  assert.match(art,/width="1600" height="1000"/);
  assert.match(art,/fill="#ffffff"/);
- assert.match(art,/ellipse/);
+ assert.match(art,/stroke-dasharray=/);
+ assert.match(art,/<path d="M/);
+ assert.ok((art.match(/<path /g)||[]).length<=100,"Keep SVG wave path count small");
+ assert.ok(art.length<40000,"Background must remain lightweight");
  assert.doesNotMatch(art,/LOREM|Canva|Edit with AI|<text\b/i);
  assert.match(css,/html\[data-theme="halftone"\] body\{/);
  assert.match(css,/url\("\.\/assets\/mint-halftone-waves\.svg"\)/);
- assert.match(css,/background-attachment:fixed/);
+ assert.match(css,/background-attachment:scroll/);
+ assert.match(css,/backdrop-filter:none/);
  assert.match(css,/color-scheme:light/);
  for(const selector of [".sidebar",".topbar",".mobile-nav",".panel",".primary-btn",".subject-card",".cm-panel"])
   assert.ok(css.includes(selector),"Missing light override for "+selector);
