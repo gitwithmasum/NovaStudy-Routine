@@ -38,6 +38,7 @@ jobs:
           node --check i18n.js
           node --check dashboard.js
           node --check study-planner.js
+          node --check course-manager.js
           node --check app.js
           node --check views.js
           node --check editors.js
