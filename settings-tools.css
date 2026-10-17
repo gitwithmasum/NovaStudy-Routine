@@ -101,3 +101,41 @@
  .settings-account-suite .settings-account-menu{grid-template-columns:1fr}
  .settings-account-suite .settings-account-option{min-height:72px}
 }
+
+/* v3.5.10 — fourth Tools & utilities card for Data & notifications */
+.settings-tools .settings-tool-grid{
+ grid-template-columns:repeat(4,minmax(0,1fr));
+}
+.settings-tools .settings-tool-link.is-selected,
+.settings-tools .settings-tool-link[aria-expanded="true"]{
+ border-color:var(--mint,#58d6ce);
+ background:color-mix(in srgb,var(--panel2,#17273c) 83%,var(--mint,#58d6ce));
+}
+.settings-tools .settings-tool-link[aria-expanded="true"] .settings-tool-arrow{
+ transform:rotate(90deg);
+}
+.settings-tools .settings-data-content{
+ display:block;
+ margin-top:18px;
+}
+.settings-tools .settings-data-content[hidden]{
+ display:none!important;
+}
+.settings-tools .settings-data-panel{
+ margin:0;
+ border:1px solid var(--line,#344a64);
+ border-radius:13px;
+ background:var(--panel,#132137);
+ padding:18px;
+ min-width:0;
+}
+.settings-tools .settings-data-panel>.panel-header{margin-bottom:14px}
+@media(max-width:1150px){
+ .settings-tools .settings-tool-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+ }
+}
+@media(max-width:660px){
+ .settings-tools .settings-tool-grid{grid-template-columns:1fr}
+ .settings-tools .settings-data-panel{padding:12px}
+}
