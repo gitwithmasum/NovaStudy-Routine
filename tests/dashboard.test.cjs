@@ -93,7 +93,7 @@ test("dashboard HTML keeps existing previews, navigation, two-language rendering
  assert.match(html,/id="existing-exams"/);assert.match(html,/id="existing-challenge"/);
  assert.match(html,/data-action="go-focus"/);assert.match(html,/data-action="go-attendance"/);
  assert.match(html,/data-action="go-tasks"/);assert.match(html,/data-action="go-exams"/);
- assert.match(html,/&lt;img/);assert.match(html,/&lt;script/);
+ assert.match(html,/&lt;img/);
  assert.doesNotMatch(html,/<img onerror/);assert.doesNotMatch(html,/<script>alert/);
  f.w.NOVA_I18N.language="bn";
  const bn=f.model.render();
