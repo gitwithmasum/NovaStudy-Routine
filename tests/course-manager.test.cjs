@@ -223,8 +223,10 @@ test("course owner sees Join Code and Students buttons with spacing beside Refre
  assert.match(header,/<div class="cm-course-actions" role="group"/);
  const a=header.indexOf('data-action="cm-toggle-owner-panel" data-panel="code"');
  const b=header.indexOf('data-action="cm-toggle-owner-panel" data-panel="students"');
+ const edit=header.indexOf('data-action="cm-edit-course" data-id="course-one"');
+ const del=header.indexOf('data-action="cm-request-delete-course" data-id="course-one"');
  const c=header.indexOf('data-action="cm-reload"');
- assert.ok(a>0&&a<b&&b<c,"Join Code → Enrolled Students → Refresh buttons must be adjacent in that order");
+ assert.ok(a>0&&a<b&&b<edit&&edit<del&&del<c,"Join Code → Enrolled Students → Edit Course → Delete Course → Refresh order");
  assert.match(header,/data-panel="code" aria-expanded="false"/);
  assert.match(header,/data-panel="students" aria-expanded="false"/);
  assert.match(header,/>Join Code<\/button>/);
@@ -263,6 +265,10 @@ test("student cannot see teacher Join Code or student list buttons, even with cr
  assert.doesNotMatch(html,/id="cm-owner-code"/);
  assert.doesNotMatch(html,/id="cm-owner-students"/);
  assert.doesNotMatch(html,/abcdef/);
+ assert.doesNotMatch(html,/data-action="cm-edit-course"|data-action="cm-request-delete-course"/);
+ assert.equal(f.app.action("cm-edit-course",{dataset:{id:"course-one"}}),true);
+ assert.equal(f.app.action("cm-request-delete-course",{dataset:{id:"course-one"}}),true);
+ assert.doesNotMatch(f.app.page(),/id="cm-course-editor"|id="cm-course-delete-confirm"/);
  assert.equal(f.app.action("cm-toggle-owner-panel",{dataset:{panel:"code"}}),true);
  assert.equal(f.app.action("cm-toggle-owner-panel",{dataset:{panel:"students"}}),true);
  assert.doesNotMatch(f.app.page(),/id="cm-owner-code"|id="cm-owner-students"/);
