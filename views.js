@@ -17,7 +17,22 @@ function tasks(filter,search){
 return heading("MISSION TRACKER / 03","Tasks & goals","Assignments, exam prep and personal to-dos.",button("+ New task","add-task"))+`<div class="toolbar"><div class="filter-row">${["all","pending","done"].map(x=>`<button class="filter-chip ${filter===x?"active":""}" data-action="filter" data-filter="${x}">${x.toUpperCase()}</button>`).join("")}</div><input type="search" placeholder="Search tasks…" id="taskSearch" aria-label="Search tasks" value="${E(search)}"></div><section class="panel" id="taskResults" aria-live="polite" aria-relevant="additions text">${taskResults(filter,search)}</section>`}
 function subjects(){const suggestions=N.subjectPreset().filter(x=>!s().subjects.some(z=>z.name.toLowerCase()===x.toLowerCase()));return heading("KNOWLEDGE LIBRARY / 04","Subject library","Choose subjects for your own academic level and curriculum.",button("+ Add subject","add-subject")+button("Import suggestions ("+suggestions.length+")","suggestions","secondary-btn"))+
 `<div class="flex-between"><b class="section-caption">MY SUBJECTS / ${s().subjects.length}</b><span class="chip">${E(I.t(C[s().profile.category].name))} • ${E(I.t(s().profile.track))}</span></div><div class="subject-grid">${s().subjects.length?s().subjects.map(x=>`<div class="subject-card" style="--subject-color:${E(N.colors.includes(x.color)?x.color:N.colors[0])}"><div class="subject-card-head"><div class="subject-initial">${E(x.name.slice(0,1))}</div>${button("Edit","edit-subject","tiny-btn",x.id)}</div><b>${E(x.name)}</b><small>${s().sessions.filter(t=>t.subjectId===x.id).length} weekly sessions</small></div>`).join(""):empty("Add your first course or import suggestions.")}</div><div class="hint-banner">Suggestions are customizable examples, not the official syllabus of any education board or university.</div>`}
+function settingsTools(){
+ const items=[
+  {route:"notifications",icon:"♧",title:"Reminders & notifications",description:"Manage study alerts, deadlines and notification history.",bn:"পড়াশোনার রিমাইন্ডার, ডেডলাইন এবং নোটিফিকেশন দেখো।"},
+  {route:"diagnostics",icon:"⌁",title:"App diagnostics",description:"Check app health, storage, PWA and troubleshooting.",bn:"অ্যাপের অবস্থা, স্টোরেজ, PWA ও সমস্যা যাচাই করো।"},
+  {route:"portability",icon:"⇩",title:"Backup & data portability",description:"Export, import and recover your study data.",bn:"পড়াশোনার ডেটা এক্সপোর্ট, ইমপোর্ট ও রিকভার করো।"}
+ ];
+ return '<section class="panel settings-tools" aria-labelledby="settingsToolsTitle">'+
+ '<div class="panel-header"><div><b id="settingsToolsTitle" class="panel-title">'+I.t("Tools & utilities")+'</b>'+
+ '<small class="panel-sub">'+I.t("Manage reminders, app health and data backups from your profile settings.")+'</small></div></div>'+
+ '<div class="settings-tool-grid">'+items.map(x=>'<button type="button" class="settings-tool-link" data-nav="'+x.route+'">'+
+ '<span class="settings-tool-icon" aria-hidden="true">'+x.icon+'</span>'+
+ '<span class="settings-tool-copy"><strong>'+I.t(x.title)+'</strong><small>'+(I.language==="bn"?x.bn:x.description)+'</small></span>'+
+ '<span class="settings-tool-arrow" aria-hidden="true">›</span></button>').join("")+'</div></section>';
+}
 function settings(){const p=s().profile,c=C[p.category];return heading("IDENTITY SYSTEM / 05","Profile & settings","Your class, category, group, preferences and local backups.",button("⇩ Install app","install","secondary-btn"))+
+settingsTools()+
 `<div class="settings-grid">${window.NOVA_AUTH.panel()}${window.NOVA_CLOUD.panel()}${window.NOVA_SYNC.panel()}${window.NOVA_AUTO.panel()}<section class="panel"><div class="panel-header"><b class="panel-title">Academic profile</b><span class="chip">STUDENT ID</span></div><form id="profileForm" class="form-grid">
 <div class="field"><label>Your name</label><input name="name" required maxlength="80" value="${E(p.name)}"></div><div class="field"><label>Institution (optional)</label><input name="institution" maxlength="100" value="${E(p.institution||"")}"></div>
 <div class="field"><label>Education category</label><select id="profileCategory" name="category">${option(Object.entries(C).map(([k,v])=>[k,v.name]),p.category)}</select></div>
@@ -44,6 +59,6 @@ function settings(){const p=s().profile,c=C[p.category];return heading("IDENTITY
 </div><hr class="separator"><div class="appearance-panel language-panel"><div class="appearance-copy"><b>Language preference</b><small>The interface language is saved on this device. Your own subjects, notes and JSON backups will not be translated.</small></div><div class="language-options" role="group" aria-label="Select interface language"><button class="language-choice" type="button" data-action="language-select" data-lang="en" aria-pressed="false">English</button><button class="language-choice" type="button" data-action="language-select" data-lang="bn" aria-pressed="false">বাংলা</button></div></div><hr class="separator"><p class="panel-sub">Your routines are saved in THIS browser, not in a cloud database. Export regularly to avoid losing data.</p><div class="settings-actions">${button("⇩ Export JSON backup","export","secondary-btn")}<label class="import-label">⇧ Import backup<input type="file" id="importFile" accept=".json,application/json"></label></div><hr class="separator">
 ${window.NOVA_REMINDERS.panel()}
 ${window.NOVA_UI?.settingsPanel?.()||""}
-<div class="hint-banner"><button type="button" class="secondary-btn" data-nav="portability">Complete Backup & Restore</button> PWA works over HTTPS/localhost after first load. Installing does not create an Android APK or iOS IPA. <button type="button" class="secondary-btn" data-nav="diagnostics">Open App Diagnostics</button></div></section></div>`}
+<div class="hint-banner">PWA works over HTTPS/localhost after first load. Installing does not create an Android APK or iOS IPA.</div></section></div>`}
 window.NOVA_VIEWS={button,heading,empty,option,session,task,dashboard,schedule,tasks,taskResults,subjects,settings};
 })();
