@@ -147,3 +147,46 @@
  }
  .cm-section-heading .cm-compact-actions{width:auto}
 }
+
+/* v3.5.4 — structural chapter header (no overlays or controls outside the row) */
+.cm-root .cm-chapter-shell{
+  display:block;position:relative;overflow:hidden;
+  border:1px solid var(--line,#344);border-radius:12px;
+  background:var(--panel2,#172839);margin:12px 0
+}
+.cm-root .cm-chapter-heading{
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;min-height:56px;gap:12px;padding:10px 14px
+}
+.cm-root .cm-chapter-toggle{
+  display:flex;align-items:center;justify-content:flex-start;
+  flex:1 1 auto;min-width:0;min-height:36px;width:auto;
+  gap:12px;padding:4px 0;
+  background:transparent;border:0;border-radius:4px;box-shadow:none;
+  font:inherit;color:var(--text,#edf4ff);text-align:left;cursor:pointer
+}
+.cm-root .cm-chapter-toggle strong{
+  font-size:13px;line-height:1.4;min-width:0;overflow-wrap:anywhere
+}
+.cm-root .cm-chapter-toggle .cm-chapter-topic-count{
+  flex:0 0 auto;font-size:11px;font-weight:400;
+  color:var(--muted,#abc);white-space:nowrap
+}
+.cm-root .cm-chapter-toggle:focus-visible{
+  outline:2px solid var(--mint,#58d6ce);outline-offset:3px
+}
+.cm-root .cm-chapter-header-actions,
+.cm-root .cm-chapter-heading>.cm-chapter-header-actions{
+  position:static;inset:auto;z-index:auto;
+  flex:0 0 auto;display:flex;align-items:center;justify-content:flex-end;
+  gap:12px;max-width:100%;margin:0
+}
+.cm-root .cm-chapter-inner{border-top:1px solid var(--line,#344);padding:17px}
+.cm-root .cm-chapter-inner[hidden]{display:none!important}
+@media(max-width:600px){
+ .cm-root .cm-chapter-heading{gap:9px;padding:9px 10px;min-height:50px}
+ .cm-root .cm-chapter-toggle{gap:6px;flex-wrap:wrap}
+ .cm-root .cm-chapter-header-actions{gap:8px}
+ .cm-root .cm-chapter-toggle strong{font-size:12px}
+ .cm-root .cm-chapter-inner{padding:13px}
+}
