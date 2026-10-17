@@ -17,7 +17,7 @@ for(const asset of appAssets){
  check(exists(asset),"Referenced resource missing: "+asset);
  check(sw.includes("'./"+asset+"'"),"Not pre-cached for offline PWA: "+asset);
 }
-check(/const CACHE='novastudy-v3\.4\.0'/.test(sw),"Wrong SW release cache");
+check(/const CACHE='novastudy-v3\.5\.0'/.test(sw),"Wrong SW release cache");
 check(/failed|partially populated/i.test(sw),"Atomic install rollback documentation missing");
 check(sw.includes("await caches.delete(CACHE)")&&sw.includes("await cache.addAll(FILES)"),"Atomic install missing");
 check(sw.includes("const checks=await Promise.all(REQUIRED.map"),"Activation verification missing");
@@ -46,6 +46,7 @@ check(routes.size>=10,"Too few desktop routes");
 check(routes.has("diagnostics"),"Diagnostics desktop route missing");
 check(routes.has("portability")&&mobile.includes('data-nav="portability"'),"Backup Center navigation missing");
 check(html.includes('src="./portability.js"')&&html.includes('href="./portability.css"'),"Backup Center assets missing");
+check(html.includes('src="./course-manager.js"')&&html.includes('href="./course-manager.css"'),"Course Manager assets missing");
 check(mobile.includes('data-nav="diagnostics"'),"Diagnostics mobile route missing");
 check(html.includes('src="./diagnostics.js"')&&html.includes('href="./diagnostics.css"'),"Diagnostics assets missing");
 check(app.includes("Diagnostics.onAction(action)")&&app.includes("Diagnostics.setIssue"),"Diagnostics events missing");
@@ -57,7 +58,7 @@ check(css.includes("focus-visible"),"Keyboard focus styling absent");
 check(css.includes("min-height:56px"),"Mobile tap target threshold absent");
 check(!html.includes('target="_blank" rel="noopener"'),"Insecure external links");
 const version=(html.match(/NOVASTUDY OS <b>([\d.]+)<\/b>/)||[])[1];
-check(version==="3.4.0","Footer release version mismatch");
+check(version==="3.5.0","Footer release version mismatch");
 check(/version/i.test(read("README.md")),"README release information missing");
-console.log("NovaStudy v3.4 release audit: "+checks+" static checks passed.");
+console.log("NovaStudy v3.5 release audit: "+checks+" static checks passed.");
 console.log("Scope: static markup/PWA references/mobile CSS; not a real browser or accessibility certification.");
