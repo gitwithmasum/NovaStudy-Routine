@@ -5,7 +5,7 @@ const N=window.NOVA,Auth=window.NOVA_AUTH;
 const e=value=>N.escape(String(value??""));
 const tr=(en,bn)=>window.NOVA_I18N?.language==="bn"?bn:en;
 const empty=()=>({courses:[],enrollments:[],chapters:[],topics:[],assets:[],assignments:[],submissions:[]});
-let data=empty(),selected="",tab="courses",busy=false,loading=false,loadedUser="",message="",refresh=()=>{},toast=()=>{},editingAsset="",deletingAsset="",openedChapters=null;
+let data=empty(),selected="",tab="courses",busy=false,loading=false,loadedUser="",message="",refresh=()=>{},toast=()=>{},editingAsset="",deletingAsset="",editingChapter="",deletingChapter="",editingTopic="",deletingTopic="",editingNote="",deletingNote="",openedChapters=null;
 const TABLES={courses:"ns_courses",enrollments:"ns_enrollments",chapters:"ns_chapters",topics:"ns_topics",assets:"ns_assets",assignments:"ns_assignments",submissions:"ns_submissions"};
 const bucket="novastudy-learning";
 const user=()=>Auth.getStatus()==="connected"?Auth.getUser():null;
@@ -19,8 +19,9 @@ function rememberOpenChapters(){
  const nodes=Array.from(document.querySelectorAll(".cm-chapter[data-chapter-id]"));
  if(nodes.length)openedChapters=new Set(nodes.filter(node=>node.open).map(node=>node.dataset.chapterId));
 }
+function resetEntityEditors(){editingChapter="";deletingChapter="";editingTopic="";deletingTopic="";editingNote="";deletingNote="";}
 function init(a){refresh=a.refresh||refresh;toast=a.toast||toast;}
-function authChanged(){loadedUser="";data=empty();selected="";if(!loading)refresh();}
+function authChanged(){loadedUser="";data=empty();selected="";openedChapters=null;resetEntityEditors();editingAsset="";deletingAsset="";if(!loading)refresh();}
 function page(){
  const u=user();if((u?.id||"")!==loadedUser&&!loading){loadedUser=u?.id||"";data=empty();selected="";if(u)queueMicrotask(load);}
  const legacy='<details class="cm-legacy"><summary>'+tr("Legacy subject library (existing subjects and routines preserved)","আগের Subject Library (পুরোনো রুটিন ও তথ্য অক্ষত)")+'</summary>'+window.NOVA_VIEWS.subjects()+'</details>';
@@ -92,16 +93,68 @@ function fileList(courseId,chapterId,topicId,isOwner=false){
 function fileUpload(courseId,chapterId,topicId=""){
  return '<label class="cm-upload">'+tr("⇧ Upload PDF / Image (max 10 MB)","⇧ PDF / ছবি আপলোড (সর্বোচ্চ ১০ MB)")+'<input type="file" data-cm-upload data-course="'+courseId+'" data-chapter="'+chapterId+'" data-topic="'+topicId+'" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"></label>';
 }
+
+function chapterControls(c,ch,topics,isOwner){
+ if(!isOwner)return "";
+ const chapterId=e(ch.id),isEditing=editingChapter===ch.id,isDeleting=deletingChapter===ch.id;
+ const files=by("assets",c.id).filter(a=>a.chapter_id===ch.id).length;
+ const toolbar='<div class="cm-section-actions" role="group" aria-label="'+tr("Chapter actions","অধ্যায়ের অপশন")+'">'+
+ button(tr("Edit Chapter","অধ্যায় এডিট"),"edit-chapter",'data-id="'+chapterId+'" aria-expanded="'+isEditing+'"')+
+ button(tr("Delete Chapter","অধ্যায় ডিলিট"),"request-delete-chapter",'data-id="'+chapterId+'"',"danger-btn")+'</div>';
+ const edit=isEditing?'<form class="cm-form cm-inline-editor" data-cm-form="chapter-edit" data-chapter="'+chapterId+'" data-course="'+e(c.id)+'">'+
+ '<label>'+tr("Chapter title","অধ্যায়ের নাম")+'<input name="title" maxlength="150" required value="'+e(ch.title)+'"></label>'+
+ '<div class="cm-section-actions"><button class="primary-btn" type="submit">'+tr("Save Chapter","অধ্যায় সেভ")+'</button>'+button(tr("Cancel","বাতিল"),"cancel-entity")+'</div></form>':"";
+ const del=isDeleting?'<div class="cm-delete-confirm" role="group" aria-label="'+tr("Confirm chapter deletion","অধ্যায় মুছে ফেলা নিশ্চিত করো")+'"><p>'+
+ tr("Deleting this chapter permanently removes its ","এই অধ্যায় মুছলে স্থায়ীভাবে মুছে যাবে: ")+
+ topics.length+" "+tr("topics and ","টি টপিক এবং ")+files+" "+tr("attached files, including topic notes. Other chapters and homework remain.","টি সংযুক্ত ফাইলসহ টপিকের লিখিত নোটস। অন্য অধ্যায় ও হোমওয়ার্ক অক্ষত থাকবে।")+'</p>'+
+ '<div class="cm-section-actions">'+button(tr("Yes, Delete Chapter","হ্যাঁ, অধ্যায় মুছো"),"confirm-delete-chapter",'data-id="'+chapterId+'"',"danger-btn")+
+ button(tr("Cancel","বাতিল"),"cancel-entity")+'</div></div>':"";
+ return toolbar+edit+del;
+}
+function renderTopic(c,ch,t,index,isOwner){
+ const topicId=e(t.id),topicTitle=e(t.title),isEditing=isOwner&&editingTopic===t.id,isDeleting=isOwner&&deletingTopic===t.id;
+ const noteEditing=isOwner&&editingNote===t.id,noteDeleting=isOwner&&deletingNote===t.id;
+ const fileCount=by("assets",c.id).filter(a=>a.topic_id===t.id).length;
+ const buttons=isOwner?'<div class="cm-section-actions" role="group" aria-label="'+tr("Topic actions","টপিকের অপশন")+'">'+
+ button(tr("Edit Topic","টপিক এডিট"),"edit-topic",'data-id="'+topicId+'"')+
+ button(tr("Delete Topic","টপিক ডিলিট"),"request-delete-topic",'data-id="'+topicId+'"',"danger-btn")+'</div>':"";
+ const edit=isEditing?'<form class="cm-form cm-inline-editor" data-cm-form="topic-edit" data-topic="'+topicId+'" data-chapter="'+e(ch.id)+'" data-course="'+e(c.id)+'">'+
+ '<label>'+tr("Topic title","টপিকের নাম")+'<input name="title" maxlength="150" required value="'+topicTitle+'"></label>'+
+ '<div class="cm-section-actions"><button class="primary-btn" type="submit">'+tr("Save Topic","টপিক সেভ")+'</button>'+button(tr("Cancel","বাতিল"),"cancel-entity")+'</div></form>':"";
+ const del=isDeleting?'<div class="cm-delete-confirm" role="group" aria-label="'+tr("Confirm topic deletion","টপিক মুছে ফেলা নিশ্চিত করো")+'"><p>'+
+ tr("Permanently delete this topic, its written notes, and ","এই টপিক, এর লিখিত নোটস এবং ")+fileCount+" "+
+ tr("attached files? Other topics and the chapter will remain.","টি সংযুক্ত ফাইল স্থায়ীভাবে মুছবে? অন্য টপিক ও অধ্যায় অক্ষত থাকবে।")+'</p>'+
+ '<div class="cm-section-actions">'+button(tr("Yes, Delete Topic","হ্যাঁ, টপিক মুছো"),"confirm-delete-topic",'data-id="'+topicId+'"',"danger-btn")+
+ button(tr("Cancel","বাতিল"),"cancel-entity")+'</div></div>':"";
+ const noteText='<p class="cm-body cm-note-text">'+e(t.body||tr("No written notes yet.","এখনো লিখিত নোটস নেই।"))+'</p>';
+ const noteButtons=isOwner?'<div class="cm-section-actions" role="group" aria-label="'+tr("Written note actions","লিখিত নোটসের অপশন")+'">'+
+ button(t.body?tr("Edit Notes","নোটস এডিট"):tr("Add Notes","নোটস যোগ"),"edit-note",'data-id="'+topicId+'"')+
+ (t.body?button(tr("Delete Notes","নোটস ডিলিট"),"request-delete-note",'data-id="'+topicId+'"',"danger-btn"):"")+
+ '</div>':"";
+ const noteEditor=noteEditing?'<form class="cm-form cm-note-editor" data-cm-form="topic-body" data-topic="'+topicId+'" data-course="'+e(c.id)+'">'+
+ '<label>'+tr("Written notes","লিখিত নোটস")+'<textarea name="body" maxlength="20000" rows="5" placeholder="'+tr("Write notes here…","এখানে নোটস লেখো…")+'">'+e(t.body)+'</textarea></label>'+
+ '<div class="cm-section-actions"><button class="primary-btn" type="submit">'+tr("Save Notes","নোটস সেভ")+'</button>'+button(tr("Cancel","বাতিল"),"cancel-entity")+'</div></form>':"";
+ const noteDel=noteDeleting?'<div class="cm-delete-confirm" role="group" aria-label="'+tr("Confirm note deletion","নোটস মুছে ফেলা নিশ্চিত করো")+'"><p>'+
+ tr("Delete only the written notes? This topic and its uploaded PDF/images will be preserved.","শুধু লিখিত নোটস মুছবে? টপিক এবং আপলোড করা PDF/ছবি অক্ষত থাকবে।")+'</p>'+
+ '<div class="cm-section-actions">'+button(tr("Yes, Delete Notes","হ্যাঁ, নোটস মুছো"),"confirm-delete-note",'data-id="'+topicId+'"',"danger-btn")+
+ button(tr("Cancel","বাতিল"),"cancel-entity")+'</div></div>':"";
+ return '<article class="cm-topic" data-topic-id="'+topicId+'"><div class="cm-section-heading"><b>'+
+ tr("Topic","টপিক")+" "+index+": "+topicTitle+'</b>'+buttons+'</div>'+edit+del+
+ '<div class="cm-note-block"><strong>'+tr("Written Notes","লিখিত নোটস")+'</strong>'+
+ (noteEditing?noteEditor:noteText+noteButtons+noteDel)+'</div>'+
+ fileList(c.id,ch.id,t.id,isOwner)+(isOwner?fileUpload(c.id,ch.id,t.id):"")+'</article>';
+}
 function renderChapter(c,ch,index,isOwner){
  const topics=by("topics",c.id).filter(t=>t.chapter_id===ch.id).sort((a,b)=>a.position-b.position||a.created_at.localeCompare(b.created_at));
  const chfiles=fileList(c.id,ch.id,null,isOwner);
- const tools=isOwner?'<form class="cm-inline" data-cm-form="topic" data-course="'+c.id+'" data-chapter="'+ch.id+'"><input name="title" maxlength="150" required placeholder="'+tr("New topic","নতুন টপিক")+'"><button class="secondary-btn" type="submit">+ '+tr("Add Topic","টপিক যোগ")+'</button></form>':"";
- return '<details class="cm-chapter" data-chapter-id="'+e(ch.id)+'" '+((openedChapters?openedChapters.has(ch.id):index===1)?'open':'')+'><summary><strong>'+tr("Chapter","অধ্যায়")+' '+index+' — '+e(ch.title)+'</strong><span>'+topics.length+' '+tr("Topics","টপিক")+'</span></summary><div class="cm-chapter-inner"><b>'+tr("Chapter Notes & Files","অধ্যায়ের নোটস ও ফাইল")+'</b>'+
+ const tools=isOwner?'<form class="cm-inline" data-cm-form="topic" data-course="'+e(c.id)+'" data-chapter="'+e(ch.id)+'"><input name="title" maxlength="150" required placeholder="'+tr("New topic","নতুন টপিক")+'"><button class="secondary-btn" type="submit">+ '+tr("Add Topic","টপিক যোগ")+'</button></form>':"";
+ return '<details class="cm-chapter" data-chapter-id="'+e(ch.id)+'" '+((openedChapters?openedChapters.has(ch.id):index===1)?'open':'')+
+ '><summary><strong>'+tr("Chapter","অধ্যায়")+' '+index+' — '+e(ch.title)+'</strong><span>'+topics.length+' '+tr("Topics","টপিক")+'</span></summary>'+
+ '<div class="cm-chapter-inner">'+chapterControls(c,ch,topics,isOwner)+
+ '<h3>'+tr("Chapter Notes & Files","অধ্যায়ের নোটস ও ফাইল")+'</h3>'+
  chfiles+(isOwner?fileUpload(c.id,ch.id):"")+tools+
- '<div class="cm-topic-list">'+(topics.length?topics.map((t,i)=>'<article class="cm-topic"><b>'+tr("Topic","টপিক")+' '+(i+1)+': '+e(t.title)+'</b>'+
- (isOwner?'<form class="cm-form" data-cm-form="topic-body" data-topic="'+t.id+'"><textarea name="body" maxlength="20000" rows="3" placeholder="'+tr("Type your notes here…","এখানে নোটস লিখো…")+'">'+e(t.body)+'</textarea><button class="secondary-btn" type="submit">'+tr("Save Notes","নোটস সেভ")+'</button></form>':
- '<p class="cm-body">'+e(t.body||tr("No notes yet.","এখনো নোট নেই।"))+'</p>')+
- fileList(c.id,ch.id,t.id,isOwner)+(isOwner?fileUpload(c.id,ch.id,t.id):"")+'</article>').join(""):'<p class="cm-muted">'+tr("Add a topic to begin.","শুরু করতে টপিক যোগ করো।")+'</p>')+'</div></div></details>';
+ '<div class="cm-topic-list">'+(topics.length?topics.map((t,i)=>renderTopic(c,ch,t,i+1,isOwner)).join(""):'<p class="cm-muted">'+tr("Add a topic to begin.","শুরু করতে টপিক যোগ করো।")+'</p>')+
+ '</div></div></details>';
 }
 function renderHomework(){
  if(!data.courses.length)return noCourses();
