@@ -190,3 +190,43 @@
  .cm-root .cm-chapter-toggle strong{font-size:12px}
  .cm-root .cm-chapter-inner{padding:13px}
 }
+
+/* v3.5.5 — teacher course utilities, compact right-aligned buttons */
+.cm-root .cm-course-header{
+ display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;
+ width:100%;min-width:0
+}
+.cm-root .cm-course-title{flex:1 1 210px;min-width:0}
+.cm-root .cm-course-title h2{overflow-wrap:anywhere}
+.cm-root .cm-course-actions{
+ display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;
+ flex:0 1 auto;gap:12px;max-width:100%
+}
+.cm-root .cm-course-actions button{
+ min-height:37px;padding:8px 12px;white-space:nowrap;border-radius:9px;
+ font-size:12px;line-height:1.2;flex:0 0 auto
+}
+.cm-root .cm-course-actions button[aria-expanded="true"]{
+ border-color:var(--mint,#58d6ce);color:var(--mint,#58d6ce)
+}
+.cm-root .cm-owner-panel{
+ margin:14px 0 2px;padding:15px;border:1px solid var(--line,#344);
+ border-radius:11px;background:var(--panel2,#192b40);min-width:0;
+}
+.cm-root .cm-owner-panel.cm-invite{
+ display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:12px
+}
+.cm-root .cm-owner-panel.cm-invite code{overflow-wrap:anywhere;word-break:break-word}
+.cm-root .cm-owner-panel.cm-members h3{margin:0 0 8px}
+.cm-root .cm-owner-panel.cm-members .cm-member:last-child{border-bottom:0}
+@media(max-width:660px){
+ .cm-root .cm-course-header{gap:12px}
+ .cm-root .cm-course-title{flex-basis:100%}
+ .cm-root .cm-course-actions{width:100%;justify-content:flex-start;gap:9px}
+ .cm-root .cm-course-actions button{font-size:11px;padding:9px 10px}
+ .cm-root .cm-owner-panel{padding:12px}
+}
+@media(max-width:360px){
+ .cm-root .cm-course-actions{gap:8px}
+ .cm-root .cm-course-actions button{white-space:normal}
+}
