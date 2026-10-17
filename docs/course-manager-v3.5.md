@@ -52,3 +52,9 @@ This release is additive. **It does not migrate or replace** `novastudy_state_v1
 - Topic and written-note headings place short **Edit** and **Delete** buttons at the right, with spacing and compact responsive sizing.
 - Button names include longer, screen-reader-only contextual labels; no database schemas or student files are changed.
 - When notes are empty, the only note action is **Add**.
+
+## v3.5.4 — Chapter actions always visible
+- Chapter heading now has a true two-part flex layout: an accessible expand/collapse button and an adjacent independent Edit/Delete button group.
+- The buttons are in the chapter's top-right on desktop and mobile, even when the chapter is collapsed. Topic count and title remain visible in the left heading.
+- Expanded chapter content is controlled with aria-expanded, aria-controls and the hidden attribute.
+- No academic data, course ownership permissions, or student submissions were modified.
