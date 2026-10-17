@@ -5,7 +5,7 @@ const N=window.NOVA,Auth=window.NOVA_AUTH;
 const e=value=>N.escape(String(value??""));
 const tr=(en,bn)=>window.NOVA_I18N?.language==="bn"?bn:en;
 const empty=()=>({courses:[],enrollments:[],chapters:[],topics:[],assets:[],assignments:[],submissions:[]});
-let data=empty(),selected="",tab="courses",busy=false,loading=false,loadedUser="",message="",refresh=()=>{},toast=()=>{},editingAsset="",deletingAsset="",editingChapter="",deletingChapter="",editingTopic="",deletingTopic="",editingNote="",deletingNote="",openedChapters=null,ownerPanel="";
+let data=empty(),selected="",tab="courses",busy=false,loading=false,loadedUser="",message="",refresh=()=>{},toast=()=>{},editingAsset="",deletingAsset="",editingChapter="",deletingChapter="",editingTopic="",deletingTopic="",editingNote="",deletingNote="",openedChapters=null,ownerPanel="",editingCourse="",deletingCourse="";
 const TABLES={courses:"ns_courses",enrollments:"ns_enrollments",chapters:"ns_chapters",topics:"ns_topics",assets:"ns_assets",assignments:"ns_assignments",submissions:"ns_submissions"};
 const bucket="novastudy-learning";
 const user=()=>Auth.getStatus()==="connected"?Auth.getUser():null;
@@ -20,8 +20,9 @@ function rememberOpenChapters(){
  if(nodes.length)openedChapters=new Set(nodes.filter(node=>node.dataset.open==="true").map(node=>node.dataset.chapterId));
 }
 function resetEntityEditors(){editingChapter="";deletingChapter="";editingTopic="";deletingTopic="";editingNote="";deletingNote="";}
+function resetCourseEditors(){editingCourse="";deletingCourse="";}
 function init(a){refresh=a.refresh||refresh;toast=a.toast||toast;}
-function authChanged(){loadedUser="";data=empty();selected="";openedChapters=null;ownerPanel="";resetEntityEditors();editingAsset="";deletingAsset="";if(!loading)refresh();}
+function authChanged(){loadedUser="";data=empty();selected="";openedChapters=null;ownerPanel="";resetCourseEditors();resetEntityEditors();editingAsset="";deletingAsset="";if(!loading)refresh();}
 function page(){
  const u=user();if((u?.id||"")!==loadedUser&&!loading){loadedUser=u?.id||"";data=empty();selected="";if(u)queueMicrotask(load);}
  const legacy='<details class="cm-legacy"><summary>'+tr("Legacy subject library (existing subjects and routines preserved)","আগের Subject Library (পুরোনো রুটিন ও তথ্য অক্ষত)")+'</summary>'+window.NOVA_VIEWS.subjects()+'</details>';
@@ -46,7 +47,7 @@ async function load(){
   }));
   if(user()?.id!==uid)return;
   data=Object.fromEntries(entries);
-  if(!data.courses.some(c=>c.id===selected)){selected=data.courses[0]?.id||"";openedChapters=null;ownerPanel="";}
+  if(!data.courses.some(c=>c.id===selected)){selected=data.courses[0]?.id||"";openedChapters=null;ownerPanel="";resetCourseEditors();}
   message="";
  }catch(err){if(user()?.id===uid)message=tr("Could not load courses: ","কোর্স লোড করা যায়নি: ")+String(err.message||err).slice(0,150)}
  finally{loading=false;refresh()}
@@ -63,15 +64,30 @@ function renderCourses(){
  const chapters=by("chapters",c.id).sort((a,b)=>a.position-b.position||a.created_at.localeCompare(b.created_at));
  const showingCode=isOwner&&ownerPanel==="code",showingStudents=isOwner&&ownerPanel==="students";
  const ownerActions=isOwner?button(tr("Join Code","জয়েন কোড"),"toggle-owner-panel",'data-panel="code" aria-expanded="'+showingCode+'" aria-controls="cm-owner-code"')+
- button(tr("Enrolled Students","ভর্তিকৃত শিক্ষার্থী")+" ("+members.length+")","toggle-owner-panel",'data-panel="students" aria-expanded="'+showingStudents+'" aria-controls="cm-owner-students"'):"";
+ button(tr("Enrolled Students","ভর্তিকৃত শিক্ষার্থী")+" ("+members.length+")","toggle-owner-panel",'data-panel="students" aria-expanded="'+showingStudents+'" aria-controls="cm-owner-students"')+
+ button(tr("Edit Course","কোর্স এডিট"),"edit-course",'data-id="'+e(c.id)+'" aria-expanded="'+(editingCourse===c.id)+'" aria-controls="cm-course-editor"')+
+ button(tr("Delete Course","কোর্স ডিলিট"),"request-delete-course",'data-id="'+e(c.id)+'" aria-expanded="'+(deletingCourse===c.id)+'" aria-controls="cm-course-delete-confirm"',"danger-btn"):"";
  const joinPanel=showingCode?'<div id="cm-owner-code" class="cm-owner-panel cm-invite" role="region" aria-label="'+tr("Student join code","শিক্ষার্থীর Join Code")+'"><span>'+tr("Student join code","শিক্ষার্থীর Join Code")+'</span><code>'+e(c.invite_code)+'</code>'+button(tr("Copy Code","কোড কপি"),"copy",'data-id="'+e(c.invite_code)+'"')+'</div>':"";
  const studentPanel=showingStudents?'<div id="cm-owner-students" class="cm-owner-panel cm-members" role="region" aria-label="'+tr("Enrolled Students","ভর্তিকৃত শিক্ষার্থী")+'">'+
  '<h3>'+tr("Enrolled Students","ভর্তিকৃত শিক্ষার্থী")+" ("+members.length+')</h3>'+
  (members.length?members.map(m=>'<div class="cm-member"><span>'+e(m.display_name||"Student")+'</span>'+button(tr("Remove","সরাও"),"remove-student",'data-id="'+c.id+'" data-student="'+m.student_id+'"')+'</div>').join(""):'<p class="cm-muted">'+tr("No students have joined yet.","এখনো শিক্ষার্থী যোগ দেয়নি।")+'</p>')+'</div>':"";
+ const courseEditor=isOwner&&editingCourse===c.id?'<form id="cm-course-editor" class="cm-form cm-course-editor cm-course-utility" data-cm-form="course-edit" data-course="'+e(c.id)+'">'+
+ '<h3>'+tr("Edit Course","কোর্স এডিট")+'</h3>'+
+ '<label>'+tr("Course name","কোর্সের নাম")+'<input name="title" maxlength="120" required value="'+e(c.title)+'"></label>'+
+ '<label>'+tr("Description (optional)","বিবরণ (ঐচ্ছিক)")+'<textarea name="description" rows="3" maxlength="1200">'+e(c.description||"")+'</textarea></label>'+
+ '<div class="cm-course-form-actions"><button type="submit" class="primary-btn">'+tr("Save Changes","পরিবর্তন সংরক্ষণ")+'</button>'+
+ button(tr("Cancel","বাতিল"),"cancel-course")+'</div></form>':"";
+ const courseDelete=isOwner&&deletingCourse===c.id?'<form id="cm-course-delete-confirm" class="cm-course-utility cm-course-delete cm-form" data-cm-form="course-delete" data-course="'+e(c.id)+'">'+
+ '<h3>'+tr("Delete Course Permanently","কোর্স স্থায়ীভাবে মুছে ফেলো")+'</h3>'+
+ '<p>'+tr("This permanently deletes this course, all chapters, topics, notes, attachments, enrollments, homework and student submissions. This cannot be undone.","এই কোর্সের অধ্যায়, টপিক, নোটস, ফাইল, শিক্ষার্থী, হোমওয়ার্ক ও সাবমিশন স্থায়ীভাবে মুছে যাবে। এটি ফেরানো যাবে না।")+'</p>'+
+ '<label>'+tr("Type the exact course name to confirm: ","নিশ্চিত করতে কোর্সের পুরো নাম লিখো: ")+'<strong>'+e(c.title)+'</strong>'+
+ '<input type="text" name="confirm_title" maxlength="120" required autocomplete="off" spellcheck="false" placeholder="'+tr("Exact course name","কোর্সের সঠিক নাম")+'"></label>'+
+ '<div class="cm-course-form-actions"><button type="submit" class="danger-btn">'+tr("Yes, Delete Course","হ্যাঁ, কোর্স মুছো")+'</button>'+
+ button(tr("Cancel","বাতিল"),"cancel-course")+'</div></form>':"";
  const add=isOwner?'<form class="cm-inline" data-cm-form="chapter" data-course="'+c.id+'"><input name="title" maxlength="150" required placeholder="'+tr("New chapter title","নতুন অধ্যায়ের নাম")+'"><button class="secondary-btn" type="submit">+ '+tr("Add Chapter","অধ্যায় যোগ")+'</button></form>':"";
  const header='<div class="cm-course-header"><div class="cm-course-title"><span class="eyebrow">'+(isOwner?"TEACHER / OWNER":"STUDENT / ENROLLED")+'</span><h2>'+e(c.title)+'</h2><p class="cm-muted">'+e(c.description)+'</p></div>'+
  '<div class="cm-course-actions" role="group" aria-label="'+tr("Course actions","কোর্সের অপশন")+'">'+ownerActions+button(tr("Refresh","রিফ্রেশ"),"reload")+'</div></div>';
- return coursePicker()+'<section class="panel cm-panel">'+header+joinPanel+studentPanel+
+ return coursePicker()+'<section class="panel cm-panel">'+header+joinPanel+studentPanel+courseEditor+courseDelete+
  '<h3>'+tr("Chapters & Topics","অধ্যায় ও টপিক")+'</h3>'+add+(chapters.length?chapters.map((ch,i)=>renderChapter(c,ch,i+1,isOwner)).join(""):'<p class="cm-muted">'+tr("No chapters yet. Add the first chapter.","কোনো অধ্যায় নেই। প্রথম অধ্যায় যোগ করো।")+'</p>')+'</section>';
 }
 function fileList(courseId,chapterId,topicId,isOwner=false){
@@ -213,7 +229,52 @@ async function submit(form){
  rememberOpenChapters();
  const fd=new FormData(form);
  try{
-  if(type==="course"){
+  if(type==="course-edit"){
+   const course=data.courses.find(c=>c.id===form.dataset.course);
+   if(!course||selected!==course.id||editingCourse!==course.id||!owner(course))
+    throw Error(tr("Only the course owner can edit this course.","শুধু কোর্সের মালিক এটি এডিট করতে পারবেন।"));
+   const title=String(fd.get("title")||"").trim(),description=String(fd.get("description")||"").trim();
+   if(!title||title.length>120||description.length>1200)
+    throw Error(tr("Valid course name (max 120) and description (max 1200) required.","কোর্সের নাম সর্বোচ্চ ১২০ ও বিবরণ ১২০০ অক্ষরের মধ্যে রাখো।"));
+   const {data:updated,error}=await sb.from(TABLES.courses).update({title,description})
+    .eq("id",course.id).eq("owner_id",u.id).select("id").maybeSingle();
+   if(error)throw error;
+   if(!updated)throw Error(tr("Course not found or permission denied. Refresh and try again.","কোর্স পাওয়া যায়নি অথবা অনুমতি নেই। রিফ্রেশ করো।"));
+   resetCourseEditors();
+  } else if(type==="course-delete"){
+   const course=data.courses.find(c=>c.id===form.dataset.course);
+   if(!course||selected!==course.id||deletingCourse!==course.id||!owner(course))
+    throw Error(tr("Only the course owner can delete this course.","শুধু কোর্সের মালিক এটি মুছতে পারবেন।"));
+   if(String(fd.get("confirm_title")||"").trim()!==course.title)
+    throw Error(tr("Course name does not match. No data was deleted.","কোর্সের নাম মেলেনি। কোনো ডেটা মোছা হয়নি।"));
+   // Read storage references before database cascade removes the child metadata.
+   const [attachments,answers]=await Promise.all([
+    sb.from(TABLES.assets).select("file_path").eq("course_id",course.id).limit(5000),
+    sb.from(TABLES.submissions).select("file_path").eq("course_id",course.id).limit(5000)
+   ]);
+   if(attachments.error)throw attachments.error;
+   if(answers.error)throw answers.error;
+   if((attachments.data||[]).length===5000||(answers.data||[]).length===5000)
+    throw Error(tr("Too many files for safe deletion. Contact support.","ফাইলের সংখ্যা বেশি; নিরাপদে মুছতে সহায়তা প্রয়োজন।"));
+   const paths=[...new Set([...(attachments.data||[]),...(answers.data||[])].map(row=>row.file_path).filter(Boolean))];
+   const {data:removed,error}=await sb.from(TABLES.courses).delete()
+    .eq("id",course.id).eq("owner_id",u.id).select("id").maybeSingle();
+   if(error)throw error;
+   if(!removed)throw Error(tr("Course no longer exists or you lack permission.","কোর্স পাওয়া যায়নি অথবা মুছে ফেলার অনুমতি নেই।"));
+   selected="";ownerPanel="";openedChapters=null;resetCourseEditors();resetEntityEditors();
+   let cleanupFailed=false;
+   for(let i=0;i<paths.length;i+=100){
+    try{
+     const {error:storageError}=await sb.storage.from(bucket).remove(paths.slice(i,i+100));
+     if(storageError){cleanupFailed=true;console.warn("Course storage cleanup requires attention",storageError)}
+    }catch(err){cleanupFailed=true;console.warn("Course storage cleanup requires attention",err)}
+   }
+   await reload();
+   msg(cleanupFailed?
+    tr("Course deleted, but some stored files require manual cleanup.","কোর্স মুছে গেছে, তবে কিছু Storage ফাইলের cleanup বাকি আছে।"):
+    tr("Course deleted permanently.","কোর্স স্থায়ীভাবে মুছে ফেলা হয়েছে।"),cleanupFailed);
+   return true;
+  } else if(type==="course"){
    const {data:row,error}=await sb.from(TABLES.courses).insert({owner_id:u.id,title:String(fd.get("title")||"").trim(),description:String(fd.get("description")||"").trim()}).select().single();
    if(error)throw error;
    selected=row.id;tab="courses";
@@ -366,11 +427,21 @@ async function deleteWrittenNote(id){
 function action(act,btn){
  if(!act?.startsWith("cm-"))return false;
  const type=act.slice(3),id=btn?.dataset.id;
- if(type==="tab"){tab=btn.dataset.tab;message="";refresh();return true}
- if(type==="select"){selected=id;message="";ownerPanel="";openedChapters=null;editingAsset="";deletingAsset="";resetEntityEditors();refresh();return true}
+ if(type==="tab"){tab=btn.dataset.tab;message="";resetCourseEditors();refresh();return true}
+ if(type==="select"){selected=id;message="";ownerPanel="";openedChapters=null;resetCourseEditors();editingAsset="";deletingAsset="";resetEntityEditors();refresh();return true}
  if(type==="login"){void Auth.signIn();return true}
  if(type==="copy"){if(navigator.clipboard?.writeText){void navigator.clipboard.writeText(id).then(()=>msg(tr("Join code copied.","Join Code কপি হয়েছে।"))).catch(()=>msg(id))}else msg(id);return true}
  if(type==="reload"){void reload();return true}
+ if(type==="edit-course"||type==="request-delete-course"){
+  const course=data.courses.find(c=>c.id===id);
+  if(!course||course.id!==selected||!owner(course)||busy)return true;
+  rememberOpenChapters();
+  const active=type==="edit-course"?editingCourse===id:deletingCourse===id;
+  resetCourseEditors();ownerPanel="";
+  if(!active){if(type==="edit-course")editingCourse=id;else deletingCourse=id}
+  refresh();return true;
+ }
+ if(type==="cancel-course"){resetCourseEditors();refresh();return true;}
  if(type==="toggle-owner-panel"){
   if(busy||!owner(currentCourse())||!["code","students"].includes(btn.dataset.panel))return true;
   rememberOpenChapters();
