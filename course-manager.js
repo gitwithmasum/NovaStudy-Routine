@@ -205,8 +205,25 @@ async function submit(form){
    const table=type==="chapter"?TABLES.chapters:TABLES.topics;
    const payload=type==="chapter"?{course_id:c,title,position:by("chapters",c).length}:{course_id:c,chapter_id:ch,title,position:data.topics.filter(x=>x.chapter_id===ch).length};
    const {error}=await sb.from(table).insert(payload);if(error)throw error;
+  } else if(type==="chapter-edit"||type==="topic-edit"){
+   const key=type==="chapter-edit"?"chapters":"topics",id=type==="chapter-edit"?form.dataset.chapter:form.dataset.topic;
+   const row=data[key].find(x=>x.id===id),title=String(fd.get("title")||"").trim();
+   if(!row||row.course_id!==form.dataset.course||!owner(data.courses.find(c=>c.id===row.course_id)))
+    throw Error(tr("Only the course owner can edit this item.","শুধু কোর্সের মালিক এটি এডিট করতে পারবেন।"));
+   if(!title||title.length>150)throw Error(tr("Enter a valid title (max 150 characters).","সঠিক নাম লেখো (সর্বোচ্চ ১৫০ অক্ষর)।"));
+   const {data:updated,error}=await sb.from(TABLES[key]).update({title}).eq("id",id).eq("course_id",row.course_id).select("id").maybeSingle();
+   if(error)throw error;
+   if(!updated)throw Error(tr("Item no longer exists or you lack permission.","তথ্যটি পাওয়া যায়নি অথবা পরিবর্তনের অনুমতি নেই।"));
+   resetEntityEditors();
   } else if(type==="topic-body"){
-   const {error}=await sb.from(TABLES.topics).update({body:String(fd.get("body")||"").slice(0,20000)}).eq("id",form.dataset.topic);if(error)throw error;
+   const topic=data.topics.find(x=>x.id===form.dataset.topic);
+   if(!topic||topic.course_id!==form.dataset.course||!owner(data.courses.find(c=>c.id===topic.course_id)))
+    throw Error(tr("Only the course owner can edit written notes.","শুধু কোর্সের মালিক লিখিত নোটস এডিট করতে পারবেন।"));
+   const {data:updated,error}=await sb.from(TABLES.topics).update({body:String(fd.get("body")||"").slice(0,20000)})
+    .eq("id",topic.id).eq("course_id",topic.course_id).select("id").maybeSingle();
+   if(error)throw error;
+   if(!updated)throw Error(tr("Notes no longer exist or you lack permission.","নোটস পাওয়া যায়নি অথবা পরিবর্তনের অনুমতি নেই।"));
+   resetEntityEditors();
   } else if(type==="asset-edit"){
    const asset=data.assets.find(a=>a.id===form.dataset.asset);
    if(!asset||!owner(data.courses.find(c=>c.id===asset.course_id)))throw Error(tr("You cannot edit this file.","এই ফাইল পরিবর্তনের অনুমতি নেই।"));
@@ -275,14 +292,90 @@ async function openFile(path){
  if(error)throw error;
  const a=document.createElement("a");a.href=link.signedUrl;a.target="_blank";a.rel="noopener noreferrer";document.body.appendChild(a);a.click();a.remove();
 }
+
+async function deleteCourseItem(kind,id){
+ if(busy)return;
+ const key=kind==="chapter"?"chapters":"topics",item=data[key].find(x=>x.id===id);
+ const course=data.courses.find(c=>c.id===item?.course_id);
+ if(!item||!owner(course))return;
+ if((kind==="chapter"?deletingChapter:deletingTopic)!==id)return;
+ const sb=client();if(!sb)return;
+ rememberOpenChapters();
+ busy=true;
+ try{
+  // Capture the exact paths before FK-cascade deletes their metadata.
+  const column=kind==="chapter"?"chapter_id":"topic_id";
+  const {data:assets,error:listingError}=await sb.from(TABLES.assets)
+   .select("file_path").eq("course_id",item.course_id).eq(column,id).limit(5000);
+  if(listingError)throw listingError;
+  if(assets.length===5000)throw Error(tr("Too many files for safe deletion; contact support.","নিরাপদে মুছতে ফাইলের সংখ্যা বেশি; সহায়তা নাও।"));
+  const {data:removed,error}=await sb.from(TABLES[key]).delete()
+   .eq("id",id).eq("course_id",item.course_id).select("id").maybeSingle();
+  if(error)throw error;
+  if(!removed)throw Error(tr("Item could not be deleted. Refresh and try again.","মুছতে পারিনি; রিফ্রেশ করে আবার চেষ্টা করো।"));
+  resetEntityEditors();
+  const paths=[...new Set(assets.map(a=>a.file_path).filter(Boolean))];
+  let cleanupFailed=false;
+  for(let i=0;i<paths.length;i+=100){
+   const {error:storageError}=await sb.storage.from(bucket).remove(paths.slice(i,i+100));
+   if(storageError){cleanupFailed=true;console.warn("NovaStudy file cleanup needs attention",storageError)}
+  }
+  await reload();
+  msg(cleanupFailed?
+   tr("Chapter/topic removed, but some private stored files could not be cleaned up.","অধ্যায়/টপিক মুছে গেছে, তবে কিছু সংরক্ষিত ফাইলের cleanup সম্পন্ন হয়নি।"):
+   kind==="chapter"?tr("Chapter deleted.","অধ্যায় মুছে ফেলা হয়েছে।"):tr("Topic deleted.","টপিক মুছে ফেলা হয়েছে।"),cleanupFailed);
+ }catch(err){msg(tr("Delete failed: ","মুছতে সমস্যা: ")+String(err.message||err).slice(0,150),true)}
+ finally{busy=false}
+}
+async function deleteWrittenNote(id){
+ if(busy||deletingNote!==id)return;
+ const topic=data.topics.find(t=>t.id===id);
+ if(!topic||!owner(data.courses.find(c=>c.id===topic.course_id)))return;
+ rememberOpenChapters();busy=true;
+ try{
+  const {data:updated,error}=await client().from(TABLES.topics)
+    .update({body:""}).eq("id",id).eq("course_id",topic.course_id).select("id").maybeSingle();
+  if(error)throw error;
+  if(!updated)throw Error(tr("Notes not found or permission denied.","নোটস পাওয়া যায়নি অথবা অনুমতি নেই।"));
+  resetEntityEditors();
+  await reload();
+  msg(tr("Written notes deleted. Topic and files kept.","লিখিত নোটস মুছে গেছে। টপিক ও ফাইল অক্ষত আছে।"));
+ }catch(err){msg(tr("Delete failed: ","মুছতে সমস্যা: ")+String(err.message||err).slice(0,150),true)}
+ finally{busy=false}
+}
 function action(act,btn){
  if(!act?.startsWith("cm-"))return false;
  const type=act.slice(3),id=btn?.dataset.id;
  if(type==="tab"){tab=btn.dataset.tab;message="";refresh();return true}
- if(type==="select"){selected=id;message="";openedChapters=null;editingAsset="";deletingAsset="";refresh();return true}
+ if(type==="select"){selected=id;message="";openedChapters=null;editingAsset="";deletingAsset="";resetEntityEditors();refresh();return true}
  if(type==="login"){void Auth.signIn();return true}
  if(type==="copy"){if(navigator.clipboard?.writeText){void navigator.clipboard.writeText(id).then(()=>msg(tr("Join code copied.","Join Code কপি হয়েছে।"))).catch(()=>msg(id))}else msg(id);return true}
  if(type==="reload"){void reload();return true}
+
+ if(["edit-chapter","request-delete-chapter","edit-topic","request-delete-topic","edit-note","request-delete-note"].includes(type)){
+  const key=type.includes("chapter")?"chapters":"topics";
+  const item=data[key].find(x=>x.id===id);
+  if(!item||!owner(data.courses.find(c=>c.id===item.course_id))||busy)return true;
+  rememberOpenChapters();
+  const prop={"edit-chapter":"editingChapter","request-delete-chapter":"deletingChapter",
+   "edit-topic":"editingTopic","request-delete-topic":"deletingTopic",
+   "edit-note":"editingNote","request-delete-note":"deletingNote"}[type];
+  const active={editingChapter,deletingChapter,editingTopic,deletingTopic,editingNote,deletingNote}[prop]===id;
+  resetEntityEditors();
+  if(!active){
+   if(prop==="editingChapter")editingChapter=id;
+   if(prop==="deletingChapter")deletingChapter=id;
+   if(prop==="editingTopic")editingTopic=id;
+   if(prop==="deletingTopic")deletingTopic=id;
+   if(prop==="editingNote")editingNote=id;
+   if(prop==="deletingNote")deletingNote=id;
+  }
+  editingAsset="";deletingAsset="";refresh();return true;
+ }
+ if(type==="cancel-entity"){rememberOpenChapters();resetEntityEditors();refresh();return true}
+ if(type==="confirm-delete-chapter"){void deleteCourseItem("chapter",id);return true}
+ if(type==="confirm-delete-topic"){void deleteCourseItem("topic",id);return true}
+ if(type==="confirm-delete-note"){void deleteWrittenNote(id);return true}
  if(type==="edit-file"||type==="request-delete-file"){
   rememberOpenChapters();
   const asset=data.assets.find(x=>x.id===id);
