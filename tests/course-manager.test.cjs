@@ -49,3 +49,52 @@ test("unknown actions are left to legacy NovaStudy modules",()=>{
  assert.equal(f.app.action("add-subject",{dataset:{}}),false);
  assert.equal(f.app.action(undefined,{dataset:{}}),false);
 });
+
+function courseFixture({asStudent=false}={}){
+ const courseId="course-one",chapterId="chapter-one",topicId="topic-one";
+ const teacherId="teacher-uuid",studentId="student-uuid";
+ const rows={
+  ns_courses:[{id:courseId,owner_id:teacherId,title:"Data Structures",description:"",invite_code:"abcdef"}],
+  ns_enrollments:[{course_id:courseId,student_id:studentId,display_name:"Student"}],
+  ns_chapters:[{id:chapterId,course_id:courseId,title:"Chapter 01",position:0,created_at:"2026-01-01"}],
+  ns_topics:[{id:topicId,chapter_id:chapterId,course_id:courseId,title:"Variables",body:"",position:0,created_at:"2026-01-01"}],
+  ns_assets:[{id:"file-one",course_id:courseId,chapter_id:chapterId,topic_id:null,file_name:"Lecture.png",file_path:"notes/course-one/teacher-uuid/picture.png",mime_type:"image/png",byte_size:100}],
+  ns_assignments:[],ns_submissions:[]
+ };
+ const account={id:asStudent?studentId:teacherId,user_metadata:{full_name:asStudent?"Student":"Teacher"}};
+ const auth={getStatus:()=>"connected",getUser:()=>account,getClient:()=>({
+  from(table){return {select(){return {limit:async()=>({data:rows[table],error:null})}}}}
+ })};
+ const window={NOVA:{escape:htmlEscape},NOVA_AUTH:auth,NOVA_I18N:{language:"en"},
+  NOVA_VIEWS:{subjects:()=>"<p>Legacy library retained</p>"}};
+ const ctx={window,console,queueMicrotask:()=>{},crypto:{randomUUID:()=>"new-id"}};
+ vm.runInNewContext(source,ctx,{filename:"course-manager.js"});
+ window.NOVA_COURSES.init({refresh:()=>{},toast:()=>{}});
+ return {app:window.NOVA_COURSES,rows};
+}
+test("teacher chapter has only one upload; topic has its own upload",async()=>{
+ const f=courseFixture();await f.app.load();
+ const html=f.app.page();
+ assert.equal((html.match(/data-cm-upload data-course="course-one" data-chapter="chapter-one" data-topic=""/g)||[]).length,1);
+ assert.equal((html.match(/data-cm-upload data-course="course-one" data-chapter="chapter-one" data-topic="topic-one"/g)||[]).length,1);
+ assert.match(html,/data-action="cm-edit-file"/);
+ assert.match(html,/data-action="cm-request-delete-file"/);
+ assert.match(html,/data-action="cm-open-file"/);
+ assert.equal(f.app.action("cm-edit-file",{dataset:{id:"file-one"}}),true);
+ assert.match(f.app.page(),/data-cm-form="asset-edit"/);
+ assert.match(f.app.page(),/name="replacement"/);
+ assert.equal(f.app.action("cm-request-delete-file",{dataset:{id:"file-one"}}),true);
+ assert.match(f.app.page(),/Delete this file permanently/);
+ assert.equal(f.app.action("cm-cancel-file",{dataset:{}}),true);
+ assert.doesNotMatch(f.app.page(),/data-cm-form="asset-edit"/);
+});
+test("student can open files but has no file edit/delete/upload controls",async()=>{
+ const f=courseFixture({asStudent:true});await f.app.load();
+ const html=f.app.page();
+ assert.match(html,/data-action="cm-open-file"/);
+ assert.doesNotMatch(html,/data-action="cm-edit-file"/);
+ assert.doesNotMatch(html,/data-action="cm-request-delete-file"/);
+ assert.doesNotMatch(html,/data-cm-upload/);
+ assert.equal(f.app.action("cm-edit-file",{dataset:{id:"file-one"}}),true);
+ assert.doesNotMatch(f.app.page(),/data-cm-form="asset-edit"/);
+});
