@@ -65,5 +65,5 @@ test("cloud UI is wired into existing profile and versioned offline cache",()=>{
  const h=read("index.html"),a=read("app.js"),v=read("views.js"),sw=read("sw.js");
  assert.match(h,/src="\.\/cloud\.js"/);assert.match(h,/href="\.\/cloud\.css"/);
  assert.match(a,/Cloud\.handle\(action\)/);assert.match(v,/NOVA_CLOUD\.panel/);
- assert.match(sw,/novastudy-v3\.5\.0/);assert.match(sw,/'\.\/cloud\.js'/);
+ assert.match(sw,/novastudy-v3\.5\.1/);assert.match(sw,/'\.\/cloud\.js'/);
 });
