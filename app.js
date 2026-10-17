@@ -26,33 +26,40 @@ const Ed=window.NOVA_EDIT(A),X=window.NOVA_EXAMS,F=window.NOVA_FOCUS,T=window.NO
 const CourseManager=window.NOVA_COURSES,CSE=window.NOVA_CHALLENGE,Auth=window.NOVA_AUTH,Cloud=window.NOVA_CLOUD,Sync=window.NOVA_SYNC,Auto=window.NOVA_AUTO,Planner=window.NOVA_SMART_PLANNER,Prep=window.NOVA_EXAM_PREP,Insights=window.NOVA_FOCUS_INSIGHTS,Hub=window.NOVA_LEARNING_HUB,Reports=window.NOVA_ACADEMIC_REPORTS,Reminders=window.NOVA_REMINDERS,UI=window.NOVA_UI,Diagnostics=window.NOVA_DIAGNOSTICS,Portability=window.NOVA_PORTABILITY;
 CSE.init({changed,toast,refresh:render});
 const THEME_KEY = "novastudy_theme_v1";
-function themeName(){return document.documentElement.dataset.theme==="gold"?"gold":"cyber"}
+const THEMES=["cyber","gold","halftone"];
+const THEME_LABELS={cyber:"Cyber",gold:"Black Gold",halftone:"Mint Halftone"};
+function themeName(){
+ const current=document.documentElement.dataset.theme;
+ return THEMES.includes(current)?current:"cyber";
+}
 function updateThemeControls(){
-  const gold=themeName()==="gold";
-  const top=$("themeToggle"),label=$("themeLabel");
-  if(top){
-    top.setAttribute("aria-pressed",String(gold));
-    top.setAttribute("aria-label",gold?"Switch to Futuristic Cyber theme":"Switch to Black and Gold theme");
-    top.title=gold?"Current: Black & Gold. Activate Cyber theme.":"Current: Cyber. Activate Black & Gold theme.";
-  }
-  if(label)label.textContent=gold?"Black Gold":"Cyber";
-  document.querySelectorAll("[data-theme-value]").forEach(el=>{
-    const active=el.dataset.themeValue===(gold?"gold":"cyber");
-    el.classList.toggle("is-selected",active);
-    el.setAttribute("aria-pressed",String(active));
-  });
-  const meta=document.querySelector('meta[name="theme-color"]');
-  if(meta)meta.content=gold?"#100c07":"#080e20";
+ const current=themeName(),top=$("themeToggle"),label=$("themeLabel");
+ const next=THEMES[(THEMES.indexOf(current)+1)%THEMES.length];
+ if(top){
+  top.setAttribute("aria-pressed",String(current!=="cyber"));
+  top.setAttribute("aria-label","Current theme: "+THEME_LABELS[current]+". Switch to "+THEME_LABELS[next]);
+  top.title="Current: "+THEME_LABELS[current]+". Activate "+THEME_LABELS[next]+".";
+ }
+ if(label)label.textContent=THEME_LABELS[current];
+ document.querySelectorAll("[data-theme-value]").forEach(el=>{
+  const active=el.dataset.themeValue===current;
+  el.classList.toggle("is-selected",active);
+  el.setAttribute("aria-pressed",String(active));
+ });
+ const meta=document.querySelector('meta[name="theme-color"]');
+ if(meta)meta.content=current==="gold"?"#100c07":current==="halftone"?"#effbf6":"#080e20";
 }
 function setTheme(next){
-  if(next!=="cyber"&&next!=="gold")return;
-  if(themeName()===next){updateThemeControls();return}
-  document.documentElement.dataset.theme=next;
-  try{localStorage.setItem(THEME_KEY,next)}catch{}
-  render();
-  toast(next==="gold"?"Black & Gold theme enabled.":"Futuristic Cyber theme enabled.");
+ if(!THEMES.includes(next))return;
+ if(themeName()===next){updateThemeControls();return}
+ document.documentElement.dataset.theme=next;
+ try{localStorage.setItem(THEME_KEY,next)}catch{}
+ render();
+ toast(THEME_LABELS[next]+" theme enabled.");
 }
-function toggleTheme(){setTheme(themeName()==="gold"?"cyber":"gold")}
+function toggleTheme(){
+ const current=themeName();setTheme(THEMES[(THEMES.indexOf(current)+1)%THEMES.length]);
+}
 function updateLanguageControls(){
  const label=$("langLabel"),btn=$("langToggle");
  if(label)label.textContent=I.language==="bn"?"EN":"বাংলা";
@@ -108,7 +115,7 @@ window.addEventListener("storage",e=>{
     return;
   }
   if(e.key!==THEME_KEY)return;
-  const next=e.newValue==="gold"?"gold":"cyber";
+  const next=THEMES.includes(e.newValue)?e.newValue:"cyber";
   if(next!==themeName()){
     document.documentElement.dataset.theme=next;
     render();
