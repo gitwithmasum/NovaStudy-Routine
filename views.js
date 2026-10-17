@@ -90,7 +90,7 @@ function accountServicePanel(){
  const active=accountServices.find(item=>item.id===selectedAccountService)||accountServices[0];
  return '<section class="panel settings-account-suite" aria-labelledby="settingsAccountTitle">'+
  '<div class="panel-header"><div><b id="settingsAccountTitle" class="panel-title">'+I.t("Account & Cloud Services")+'</b>'+
- '<small class="panel-sub">'+I.t("Google sign-in, cloud backups and sync settings in one place.")+'</small></div>'+
+ '<small class="panel-sub">'+I.t("Google sign-in, cloud backup, sync and academic profile in one place.")+'</small></div>'+
  '<span class="chip">'+I.t("5 services")+'</span></div>'+
  '<div class="settings-account-menu" role="group" aria-label="'+I.t("Account & Cloud Services")+'">'+
  accountServices.map(item=>'<button type="button" class="settings-tool-link settings-account-option'+
