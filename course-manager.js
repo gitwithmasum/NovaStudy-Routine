@@ -5,7 +5,7 @@ const N=window.NOVA,Auth=window.NOVA_AUTH;
 const e=value=>N.escape(String(value??""));
 const tr=(en,bn)=>window.NOVA_I18N?.language==="bn"?bn:en;
 const empty=()=>({courses:[],enrollments:[],chapters:[],topics:[],assets:[],assignments:[],submissions:[]});
-let data=empty(),selected="",tab="courses",busy=false,loading=false,loadedUser="",message="",refresh=()=>{},toast=()=>{},editingAsset="",deletingAsset="",editingChapter="",deletingChapter="",editingTopic="",deletingTopic="",editingNote="",deletingNote="",openedChapters=null;
+let data=empty(),selected="",tab="courses",busy=false,loading=false,loadedUser="",message="",refresh=()=>{},toast=()=>{},editingAsset="",deletingAsset="",editingChapter="",deletingChapter="",editingTopic="",deletingTopic="",editingNote="",deletingNote="",openedChapters=null,ownerPanel="";
 const TABLES={courses:"ns_courses",enrollments:"ns_enrollments",chapters:"ns_chapters",topics:"ns_topics",assets:"ns_assets",assignments:"ns_assignments",submissions:"ns_submissions"};
 const bucket="novastudy-learning";
 const user=()=>Auth.getStatus()==="connected"?Auth.getUser():null;
@@ -21,7 +21,7 @@ function rememberOpenChapters(){
 }
 function resetEntityEditors(){editingChapter="";deletingChapter="";editingTopic="";deletingTopic="";editingNote="";deletingNote="";}
 function init(a){refresh=a.refresh||refresh;toast=a.toast||toast;}
-function authChanged(){loadedUser="";data=empty();selected="";openedChapters=null;resetEntityEditors();editingAsset="";deletingAsset="";if(!loading)refresh();}
+function authChanged(){loadedUser="";data=empty();selected="";openedChapters=null;ownerPanel="";resetEntityEditors();editingAsset="";deletingAsset="";if(!loading)refresh();}
 function page(){
  const u=user();if((u?.id||"")!==loadedUser&&!loading){loadedUser=u?.id||"";data=empty();selected="";if(u)queueMicrotask(load);}
  const legacy='<details class="cm-legacy"><summary>'+tr("Legacy subject library (existing subjects and routines preserved)","আগের Subject Library (পুরোনো রুটিন ও তথ্য অক্ষত)")+'</summary>'+window.NOVA_VIEWS.subjects()+'</details>';
@@ -46,7 +46,7 @@ async function load(){
   }));
   if(user()?.id!==uid)return;
   data=Object.fromEntries(entries);
-  if(!data.courses.some(c=>c.id===selected)){selected=data.courses[0]?.id||"";openedChapters=null;}
+  if(!data.courses.some(c=>c.id===selected)){selected=data.courses[0]?.id||"";openedChapters=null;ownerPanel="";}
   message="";
  }catch(err){if(user()?.id===uid)message=tr("Could not load courses: ","কোর্স লোড করা যায়নি: ")+String(err.message||err).slice(0,150)}
  finally{loading=false;refresh()}
@@ -61,10 +61,18 @@ function renderCourses(){
  if(!data.courses.length)return noCourses();
  const c=currentCourse(),isOwner=owner(c),members=by("enrollments",c.id);
  const chapters=by("chapters",c.id).sort((a,b)=>a.position-b.position||a.created_at.localeCompare(b.created_at));
- const invite=isOwner?'<div class="cm-invite"><span>'+tr("Student join code","শিক্ষার্থীর Join Code")+'</span><code>'+e(c.invite_code)+'</code>'+button(tr("Copy Code","কোড কপি"),"copy",'data-id="'+e(c.invite_code)+'"')+'</div>':"";
+ const showingCode=isOwner&&ownerPanel==="code",showingStudents=isOwner&&ownerPanel==="students";
+ const ownerActions=isOwner?button(tr("Join Code","জয়েন কোড"),"toggle-owner-panel",'data-panel="code" aria-expanded="'+showingCode+'" aria-controls="cm-owner-code"')+
+ button(tr("Enrolled Students","ভর্তিকৃত শিক্ষার্থী")+" ("+members.length+")","toggle-owner-panel",'data-panel="students" aria-expanded="'+showingStudents+'" aria-controls="cm-owner-students"'):"";
+ const joinPanel=showingCode?'<div id="cm-owner-code" class="cm-owner-panel cm-invite" role="region" aria-label="'+tr("Student join code","শিক্ষার্থীর Join Code")+'"><span>'+tr("Student join code","শিক্ষার্থীর Join Code")+'</span><code>'+e(c.invite_code)+'</code>'+button(tr("Copy Code","কোড কপি"),"copy",'data-id="'+e(c.invite_code)+'"')+'</div>':"";
+ const studentPanel=showingStudents?'<div id="cm-owner-students" class="cm-owner-panel cm-members" role="region" aria-label="'+tr("Enrolled Students","ভর্তিকৃত শিক্ষার্থী")+'">'+
+ '<h3>'+tr("Enrolled Students","ভর্তিকৃত শিক্ষার্থী")+" ("+members.length+')</h3>'+
+ (members.length?members.map(m=>'<div class="cm-member"><span>'+e(m.display_name||"Student")+'</span>'+button(tr("Remove","সরাও"),"remove-student",'data-id="'+c.id+'" data-student="'+m.student_id+'"')+'</div>').join(""):'<p class="cm-muted">'+tr("No students have joined yet.","এখনো শিক্ষার্থী যোগ দেয়নি।")+'</p>')+'</div>':"";
  const add=isOwner?'<form class="cm-inline" data-cm-form="chapter" data-course="'+c.id+'"><input name="title" maxlength="150" required placeholder="'+tr("New chapter title","নতুন অধ্যায়ের নাম")+'"><button class="secondary-btn" type="submit">+ '+tr("Add Chapter","অধ্যায় যোগ")+'</button></form>':"";
- const membersBox=isOwner?'<details class="cm-members"><summary>'+tr("Enrolled Students","ভর্তিকৃত শিক্ষার্থী")+' ('+members.length+')</summary>'+ (members.length?members.map(m=>'<div class="cm-member"><span>'+e(m.display_name||"Student")+'</span>'+button(tr("Remove","সরাও"),"remove-student",'data-id="'+c.id+'" data-student="'+m.student_id+'"')+'</div>').join(""):'<p class="cm-muted">'+tr("No students have joined yet.","এখনো শিক্ষার্থী যোগ দেয়নি।")+'</p>')+'</details>':"";
- return coursePicker()+'<section class="panel cm-panel"><div class="cm-flex"><div><span class="eyebrow">'+(isOwner?"TEACHER / OWNER":"STUDENT / ENROLLED")+'</span><h2>'+e(c.title)+'</h2><p class="cm-muted">'+e(c.description)+'</p></div>'+button(tr("Refresh","রিফ্রেশ"),"reload")+'</div>'+invite+membersBox+'<h3>'+tr("Chapters & Topics","অধ্যায় ও টপিক")+'</h3>'+add+(chapters.length?chapters.map((ch,i)=>renderChapter(c,ch,i+1,isOwner)).join(""):'<p class="cm-muted">'+tr("No chapters yet. Add the first chapter.","কোনো অধ্যায় নেই। প্রথম অধ্যায় যোগ করো।")+'</p>')+'</section>';
+ const header='<div class="cm-course-header"><div class="cm-course-title"><span class="eyebrow">'+(isOwner?"TEACHER / OWNER":"STUDENT / ENROLLED")+'</span><h2>'+e(c.title)+'</h2><p class="cm-muted">'+e(c.description)+'</p></div>'+
+ '<div class="cm-course-actions" role="group" aria-label="'+tr("Course actions","কোর্সের অপশন")+'">'+ownerActions+button(tr("Refresh","রিফ্রেশ"),"reload")+'</div></div>';
+ return coursePicker()+'<section class="panel cm-panel">'+header+joinPanel+studentPanel+
+ '<h3>'+tr("Chapters & Topics","অধ্যায় ও টপিক")+'</h3>'+add+(chapters.length?chapters.map((ch,i)=>renderChapter(c,ch,i+1,isOwner)).join(""):'<p class="cm-muted">'+tr("No chapters yet. Add the first chapter.","কোনো অধ্যায় নেই। প্রথম অধ্যায় যোগ করো।")+'</p>')+'</section>';
 }
 function fileList(courseId,chapterId,topicId,isOwner=false){
  const attachments=by("assets",courseId).filter(a=>topicId?a.topic_id===topicId:!!chapterId&&a.chapter_id===chapterId&&!a.topic_id);
@@ -359,10 +367,16 @@ function action(act,btn){
  if(!act?.startsWith("cm-"))return false;
  const type=act.slice(3),id=btn?.dataset.id;
  if(type==="tab"){tab=btn.dataset.tab;message="";refresh();return true}
- if(type==="select"){selected=id;message="";openedChapters=null;editingAsset="";deletingAsset="";resetEntityEditors();refresh();return true}
+ if(type==="select"){selected=id;message="";ownerPanel="";openedChapters=null;editingAsset="";deletingAsset="";resetEntityEditors();refresh();return true}
  if(type==="login"){void Auth.signIn();return true}
  if(type==="copy"){if(navigator.clipboard?.writeText){void navigator.clipboard.writeText(id).then(()=>msg(tr("Join code copied.","Join Code কপি হয়েছে।"))).catch(()=>msg(id))}else msg(id);return true}
  if(type==="reload"){void reload();return true}
+ if(type==="toggle-owner-panel"){
+  if(busy||!owner(currentCourse())||!["code","students"].includes(btn.dataset.panel))return true;
+  rememberOpenChapters();
+  ownerPanel=ownerPanel===btn.dataset.panel?"":btn.dataset.panel;
+  refresh();return true;
+ }
  if(type==="toggle-chapter"){
   const ch=data.chapters.find(x=>x.id===id);
   if(!ch||!data.courses.some(c=>c.id===ch.course_id))return true;
