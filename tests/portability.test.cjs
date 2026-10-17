@@ -132,16 +132,16 @@ test("backup UI escapes records and includes explicit preview controls",async()=
 test("v3.4 scripts, app routes, offline cache, static audits and validation hooks are wired",()=>{
  const html=read("index.html"),app=read("app.js"),sw=read("sw.js"),focus=read("focus-insights.js"),
  audit=read("scripts/release-audit.cjs"),ci=read(".github/workflows/novastudy-tests.yml");
- assert.match(html,/NOVASTUDY OS <b>3\.5\.1<\/b>/);
+ assert.match(html,/NOVASTUDY OS <b>3\.5\.2<\/b>/);
  assert.match(html,/data-nav="portability"/);
  assert.match(html,/src="\.\/portability\.js"/);
  assert.match(html,/href="\.\/portability\.css"/);
  assert.match(app,/Portability\.page\(\)/);assert.match(app,/Portability\.change/);
  assert.match(app,/Portability\.init/);
  assert.match(focus,/NOVA_FOCUS_INSIGHTS=\{KEY,valid/);
- assert.match(sw,/novastudy-v3\.5\.1/);
+ assert.match(sw,/novastudy-v3\.5\.2/);
  assert.match(sw,/'\.\/portability\.js'/);
- assert.match(audit,/novastudy-v3\\\.5\\\.1/);
+ assert.match(audit,/novastudy-v3\\\.5\\\.2/);
  assert.match(ci,/node --check portability\.js/);
  for(const p of ["portability.js","app.js","sw.js"])assert.doesNotThrow(()=>new vm.Script(read(p),{filename:p}));
 });

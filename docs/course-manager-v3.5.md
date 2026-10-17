@@ -38,3 +38,11 @@ This release is additive. **It does not migrate or replace** `novastudy_state_v1
 - This module currently has no offline course edit or offline submission queue.
 - Course content and submissions are not included in existing JSON backup/restore.
 - Email notifications, grading, comments, and student-specific homework allocation are not implemented in this release.
+
+## v3.5.2 — Chapter, topic and written-note management
+- Course owners see **Edit Chapter**, **Delete Chapter**, **Edit Topic** and **Delete Topic**.
+- Existing written topic notes are read-only by default with explicit **Edit Notes** and **Delete Notes** controls. Blank notes show **Add Notes**.
+- Delete confirmations identify affected topic and file counts. Chapter deletion cascades to its topics, note text and file metadata. Topic deletion cascades to its note text and attached file metadata. Private Storage cleanup is attempted after the database operation.
+- Deleting only written notes clears the \`body\` field; it **does not** delete the topic, chapter, or uploaded files.
+- Only the course owner can modify this content; students can read it.
+- Existing routine, tasks, exams, homework, enrollment, and personal backup are preserved.
