@@ -1,0 +1,31 @@
+/* NovaStudy Settings tools — quick access to existing full-featured modules */
+.settings-tools{margin:0 0 18px;padding:19px}
+.settings-tools .panel-header{margin-bottom:13px}
+.settings-tool-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.settings-tool-link{
+ display:flex;align-items:center;gap:12px;text-align:left;min-height:92px;
+ width:100%;padding:15px 13px;border:1px solid var(--line,#384e67);
+ border-radius:13px;background:var(--panel2,#17273c);color:var(--text,#eaf5ff);
+ cursor:pointer;font:inherit;transition:background .2s,border-color .2s,transform .2s
+}
+.settings-tool-link:hover,.settings-tool-link:focus-visible{
+ background:color-mix(in srgb,var(--panel2,#17273c) 76%,var(--mint,#57d3c8));
+ border-color:var(--mint,#57d3c8)
+}
+.settings-tool-link:focus-visible{outline:2px solid var(--mint,#57d3c8);outline-offset:2px}
+.settings-tool-icon{
+ display:grid;place-items:center;flex:0 0 38px;height:38px;
+ border:1px solid var(--line,#38506b);border-radius:10px;
+ background:var(--panel,#132137);color:var(--mint,#57d3c8);font-size:20px
+}
+.settings-tool-copy{display:grid;gap:5px;flex:1;min-width:0}
+.settings-tool-copy strong{font-size:13px;font-weight:800;line-height:1.4;overflow-wrap:anywhere}
+.settings-tool-copy small{font-size:11px;line-height:1.5;color:var(--muted,#acc0d2);overflow-wrap:anywhere}
+.settings-tool-arrow{font-size:22px;color:var(--mint,#57d3c8);flex:none}
+@media(max-width:1040px){.settings-tool-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:660px){
+ .settings-tools{padding:15px}
+ .settings-tool-grid{grid-template-columns:1fr;gap:9px}
+ .settings-tool-link{min-height:70px;padding:12px}
+}
+@media(prefers-reduced-motion:reduce){.settings-tool-link{transition:none}}
