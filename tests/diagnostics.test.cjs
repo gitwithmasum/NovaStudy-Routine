@@ -120,7 +120,7 @@ test("v3.3 integration keeps original data modules, adds diagnostics navigation 
  assert.match(sw,/'\.\/diagnostics\.js'/);
  assert.match(sw,/'\.\/diagnostics\.css'/);
  assert.match(css,/focus-visible/);
- assert.match(audit,/novastudy-v3\\\.4\\\.0/);
+ assert.match(audit,/novastudy-v3\\\.5\\\.0/);
  for(const f of ["diagnostics.js","editors.js","app.js","sw.js"])
   assert.doesNotThrow(()=>new vm.Script(read(f),{filename:f}));
 });
