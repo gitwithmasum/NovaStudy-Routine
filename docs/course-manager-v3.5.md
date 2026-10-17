@@ -70,3 +70,9 @@ This release is additive. **It does not migrate or replace** `novastudy_state_v1
 - **My Profile & Settings** has a responsive **Tools & utilities** card group with exactly those three options. Each opens its existing full-featured utility page; direct hash routes stay supported for bookmarks and recovery.
 - Profile Settings is highlighted in navigation when a utility route is open. The notification bell in the topbar remains an alert shortcut.
 - Existing reminder preferences, academic profile, UI settings, backup and restore, exams, routines, course data and Cloud backups are preserved.
+
+## v3.5.8 — Side-by-side Account & Cloud Services cards
+- Profile & Settings → Account & Cloud Services presents four selectable cards like Tools & Utilities: Google Account, Google Account Cloud Backup, Smart Sync v2.2, Automatic Sync v2.2.
+- The desktop layout is 4 columns, medium screens 2 columns, and mobile a vertical stack. The currently selected card is highlighted and exposes its complete existing controls below.
+- Only the selected detail panel is rendered; changing cards does not modify any existing cloud, authentication, smart sync or local user data. Defaults to Google Account on a fresh page load and preserves selection during in-app renders.
+- The four original modules, event handlers, privacy controls, and update semantics are unchanged. Bilingual labels and accessibility attributes are preserved.
