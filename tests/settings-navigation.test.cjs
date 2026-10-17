@@ -38,16 +38,16 @@ test("Profile Settings groups four utility cards, including Personalization",()=
  assert.match(html,/id="settingsToolsTitle"/);
  assert.ok(html.indexOf('class="settings-tools"')<html.indexOf('class="settings-grid"'));
  for(const route of ["notifications","diagnostics","portability"])
-  assert.equal((cards.match(new RegExp('data-nav="'+route+'"','g'))||[]).length,1);
+  assert.equal((cards.match(new RegExp('data-settings-utility="'+route+'"','g'))||[]).length,1);
  assert.match(cards,/Reminders & notifications/);
  assert.match(cards,/App diagnostics/);
  assert.match(cards,/Backup & data portability/);
  assert.match(cards,/Personalization/);
  assert.equal((cards.match(/data-action="settings-data-toggle"/g)||[]).length,1);
- assert.match(cards,/aria-expanded="false" aria-controls="settingsDataNotifications"/);
+ assert.match(cards,/aria-expanded="false" aria-controls="settingsUtilityContent"/);
  assert.equal((cards.match(/class="settings-tool-link/g)||[]).length,4);
- assert.ok(cards.indexOf('data-nav="notifications"')<cards.indexOf('data-nav="diagnostics"'));
- assert.ok(cards.indexOf('data-nav="diagnostics"')<cards.indexOf('data-nav="portability"'));
+ assert.ok(cards.indexOf('data-settings-utility="notifications"')<cards.indexOf('data-settings-utility="diagnostics"'));
+ assert.ok(cards.indexOf('data-settings-utility="diagnostics"')<cards.indexOf('data-settings-utility="portability"'));
  for(const text of ["Google login preserved"])
   assert.match(html,new RegExp(text));
  assert.match(html,/data-account-service="cloud"/);
@@ -61,7 +61,7 @@ test("Bangla settings navigation keeps all utility shortcuts and translated titl
  assert.match(html,/ডেটা এক্সপোর্ট/);
  assert.match(html,/Personalization/);
  for(const route of ["notifications","diagnostics","portability"])
-  assert.match(html,new RegExp('data-nav="'+route+'"'));
+  assert.match(html,new RegExp('data-settings-utility="'+route+'"'));
 });
 test("legacy utility routes remain loadable from Settings without touching course navigation",()=>{
  const app=read("app.js"),sw=read("sw.js"),html=read("index.html");
