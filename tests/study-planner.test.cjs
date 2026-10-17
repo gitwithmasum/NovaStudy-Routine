@@ -138,10 +138,10 @@ test("integration includes standalone planner, PWA, route and no sync source mod
  assert.match(index,/src="\.\/study-planner\.js"/);
  assert.match(index,/href="\.\/study-planner\.css"/);
  assert.match(index,/data-nav="planner"/);
- assert.match(index,/3\.5\.10/);
+ assert.match(index,/3\.5\.11/);
  assert.match(app,/Planner\.page\(\)/);assert.match(app,/Planner\.review/);assert.match(app,/Planner\.handle/);
  assert.match(v,/go-planner/);
- assert.match(sw,/novastudy-v3\.5\.10/);
+ assert.match(sw,/novastudy-v3\.5\.11/);
  assert.match(sw,/'\.\/study-planner\.js'/);
  assert.match(ci,/node --check study-planner\.js/);
  for(const f of ["study-planner.js","app.js","dashboard.js","views.js","sw.js"]){
