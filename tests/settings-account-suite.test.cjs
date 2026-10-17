@@ -2,7 +2,7 @@
 const {test}=require("node:test"),assert=require("node:assert/strict");
 const fs=require("node:fs"),vm=require("node:vm"),path=require("node:path");
 const read=p=>fs.readFileSync(path.join(__dirname,"..",p),"utf8");
-function settingsMarkup(lang="en"){
+function boot(lang="en"){
  const profile={name:"Student",institution:"",category:"university",level:"1",track:"CSE",weekStart:6};
  const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  const panels={
@@ -16,41 +16,60 @@ function settingsMarkup(lang="en"){
  NOVA_REMINDERS:{panel:()=>'<section>Reminder preferences preserved</section>'},
  NOVA_UI:{settingsPanel:()=>'<section>Appearance preferences preserved</section>'}};
  vm.runInNewContext(read("views.js"),{window:win},{filename:"views.js"});
- return win.NOVA_VIEWS.settings();
+ return {views:win.NOVA_VIEWS,markup:()=>win.NOVA_VIEWS.settings()};
 }
-test("four existing independent account/cloud/sync modules are grouped under one settings panel",()=>{
- const html=settingsMarkup();
+test("Account & Cloud Services shows four side-by-side selectable cards like Tools & utilities",()=>{
+ const {markup}=boot();
+ const html=markup();
  assert.equal((html.match(/class="panel settings-account-suite"/g)||[]).length,1);
- assert.match(html,/<section class="panel settings-account-suite" aria-labelledby="settingsAccountTitle">/);
  assert.match(html,/id="settingsAccountTitle" class="panel-title">Account & Cloud Services/);
- assert.match(html,/<div class="settings-account-modules">/);
- const tags=["google-auth-panel",'aria-label="Cloud Backup"','aria-label="Smart Sync"','aria-label="Automatic Sync"'];
- const positions=tags.map(x=>html.indexOf(x));
- assert.ok(positions.every(x=>x>=0));
- assert.ok(positions.every((x,i)=>i===0||x>positions[i-1]),"Four modules should appear in existing order");
- assert.ok(html.indexOf("settings-account-modules")<positions[0]);
- assert.ok(positions[3]<html.indexOf("Academic profile"));
- assert.equal((html.match(/class="settings-account-modules"/g)||[]).length,1);
+ assert.match(html,/class="settings-account-menu" role="group"/);
+ const ids=["auth","cloud","sync","auto"];
+ for(const id of ids)
+  assert.equal((html.match(new RegExp('data-action="account-service-select" data-account-service="'+id+'"','g'))||[]).length,1);
+ assert.equal((html.match(/class="settings-tool-link settings-account-option/g)||[]).length,4);
+ const positions=ids.map(id=>html.indexOf('data-account-service="'+id+'"'));
+ assert.ok(positions.every((pos,i)=>i===0||pos>positions[i-1]));
+ assert.match(html,/data-account-service="auth" aria-pressed="true"/);
+ assert.equal((html.match(/aria-pressed="true"/g)||[]).length,1);
 });
-test("all existing action IDs stay wired and are not copied into new actions",()=>{
- const html=settingsMarkup();
- for(const action of ["google-signin","cloud-refresh","sync-review","auto-toggle"])
-  assert.equal((html.match(new RegExp('data-action="'+action+'"','g'))||[]).length,1);
+test("only selected module details render below cards while all original action IDs work",()=>{
+ const {views,markup}=boot();
+ const specs=[
+  ["auth","google-signin"],
+  ["cloud","cloud-refresh"],
+  ["sync","sync-review"],
+  ["auto","auto-toggle"]
+ ];
+ for(const [name,action] of specs){
+  assert.equal(views.selectAccountService(name),true);
+  const html=markup();
+  assert.match(html,new RegExp('data-account-service="'+name+'" aria-pressed="true"'));
+  assert.match(html,new RegExp('data-action="'+action+'"'));
+  for(const other of specs.filter(v=>v[0]!==name))
+   assert.doesNotMatch(html,new RegExp('data-action="'+other[1]+'"'));
+  assert.match(html,/id="accountServiceContent" role="region"/);
+ }
+ assert.equal(views.selectAccountService("unknown"),false);
+ assert.match(markup(),/data-account-service="auto" aria-pressed="true"/);
+});
+test("cards use true 4/2/1-column grid and active state styling; original four panel functions are untouched",()=>{
+ const css=read("settings-tools.css"),html=read("index.html"),views=read("views.js"),app=read("app.js");
+ assert.match(css,/\.settings-account-menu\{\s*display:grid;grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+ assert.match(css,/@media\(max-width:1150px\)[\s\S]*?grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+ assert.match(css,/@media\(max-width:620px\)[\s\S]*?grid-template-columns:1fr/);
+ assert.match(css,/settings-account-option\.selected/);
+ assert.match(html,/href="\.\/settings-tools\.css"/);
+ assert.match(app,/case"account-service-select":if\(V\.selectAccountService\(b\.dataset\.accountService\)\)\{render\(\)\}break/);
  for(const panel of ["NOVA_AUTH","NOVA_CLOUD","NOVA_SYNC","NOVA_AUTO"])
-  assert.match(read("views.js"),new RegExp('window\\.'+panel+'\\.panel\\(\\)'));
+  assert.match(views,new RegExp('window\\.'+panel+'\\.panel\\(\\)'));
+});
+test("Bangla header and other settings sections remain intact with no storage writes",()=>{
+ const {markup}=boot("bn");
+ const html=markup();
+ assert.match(html,/অ্যাকাউন্ট ও ক্লাউড সার্ভিসেস/);
  assert.match(html,/Reminder preferences preserved/);
  assert.match(html,/Appearance preferences preserved/);
-});
-test("consolidated panel styling removes internal card boundaries but retains section separators and mobile layout",()=>{
- const css=read("settings-tools.css"),html=read("index.html");
- assert.match(css,/settings-account-modules>\.panel\+\.panel/);
- assert.match(css,/background:transparent!important/);
- assert.match(css,/border-top:1px solid/);
- assert.match(css,/@media\(max-width:660px\)/);
- assert.match(html,/href="\.\/settings-tools\.css"/);
-});
-test("combined account panel has Bangla title and changes no app storage keys",()=>{
- assert.match(settingsMarkup("bn"),/অ্যাকাউন্ট ও ক্লাউড সার্ভিসেস/);
- assert.match(read("i18n.js"),/"Account & Cloud Services":"অ্যাকাউন্ট ও ক্লাউড সার্ভিসেস"/);
+ assert.match(read("i18n.js"),/"Google Account Cloud Backup":"গুগল অ্যাকাউন্ট ক্লাউড ব্যাকআপ"/);
  assert.doesNotMatch(read("views.js"),/localStorage\.setItem|sessionStorage\.setItem/);
 });
