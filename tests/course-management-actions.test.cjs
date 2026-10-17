@@ -54,6 +54,8 @@ function setup({account="owner"}={}){
  const FormData=class{constructor(form){this.form=form}get(k){return this.form.values?.[k]??null}};
  vm.runInNewContext(read("course-manager.js"),{window:win,FormData,queueMicrotask:()=>{},console,crypto:{randomUUID:()=>""}},{filename:"course-manager.js"});
  win.NOVA_COURSES.init({refresh:()=>{},toast:t=>notify.push(t)});
+ // The real app renders once before initial async load to bind its current user.
+ win.NOVA_COURSES.page();
  return {app:win.NOVA_COURSES,rows,operations,cleanups,notify};
 }
 test("every owner-selected course has independent Edit/Delete buttons beside Refresh",async()=>{
