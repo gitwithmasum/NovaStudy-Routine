@@ -3,9 +3,9 @@ const {test}=require("node:test"),assert=require("node:assert/strict");
 const fs=require("node:fs"),path=require("node:path");
 const read=p=>fs.readFileSync(path.join(__dirname,"..",p),"utf8");
 
-test("third Mint Halftone theme appears in the settings gallery beside Cyber and Black & Gold",()=>{
+test("Mint Halftone theme appears in the settings gallery beside Cyber and Black & Gold",()=>{
  const view=read("views.js");
- for(const theme of ["cyber","gold","halftone"])
+ for(const theme of ["cyber","gold","halftone","neonwave","neonwave"])
   assert.match(view,new RegExp('data-theme-value="'+theme+'"'));
  assert.match(view,/theme-preview-halftone/);
  assert.match(view,/Mint Halftone/);
@@ -18,8 +18,8 @@ test("third Mint Halftone theme appears in the settings gallery beside Cyber and
 test("Mint Halftone restores before paint, persists and participates in the three-way toggle",()=>{
  const html=read("index.html"),js=read("app.js");
  assert.match(html,/localStorage\.getItem\("novastudy_theme_v1"\)/);
- assert.match(html,/\["cyber","gold","halftone"\]\.includes/);
- assert.match(js,/const THEMES=\["cyber","gold","halftone"\]/);
+ assert.match(html,/\["cyber","gold","halftone","neonwave"\]\.includes/);
+ assert.match(js,/const THEMES=\["cyber","gold","halftone","neonwave"\]/);
  assert.match(js,/THEMES\[\(THEMES.indexOf\(current\)\+1\)%THEMES.length\]/);
  assert.match(js,/localStorage\.setItem\(THEME_KEY,next\)/);
  assert.match(js,/THEMES\.includes\(e\.newValue\)\?e\.newValue:"cyber"/);

@@ -19,7 +19,7 @@ function valueOk(k,x){
  if(k==="focus")return F.valid(x);
  if(k==="reminders")return R.valid(x);
  if(k==="ui")return U.valid(x);
- if(k==="theme")return x==="gold"||x==="cyber"||x==="halftone";
+ if(k==="theme")return x==="gold"||x==="cyber"||x==="halftone"||x==="neonwave";
  if(k==="language")return x==="bn"||x==="en";
  return false;
 }

@@ -38,8 +38,8 @@ const Ed=window.NOVA_EDIT(A),X=window.NOVA_EXAMS,F=window.NOVA_FOCUS,T=window.NO
 const CourseManager=window.NOVA_COURSES,CSE=window.NOVA_CHALLENGE,Auth=window.NOVA_AUTH,Cloud=window.NOVA_CLOUD,Sync=window.NOVA_SYNC,Auto=window.NOVA_AUTO,Planner=window.NOVA_SMART_PLANNER,Prep=window.NOVA_EXAM_PREP,Insights=window.NOVA_FOCUS_INSIGHTS,Hub=window.NOVA_LEARNING_HUB,Reports=window.NOVA_ACADEMIC_REPORTS,Reminders=window.NOVA_REMINDERS,UI=window.NOVA_UI,Diagnostics=window.NOVA_DIAGNOSTICS,Portability=window.NOVA_PORTABILITY;
 CSE.init({changed,toast,refresh:render});
 const THEME_KEY = "novastudy_theme_v1";
-const THEMES=["cyber","gold","halftone"];
-const THEME_LABELS={cyber:"Cyber",gold:"Black Gold",halftone:"Mint Halftone"};
+const THEMES=["cyber","gold","halftone","neonwave"];
+const THEME_LABELS={cyber:"Cyber",gold:"Black Gold",halftone:"Mint Halftone",neonwave:"Neon Wave"};
 function themeName(){
  const current=document.documentElement.dataset.theme;
  return THEMES.includes(current)?current:"cyber";
@@ -59,7 +59,7 @@ function updateThemeControls(){
   el.setAttribute("aria-pressed",String(active));
  });
  const meta=document.querySelector('meta[name="theme-color"]');
- if(meta)meta.content=current==="gold"?"#100c07":current==="halftone"?"#effbf6":"#080e20";
+ if(meta)meta.content=current==="gold"?"#100c07":current==="halftone"?"#effbf6":current==="neonwave"?"#0a0621":"#080e20";
 }
 function setTheme(next){
  if(!THEMES.includes(next))return;

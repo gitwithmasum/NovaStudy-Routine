@@ -15,7 +15,7 @@
     // Keep the user's appearance preference independent from routine and task data.
     try {
       document.documentElement.dataset.theme =
-        ["cyber","gold","halftone"].includes(localStorage.getItem("novastudy_theme_v1")) ? localStorage.getItem("novastudy_theme_v1") : "cyber";
+        ["cyber","gold","halftone","neonwave"].includes(localStorage.getItem("novastudy_theme_v1")) ? localStorage.getItem("novastudy_theme_v1") : "cyber";
     } catch {
       document.documentElement.dataset.theme = "cyber";
     }
@@ -43,6 +43,7 @@
   <link rel="stylesheet" href="./portability.css" />
   <link rel="stylesheet" href="./settings-tools.css" />
   <link rel="stylesheet" href="./halftone-theme.css" />
+  <link rel="stylesheet" href="./neon-wave-theme.css" />
   <title>NovaStudy — Routine OS</title>
 </head>
 <body>
@@ -93,7 +94,7 @@
       <div class="reliability-actions"><button type="button" data-action="apply-update">Update and reload</button><button type="button" data-action="update-later">Later</button><button type="button" data-action="retry-update" id="updateRetry" hidden>Retry update</button><button type="button" data-action="export">Export routine backup</button></div>
     </div>
     <div id="view" class="view" tabindex="-1"></div>
-      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>3.5.14</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
+      <footer class="app-footer"><span>✦ NOVASTUDY OS <b>3.5.15</b></span><span>ENGINEERED FOR YOUR NEXT LEVEL</span></footer>
     </main>
   </div>
   <nav class="mobile-nav" aria-label="Mobile navigation">

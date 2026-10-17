@@ -1,0 +1,82 @@
+/* NovaStudy Neon Wave: static, vector-only. No animated gradients or expensive backdrop filters. */
+html[data-theme="neonwave"]{
+ color-scheme:dark;
+ --bg:#070519;--panel:#14102deF;--panel2:#1d1639;
+ --line:#66548e;--text:#f5f3ff;--muted:#c2badf;
+ --mint:#56d9ff;--purple:#bf69ff;--gold:#e66bdf;
+ --gold-strong:#ec76f2;--gold-soft:#d8a9ff;--gold-dark:#9b40b2;
+}
+html[data-theme="neonwave"] body{
+ background-color:#070519;
+ background-image:linear-gradient(#05031829,#05031847),url("./assets/neon-wave.svg");
+ background-size:cover;
+ background-position:center top;
+ background-repeat:no-repeat;
+ background-attachment:scroll;
+ color:var(--text);
+}
+html[data-theme="neonwave"] :is(.app-shell,.content){background:transparent}
+html[data-theme="neonwave"] :is(.sidebar,.topbar,.mobile-nav){
+ background:#0d0b24f2;border-color:#57467c;
+ backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+html[data-theme="neonwave"] :is(.panel,.cm-panel,.hero,.subject-card,.timeline-card,.cm-topic,.cm-file-item,
+ .settings-tool-link,.settings-account-option,.settings-data-panel,.hub-topic,.hub-project,.hub-record,
+ .study-planner-card,.study-preview-day,.cm-chapter-shell,.cm-note-block,.cm-owner-panel){
+ background:#15102ee8;border-color:#625087;color:#f5f3ff;
+ box-shadow:0 2px 12px #03020b2b;
+ backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+html[data-theme="neonwave"] :is(.brand strong,.view-title,.panel-title,.stat-value,.cm-chapter-toggle strong){color:#faf8ff}
+html[data-theme="neonwave"] :is(.brand small,.sidebar-caption,.sidebar-footer,.breadcrumb,.panel-sub,.cm-muted,.settings-tool-copy small){color:#c4b8e3}
+html[data-theme="neonwave"] :is(.nav-btn,.mobile-nav button,.cm-chapter-toggle){color:#e2dafa}
+html[data-theme="neonwave"] :is(.nav-btn:hover,.nav-btn.active,.mobile-nav button.active){
+ background:#292053e8;color:#fff;border-color:#6185e9;
+}
+html[data-theme="neonwave"] :is(.nav-ico,.eyebrow,.stat-icon,.theme-symbol,.settings-tool-icon){color:#65deff}
+html[data-theme="neonwave"] .primary-btn{
+ background:linear-gradient(110deg,#008cbd,#803bba);color:#fff;border-color:#438de0;
+ box-shadow:none;
+}
+html[data-theme="neonwave"] :is(.secondary-btn,.outline-button,.tiny-btn,.import-label,.cm-file-actions button){
+ background:#272044;color:#f4f1ff;border-color:#72619b;
+}
+html[data-theme="neonwave"] :is(.secondary-btn:hover,.outline-button:hover,.tiny-btn:hover){
+ background:#393068;border-color:#74caff;
+}
+html[data-theme="neonwave"] :is(.chip,.status-pill,.day-pill,.filter-chip,.hub-tab){
+ background:#272044;color:#f2ebff;border-color:#6b598f;
+}
+html[data-theme="neonwave"] :is(input,select,textarea){
+ background:#151129;color:#f4f1ff;border-color:#655589;accent-color:#38c9f4;
+}
+html[data-theme="neonwave"] :is(input::placeholder,textarea::placeholder){color:#b2a6c9}
+html[data-theme="neonwave"] :is(button,input,select,textarea):focus-visible{
+ outline:2px solid #4bdfff;outline-offset:2px;
+}
+html[data-theme="neonwave"] :is(.hint-banner,.auth-state,.cloud-counts,.settings-tool-link.is-selected,.settings-account-option.selected){
+ background:#282047;border-color:#7063a9;color:#ece5ff;
+}
+html[data-theme="neonwave"] :is(.modal,dialog,.toast){
+ background:#16122f;color:#f5f3ff;border-color:#74639a;
+}
+html[data-theme="neonwave"] .theme-option{background:#1b1635;color:#f5f3ff;border-color:#61518a}
+html[data-theme="neonwave"] .theme-option.is-selected{border-color:#46cfff;box-shadow:0 0 0 1px #46cfff}
+html[data-theme="neonwave"] .cm-upload{border-color:#4cd9fd;color:#71e3ff}
+html[data-theme="neonwave"] .cm-delete-confirm{background:#392037;color:#fbdde5}
+html[data-theme="neonwave"] .app-footer{background:#100c25e8;border-color:#564775;color:#d4c8ee}
+.theme-preview-neonwave{
+ --preview-line:#6756cf;--preview-bg:#08051d;--preview-accent:#55cafa;--preview-light:#b62cbd;
+ background:#09051f url("./assets/neon-wave.svg") center / cover no-repeat;
+}
+.theme-preview-neonwave .preview-top{background:#0c1147bd}
+.theme-preview-neonwave .preview-main b{background:linear-gradient(90deg,#147fe0,#c236e5)}
+/* Four previews on wide screens without large animated raster effects. */
+.theme-gallery{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:900px){.theme-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.theme-gallery{grid-template-columns:1fr}}
+@media(max-width:660px){
+ html[data-theme="neonwave"] body{background-size:auto 100vh;background-position:center top;background-repeat:repeat-y}
+ html[data-theme="neonwave"] :is(.panel,.cm-panel){box-shadow:none}
+}
+@media(prefers-reduced-motion:reduce){html[data-theme="neonwave"] *{scroll-behavior:auto}}
