@@ -18,7 +18,7 @@ function boot(language="en"){
  vm.runInNewContext(read("views.js"),{window},{filename:"views.js"});
  return {views:window.NOVA_VIEWS,html:()=>window.NOVA_VIEWS.settings()};
 }
-test("Tools & utilities has four visible cards in requested order; Data & notifications is initially closed",()=>{
+test("Tools & utilities has four visible cards in requested order; Personalization is initially closed",()=>{
  const {html}=boot(),markup=html();
  const tools=markup.slice(markup.indexOf('class="settings-tool-grid"'),markup.indexOf('class="settings-data-content"'));
  const entries=['data-nav="notifications"','data-nav="diagnostics"','data-nav="portability"','data-action="settings-data-toggle"'];
@@ -29,13 +29,13 @@ test("Tools & utilities has four visible cards in requested order; Data & notifi
   last=current;
  }
  assert.equal((tools.match(/class="settings-tool-link/g)||[]).length,4);
- assert.match(tools,/Data & notifications/);
+ assert.match(tools,/Personalization/);
  assert.match(tools,/aria-expanded="false" aria-controls="settingsDataNotifications"/);
  assert.match(markup,/class="settings-data-content" id="settingsDataNotifications" hidden/);
- assert.equal((markup.match(/<b class="panel-title">Data & notifications<\/b>/g)||[]).length,1);
+ assert.doesNotMatch(markup,/<b class="panel-title">Personalization<\/b>/);
  assert.ok(markup.indexOf('id="settingsDataNotifications"')<markup.indexOf('class="settings-grid"'));
 });
-test("clicking fourth card opens/closes original theme, language, backup and notification settings without duplication",()=>{
+test("clicking fourth card opens/closes original theme, language, backup and display settings without duplication",()=>{
  const {views,html}=boot();
  assert.equal(views.toggleDataNotifications(),true);
  const open=html();
@@ -46,9 +46,9 @@ test("clicking fourth card opens/closes original theme, language, backup and not
  assert.match(open,/data-action="language-select" data-lang="bn"/);
  assert.match(open,/data-action="export"/);
  assert.match(open,/id="importFile"/);
- assert.match(open,/Reminder preferences retained/);
+ assert.doesNotMatch(open,/Reminder preferences retained|Reminder preferences/i);
  assert.match(open,/Accessibility preferences retained/);
- assert.equal((open.match(/<b class="panel-title">Data & notifications<\/b>/g)||[]).length,1);
+ assert.equal((open.match(/<b class="panel-title">Personalization<\/b>/g)||[]).length,1);
  assert.equal(views.toggleDataNotifications(),false);
  assert.match(html(),/class="settings-data-content" id="settingsDataNotifications" hidden/);
 });
@@ -63,9 +63,9 @@ test("theme selection handler and responsive 4/2/1 card layout stay functional",
  assert.match(css,/@media\(max-width:1150px\)[\s\S]*?\.settings-tools \.settings-tool-grid\{\s*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
  assert.match(css,/\.settings-data-content\[hidden\]\{\s*display:none!important/);
  assert.match(css,/@media\(max-width:660px\)[\s\S]*?\.settings-tools \.settings-tool-grid\{grid-template-columns:1fr\}/);
- assert.match(read("i18n.js"),/"Data & notifications":"ডেটা ও নোটিফিকেশন"/);
+ assert.match(read("i18n.js"),/"Personalization":"পার্সোনালাইজেশন"/);
 });
-test("Data & notifications move does not alter user data, original settings or primary navigation",()=>{
+test("Personalization move does not alter user data, original settings or primary navigation",()=>{
  const source=read("views.js"),app=read("app.js"),index=read("index.html");
  assert.doesNotMatch(source,/localStorage\.setItem|sessionStorage\.setItem/);
  assert.match(source,/Academic profile/);
