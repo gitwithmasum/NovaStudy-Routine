@@ -43,11 +43,14 @@ const routes=new Set([...sidebar.matchAll(/data-nav="([^"]+)"/g)].map(x=>x[1]));
 for(const route of [...mobile.matchAll(/data-nav="([^"]+)"/g)].map(x=>x[1]))
  check(routes.has(route),"Mobile route missing on desktop: "+route);
 check(routes.size>=10,"Too few desktop routes");
-check(routes.has("diagnostics"),"Diagnostics desktop route missing");
-check(routes.has("portability")&&mobile.includes('data-nav="portability"'),"Backup Center navigation missing");
+check(!routes.has("notifications")&&!routes.has("diagnostics")&&!routes.has("portability"),"Utility routes must be removed from sidebar");
+check(!mobile.includes('data-nav="notifications"')&&!mobile.includes('data-nav="diagnostics"')&&!mobile.includes('data-nav="portability"'),"Utility routes must be removed from mobile nav");
+const settingsView=read("views.js");
+for(const route of ["notifications","diagnostics","portability"])check(settingsView.includes('data-nav="'+route+'"'),"Utility must remain accessible from Profile Settings: "+route);
+check(routes.has("subjects")&&routes.has("settings"),"Courses and Profile Settings navigation must be preserved");
 check(html.includes('src="./portability.js"')&&html.includes('href="./portability.css"'),"Backup Center assets missing");
 check(html.includes('src="./course-manager.js"')&&html.includes('href="./course-manager.css"'),"Course Manager assets missing");
-check(mobile.includes('data-nav="diagnostics"'),"Diagnostics mobile route missing");
+check(html.includes('href="./settings-tools.css"')&&sw.includes("'./settings-tools.css'"),"Settings utilities stylesheet not cached");
 check(html.includes('src="./diagnostics.js"')&&html.includes('href="./diagnostics.css"'),"Diagnostics assets missing");
 check(app.includes("Diagnostics.onAction(action)")&&app.includes("Diagnostics.setIssue"),"Diagnostics events missing");
 const css=read("navigation-scroll.css")+read("performance-mobile.css")+read("premium-ui.css");
