@@ -98,3 +98,55 @@ test("student can open files but has no file edit/delete/upload controls",async(
  assert.equal(f.app.action("cm-edit-file",{dataset:{id:"file-one"}}),true);
  assert.doesNotMatch(f.app.page(),/data-cm-form="asset-edit"/);
 });
+
+test("teacher can edit chapter/title, edit topic/title, and edit or delete only written notes",async()=>{
+ const f=courseFixture();f.app.page();await f.app.load();
+ f.rows.ns_topics[0].body="A variable stores information.";
+ let html=f.app.page();
+ for(const name of ["cm-edit-chapter","cm-request-delete-chapter","cm-edit-topic","cm-request-delete-topic","cm-edit-note","cm-request-delete-note"])
+  assert.match(html,new RegExp('data-action="'+name+'"'),name);
+ assert.match(html,/A variable stores information/);
+ assert.doesNotMatch(html,/data-cm-form="topic-body"/);
+ assert.equal(f.app.action("cm-edit-chapter",{dataset:{id:"chapter-one"}}),true);
+ assert.match(f.app.page(),/data-cm-form="chapter-edit"/);
+ assert.equal(f.app.action("cm-cancel-entity",{dataset:{}}),true);
+ assert.equal(f.app.action("cm-edit-topic",{dataset:{id:"topic-one"}}),true);
+ assert.match(f.app.page(),/data-cm-form="topic-edit"/);
+ assert.equal(f.app.action("cm-cancel-entity",{dataset:{}}),true);
+ assert.equal(f.app.action("cm-edit-note",{dataset:{id:"topic-one"}}),true);
+ assert.match(f.app.page(),/data-cm-form="topic-body"/);
+ assert.match(f.app.page(),/A variable stores information/);
+ assert.equal(f.app.action("cm-cancel-entity",{dataset:{}}),true);
+ assert.doesNotMatch(f.app.page(),/data-cm-form="topic-body"/);
+ assert.equal(f.app.action("cm-request-delete-note",{dataset:{id:"topic-one"}}),true);
+ assert.match(f.app.page(),/Delete only the written notes/);
+ assert.match(f.app.page(),/uploaded PDF\/images will be preserved/);
+ assert.doesNotMatch(f.app.page(),/data-action="cm-confirm-delete-topic"/);
+});
+test("owner deletion confirmation explains chapter/topic cascading data loss",async()=>{
+ const f=courseFixture();f.app.page();await f.app.load();
+ assert.equal(f.app.action("cm-request-delete-chapter",{dataset:{id:"chapter-one"}}),true);
+ assert.match(f.app.page(),/Deleting this chapter permanently removes its/);
+ assert.match(f.app.page(),/1 topics and 1 attached files/);
+ assert.match(f.app.page(),/data-action="cm-confirm-delete-chapter"/);
+ assert.equal(f.app.action("cm-cancel-entity",{dataset:{}}),true);
+ assert.doesNotMatch(f.app.page(),/data-action="cm-confirm-delete-chapter"/);
+ assert.equal(f.app.action("cm-request-delete-topic",{dataset:{id:"topic-one"}}),true);
+ assert.match(f.app.page(),/Permanently delete this topic/);
+ assert.match(f.app.page(),/data-action="cm-confirm-delete-topic"/);
+});
+test("student cannot see or open chapter/topic or written-note edit and delete controls",async()=>{
+ const f=courseFixture({asStudent:true});f.app.page();await f.app.load();
+ f.rows.ns_topics[0].body="Student can read but not modify";
+ let html=f.app.page();
+ assert.match(html,/Student can read but not modify/);
+ for(const action of ["edit-chapter","request-delete-chapter","edit-topic","request-delete-topic","edit-note","request-delete-note"])
+  assert.doesNotMatch(html,new RegExp('data-action="cm-'+action+'"'),action);
+ assert.equal(f.app.action("cm-edit-chapter",{dataset:{id:"chapter-one"}}),true);
+ assert.equal(f.app.action("cm-edit-topic",{dataset:{id:"topic-one"}}),true);
+ assert.equal(f.app.action("cm-request-delete-note",{dataset:{id:"topic-one"}}),true);
+ html=f.app.page();
+ assert.doesNotMatch(html,/data-cm-form="chapter-edit"/);
+ assert.doesNotMatch(html,/data-cm-form="topic-edit"/);
+ assert.doesNotMatch(html,/data-cm-form="topic-body"/);
+});
