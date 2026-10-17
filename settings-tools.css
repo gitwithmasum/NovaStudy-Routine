@@ -139,3 +139,32 @@
  .settings-tools .settings-tool-grid{grid-template-columns:1fr}
  .settings-tools .settings-data-panel{padding:12px}
 }
+
+/* v3.5.11 — Academic Profile is the fifth selectable Account & Cloud Services card */
+.settings-account-suite .settings-account-menu{
+ grid-template-columns:repeat(5,minmax(0,1fr));
+}
+.settings-account-suite .settings-account-option{
+ min-width:0;
+}
+.settings-account-suite .settings-account-modules>.panel form#profileForm{
+ width:100%;max-width:100%;
+}
+.settings-account-suite .settings-account-modules>.panel .form-grid{
+ width:100%;
+}
+@media(max-width:1300px){
+ .settings-account-suite .settings-account-menu{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+ }
+}
+@media(max-width:860px){
+ .settings-account-suite .settings-account-menu{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+ }
+}
+@media(max-width:620px){
+ .settings-account-suite .settings-account-menu{
+  grid-template-columns:1fr;
+ }
+}
