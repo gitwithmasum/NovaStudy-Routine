@@ -7,6 +7,18 @@ let day=new Date().getDay(),filter="all",query="",promptInstall=null,toastTimer=
 function toast(s){const e=$("toast");e.textContent=I.t(s);e.classList.add("visible");clearTimeout(toastTimer);toastTimer=setTimeout(()=>e.classList.remove("visible"),3300)}
 function updateReminderBadge(){const count=Reminders.badge(),bell=$("reminderBadge");if(bell){bell.hidden=count===0;bell.textContent=count>99?"99+":I.number(count)}}
 function render(){clearTimeout(taskSearchTimer);document.querySelectorAll("[data-nav]").forEach(x=>{const current=x.dataset.nav===page||(page==="challenge"&&x.dataset.nav==="learning")||(["notifications","diagnostics","portability"].includes(page)&&x.dataset.nav==="settings");x.classList.toggle("active",current);x.setAttribute("aria-current",current?"page":"false")});$("pageLabel").textContent=I.language==="bn"?I.t({dashboard:"Dashboard",schedule:"Weekly routine",planner:"Smart study planner",tasks:"Tasks & goals",challenge:"CSE Learning Hub",learning:"CSE Learning Hub",subjects:"Course & Notes Manager",exams:"Exams & revision",focus:"Focus timer",attendance:"Attendance & analytics",reports:"Academic reports",notifications:"Reminders & notifications",diagnostics:"App diagnostics",portability:"Backup & data portability",settings:"Settings"}[page]):page==="subjects"?"COURSE & NOTES MANAGER":page.toUpperCase();$("view").innerHTML=page==="portability"?Portability.page():page==="diagnostics"?Diagnostics.page():page==="notifications"?Reminders.page():page==="reports"?Reports.page():(page==="learning"||page==="challenge")?Hub.page():page==="planner"?Planner.page():page==="schedule"?V.schedule(day):page==="tasks"?V.tasks(filter,query):page==="subjects"?CourseManager.page():page==="exams"?X.page():page==="focus"?F.page():page==="attendance"?T.page():page==="challenge"?CSE.view():V[page]();updateThemeControls();updateLanguageControls();I.apply(document);updateReminderBadge()}
+function refreshSettingsTools(focusId){
+ const section=document.querySelector(".settings-tools");
+ if(!section){render();return}
+ section.outerHTML=V.settingsTools();
+ const next=document.querySelector(".settings-tools");
+ if(next)I.apply(next);
+ const button=next?.querySelector('[data-settings-utility="'+focusId+'"]');
+ button?.focus({preventScroll:true});
+ updateThemeControls();
+ updateLanguageControls();
+ updateReminderBadge();
+}
 function showRecovery(message){
  const box=$("recoveryNotice"),detail=$("recoveryMessage");
  detail.textContent=I.t(message);box.hidden=false;
@@ -75,7 +87,13 @@ function exportBackup(){const file=new Blob([JSON.stringify({...S(),demo:false},
 async function importBackup(file){if(!file)return;if(file.size>1000000){toast("Backups must be under 1 MB.");return}try{const v=JSON.parse(await file.text());if(!N.valid(v))throw Error("Unsupported or invalid backup.");if(!confirm("Replace ALL current profile, subjects, routine, tasks, exams, attendance AND CSE 100 challenge progress?"))return;if(!N.setState(v)){showRecovery(N.getIssue());return}$("recoveryNotice").hidden=true;nav("dashboard");toast("Backup restored.")}catch(e){showRecovery("Backup was rejected; existing data is unchanged. "+(e.message||"Invalid file."));toast("Import failed: no data was replaced.")}}
 function refreshChoices(){const cat=$("profileCategory")?.value;if(!N.C[cat])return;const lev=$("profileLevel"),track=$("profileTrack"),oldL=lev.value,oldT=track.value;lev.innerHTML=V.option(N.C[cat].levels,N.C[cat].levels.includes(oldL)?oldL:N.C[cat].levels[0]);track.innerHTML=V.option(Object.keys(N.C[cat].tracks),N.C[cat].tracks[oldT]?oldT:Object.keys(N.C[cat].tracks)[0])}
 document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.nav){nav(b.dataset.nav);return}const {action,id,day:d,filter:f}=b.dataset;if(CourseManager.action(action,b)||Portability.action(action)||Diagnostics.onAction(action)||UI.handle(action,b)||Reminders.handle(action,b)||Reports.handle(action)||Hub.handle(action,b)||Insights.handle(action,b)||F.handle(action,b)||T.handle(action,b)||CSE.handle(action,b)||Auth.handle(action)||Cloud.handle(action)||Sync.handle(action)||Auto.handle(action)||Planner.handle(action)||Prep.handle(action,id))return;switch(action){
-case"settings-data-toggle":V.toggleDataNotifications();render();break;
+case"settings-utility-toggle":
+case"settings-data-toggle":{
+ const utility=action==="settings-data-toggle"?"data":b.dataset.settingsUtility;
+ if(V.toggleSettingsUtility(utility))refreshSettingsTools(utility);
+ else refreshSettingsTools(utility);
+ break;
+}
 case"account-service-select":if(V.selectAccountService(b.dataset.accountService)){render()}break;
 case"focus-content":$("view").focus();break;case"add-subject":Ed.subject();break;case"edit-subject":Ed.subject(id);break;
 case"add-session":Ed.session();break;case"edit-session":Ed.session(id);break;
