@@ -44,8 +44,10 @@ test("Profile Settings groups exactly three relocated utility shortcuts above ot
  assert.match(cards,/Backup & data portability/);
  assert.ok(cards.indexOf('data-nav="notifications"')<cards.indexOf('data-nav="diagnostics"'));
  assert.ok(cards.indexOf('data-nav="diagnostics"')<cards.indexOf('data-nav="portability"'));
- for(const text of ["Google login preserved","Cloud backup preserved","Reminder preferences preserved","Accessibility preserved"])
+ for(const text of ["Google login preserved","Reminder preferences preserved","Accessibility preserved"])
   assert.match(html,new RegExp(text));
+ assert.match(html,/data-account-service="cloud"/);
+ assert.match(read("views.js"),/window\.NOVA_CLOUD\.panel\(\)/);
 });
 test("Bangla settings navigation keeps all utility shortcuts and translated title",()=>{
  const html=settingsMarkup("bn");
