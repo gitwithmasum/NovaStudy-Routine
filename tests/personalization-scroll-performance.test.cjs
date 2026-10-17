@@ -12,7 +12,7 @@ test("Personalization card renders theme, language and UI settings but never Rem
  assert.match(reminders,/Reminder preferences/);
  assert.match(reminders,/function page\(\)/);
  assert.match(app,/page==="notifications"\?Reminders\.page\(\)/);
- assert.match(views,/\(dataNotificationsOpen\?dataNotificationsPanel\(\):''\)/);
+ assert.match(views,/\(active\?settingsUtilityBody\(active\.route\):\'\'\)/);
 });
 test("Mint Halftone wallpaper has bounded vector complexity and uses scroll-safe static paint",()=>{
  const svg=read("assets/mint-halftone-waves.svg"),css=read("halftone-theme.css");
