@@ -87,10 +87,10 @@ test("v2.2 auto-sync module is wired into app, PWA and source validation",()=>{
  const html=read("index.html"),app=read("app.js"),views=read("views.js"),sw=read("sw.js"),ci=read(".github/workflows/novastudy-tests.yml");
  assert.match(html,/src="\.\/auto-sync\.js"/);
  assert.match(html,/href="\.\/auto-sync\.css"/);
- assert.match(html,/NOVASTUDY OS <b>3\.5\.6<\/b>/);
+ assert.match(html,/NOVASTUDY OS <b>3\.5\.7<\/b>/);
  assert.match(app,/Auto\.handle\(action\)/);
  assert.match(views,/NOVA_AUTO\.panel/);
- assert.match(sw,/novastudy-v3\.5\.6/);
+ assert.match(sw,/novastudy-v3\.5\.7/);
  assert.match(sw,/'\.\/auto-sync\.js'/);
  assert.match(ci,/node --check auto-sync\.js/);
  for(const file of ["auto-sync.js","sync.js","app.js","cloud.js","auth.js"]){
