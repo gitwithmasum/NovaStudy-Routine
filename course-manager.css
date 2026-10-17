@@ -54,3 +54,20 @@
 .cm-legacy .page-head{padding-top:20px}
 @media(max-width:800px){.cm-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.cm-panel{padding:15px!important}.cm-invite{align-items:flex-start;flex-direction:column}.cm-tabs button{flex:1 1 145px}.cm-root{gap:12px}}
 @media(max-width:480px){.cm-stats b{font-size:18px}.cm-stats>span{padding:12px}.cm-chapter>summary{padding:11px;flex-direction:column;align-items:start}.cm-inline{display:grid}.cm-inline>*{width:100%}.cm-legacy{margin-bottom:80px}}
+
+/* Notes and file management — v3.5 owner-only controls */
+.cm-file-item{min-width:0;overflow:hidden;border:1px solid var(--line,#344);border-radius:11px}
+.cm-file-item .cm-file{border:0;border-radius:0;gap:14px;flex-wrap:wrap}
+.cm-file-title{display:flex;align-items:center;gap:7px;min-width:0;flex:1 1 190px;overflow-wrap:anywhere}
+.cm-file-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.cm-file-actions button{min-height:36px;padding:7px 13px;white-space:nowrap}
+.cm-asset-editor{display:grid;gap:13px;max-width:100%!important;padding:17px;border-top:1px solid var(--line,#344);background:var(--panel2,#1d2a3c)}
+.cm-asset-editor label{font-size:13px}
+.cm-asset-editor input{width:100%}
+.cm-asset-editor .cm-file-actions{justify-content:flex-start}
+.cm-delete-confirm{padding:14px 17px;border-top:1px solid var(--line,#344);background:var(--panel2,#1d2a3c)}
+.cm-delete-confirm p{margin:0 0 12px;font-size:13px}
+.cm-delete-confirm .cm-file-actions{justify-content:flex-start}
+.cm-file-actions .danger-btn{background:rgba(220,60,73,.12);color:#f8a5a5;border:1px solid rgba(224,89,94,.6);border-radius:10px}
+.cm-file-actions .danger-btn:hover{background:rgba(220,60,73,.22)}
+@media(max-width:620px){.cm-file-item .cm-file{align-items:stretch}.cm-file-actions{justify-content:flex-start;width:100%}.cm-file-actions button{flex:1 0 auto}.cm-asset-editor,.cm-delete-confirm{padding:13px}}
