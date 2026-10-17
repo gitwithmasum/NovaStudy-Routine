@@ -94,3 +94,21 @@ test("navigation, the 5 account-service cards and stored academic records are un
  assert.match(src,/id="profileForm"/);
  assert.doesNotMatch(src,/localStorage\.clear\(|localStorage\.removeItem\(/);
 });
+
+test("Personalization hides duplicate JSON backup while the dedicated Backup & Data Portability module keeps controls",()=>{
+ const {view,render}=boot();
+ view.toggleSettingsUtility("data");
+ const ui=render();
+ assert.match(ui,/data-theme-value="halftone"/);
+ assert.match(ui,/data-action="language-select"/);
+ assert.doesNotMatch(ui,/Your routines are saved in THIS browser/);
+ assert.doesNotMatch(ui,/id="importFile"|data-action="export"/);
+ view.toggleSettingsUtility("portability");
+ const port=render();
+ assert.match(port,/id="portabilityFile"/);
+ assert.match(port,/data-action="portability-export"/);
+ assert.doesNotMatch(port,/class="panel settings-data-panel"/);
+ const actual=read("portability.js");
+ assert.match(actual,/data-action="portability-export"/);
+ assert.match(actual,/id="portabilityFile"/);
+});
