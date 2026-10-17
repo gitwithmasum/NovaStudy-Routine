@@ -155,9 +155,10 @@ test("short Edit/Delete labels align at the chapter top-right, topic header and 
  const f=courseFixture();f.app.page();await f.app.load();
  f.rows.ns_topics[0].body="Example written notes";
  const html=f.app.page();
- // A chapter header's actions must stay outside the collapsible details content.
- assert.match(html,/<div class="cm-chapter-shell"><details class="cm-chapter"[\s\S]*?<\/details><div class="cm-chapter-header-actions cm-compact-actions"[^>]*>/);
- assert.match(html,/<summary><strong>Chapter 1 — Chapter 01<\/strong>/);
+ // Chapter title and owner actions share a real flex header; no absolute overlay or summary nesting.
+ assert.match(html,/<section class="cm-chapter-shell" data-chapter-id="chapter-one" data-open="true"><div class="cm-chapter-heading">/);
+ assert.match(html,/<button type="button" class="cm-chapter-toggle" data-action="cm-toggle-chapter"[^>]*><strong>Chapter 1 — Chapter 01<\/strong>/);
+ assert.match(html,/<\/button><div class="cm-chapter-header-actions cm-compact-actions"/);
  assert.match(html,/data-action="cm-edit-chapter"[^>]*>Edit<\/button>/);
  assert.match(html,/data-action="cm-request-delete-chapter"[^>]*>Delete<\/button>/);
  assert.match(html,/aria-label="Edit chapter: Chapter 01"/);
@@ -173,13 +174,43 @@ test("short Edit/Delete labels align at the chapter top-right, topic header and 
  assert.equal((html.match(/data-action="cm-edit-chapter"/g)||[]).length,1);
  assert.equal((html.match(/data-action="cm-request-delete-chapter"/g)||[]).length,1);
  assert.match(html,/class="cm-chapter-header-actions cm-compact-actions"/);
- // Even when collapsed, the actions live outside <details>.
- const shell=html.slice(html.indexOf('<div class="cm-chapter-shell">'));
- assert.ok(shell.indexOf('</details>')<shell.indexOf('data-action="cm-edit-chapter"'));
+ // Edit/Delete remain in the row with an actual independent collapse button.
+ const heading=html.slice(html.indexOf('<div class="cm-chapter-heading">'),html.indexOf('<div class="cm-chapter-inner"'));
+ assert.ok(heading.indexOf('data-action="cm-toggle-chapter"') < heading.indexOf('data-action="cm-edit-chapter"'));
+ assert.ok(heading.indexOf('data-action="cm-edit-chapter"') < heading.indexOf('data-action="cm-request-delete-chapter"'));
 });
 test("empty written note exposes a compact Add action, not a destructive Delete",async()=>{
  const f=courseFixture();f.app.page();await f.app.load();
  const html=f.app.page();
  assert.match(html,/data-action="cm-edit-note"[^>]*>Add<\/button>/);
  assert.doesNotMatch(html,/data-action="cm-request-delete-note"/);
+});
+
+test("chapter actions remain visible when chapter is collapsed; toggle does not trigger Edit/Delete",async()=>{
+ const f=courseFixture();f.app.page();await f.app.load();
+ const open=f.app.page();
+ assert.match(open,/data-chapter-id="chapter-one" data-open="true"/);
+ assert.match(open,/<div class="cm-chapter-inner" id="cm-chapter-content-chapter-one" >/);
+ assert.equal(f.app.action("cm-toggle-chapter",{dataset:{id:"chapter-one"}}),true);
+ const closed=f.app.page();
+ assert.match(closed,/data-chapter-id="chapter-one" data-open="false"/);
+ assert.match(closed,/<div class="cm-chapter-inner" id="cm-chapter-content-chapter-one" hidden>/);
+ assert.match(closed,/data-action="cm-edit-chapter"[^>]*>Edit<\/button>/);
+ assert.match(closed,/data-action="cm-request-delete-chapter"[^>]*>Delete<\/button>/);
+ assert.doesNotMatch(closed,/data-cm-form="chapter-edit"/);
+ assert.equal(f.app.action("cm-edit-chapter",{dataset:{id:"chapter-one"}}),true);
+ const expanded=f.app.page();
+ assert.match(expanded,/data-chapter-id="chapter-one" data-open="true"/);
+ assert.match(expanded,/data-cm-form="chapter-edit"/);
+ assert.equal(f.app.action("cm-cancel-entity",{dataset:{}}),true);
+ assert.equal(f.app.action("cm-toggle-chapter",{dataset:{id:"chapter-one"}}),true);
+ assert.match(f.app.page(),/data-chapter-id="chapter-one" data-open="false"/);
+});
+test("student still sees chapter title and toggle but no owner-only Edit/Delete",async()=>{
+ const f=courseFixture({asStudent:true});f.app.page();await f.app.load();
+ const html=f.app.page();
+ assert.match(html,/data-action="cm-toggle-chapter"/);
+ assert.match(html,/Chapter 1 — Chapter 01/);
+ assert.doesNotMatch(html,/data-action="cm-edit-chapter"/);
+ assert.doesNotMatch(html,/data-action="cm-request-delete-chapter"/);
 });
