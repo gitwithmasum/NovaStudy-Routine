@@ -214,3 +214,56 @@ test("student still sees chapter title and toggle but no owner-only Edit/Delete"
  assert.doesNotMatch(html,/data-action="cm-edit-chapter"/);
  assert.doesNotMatch(html,/data-action="cm-request-delete-chapter"/);
 });
+
+test("course owner sees Join Code and Students buttons with spacing beside Refresh; panels start closed",async()=>{
+ const f=courseFixture();f.app.page();await f.app.load();
+ const html=f.app.page();
+ const header=html.slice(html.indexOf('<div class="cm-course-header">'),html.indexOf('</div></div>',html.indexOf('<div class="cm-course-header">'))+12);
+ assert.match(html,/<div class="cm-course-header">/);
+ assert.match(header,/<div class="cm-course-actions" role="group"/);
+ const a=header.indexOf('data-action="cm-toggle-owner-panel" data-panel="code"');
+ const b=header.indexOf('data-action="cm-toggle-owner-panel" data-panel="students"');
+ const c=header.indexOf('data-action="cm-reload"');
+ assert.ok(a>0&&a<b&&b<c,"Join Code → Enrolled Students → Refresh buttons must be adjacent in that order");
+ assert.match(header,/data-panel="code" aria-expanded="false"/);
+ assert.match(header,/data-panel="students" aria-expanded="false"/);
+ assert.match(header,/>Join Code<\/button>/);
+ assert.match(header,/>Enrolled Students \(1\)<\/button>/);
+ assert.doesNotMatch(html,/id="cm-owner-code" role="region"/);
+ assert.doesNotMatch(html,/id="cm-owner-students" role="region"/);
+ assert.doesNotMatch(html,/cm-invite"><span>/);
+ assert.doesNotMatch(html,/<details class="cm-members">/);
+});
+test("Join Code and Enrolled Students open exclusively; copy and member removal still available",async()=>{
+ const f=courseFixture();f.app.page();await f.app.load();
+ let html=f.app.page();
+ assert.equal(f.app.action("cm-toggle-owner-panel",{dataset:{panel:"code"}}),true);
+ html=f.app.page();
+ assert.match(html,/id="cm-owner-code" class="cm-owner-panel cm-invite"/);
+ assert.match(html,/<code>abcdef<\/code>/);
+ assert.match(html,/data-action="cm-copy" data-id="abcdef"/);
+ assert.match(html,/data-panel="code" aria-expanded="true"/);
+ assert.doesNotMatch(html,/id="cm-owner-students"/);
+ assert.equal(f.app.action("cm-toggle-owner-panel",{dataset:{panel:"students"}}),true);
+ html=f.app.page();
+ assert.doesNotMatch(html,/id="cm-owner-code"/);
+ assert.match(html,/id="cm-owner-students" class="cm-owner-panel cm-members"/);
+ assert.match(html,/>Student<\/span>/);
+ assert.match(html,/data-action="cm-remove-student" data-id="course-one" data-student="student-uuid"/);
+ assert.match(html,/data-panel="students" aria-expanded="true"/);
+ assert.equal(f.app.action("cm-toggle-owner-panel",{dataset:{panel:"students"}}),true);
+ assert.doesNotMatch(f.app.page(),/id="cm-owner-students"/);
+});
+test("student cannot see teacher Join Code or student list buttons, even with crafted actions",async()=>{
+ const f=courseFixture({asStudent:true});f.app.page();await f.app.load();
+ const html=f.app.page();
+ assert.match(html,/<div class="cm-course-actions" role="group"/);
+ assert.match(html,/data-action="cm-reload"/);
+ assert.doesNotMatch(html,/data-action="cm-toggle-owner-panel"/);
+ assert.doesNotMatch(html,/id="cm-owner-code"/);
+ assert.doesNotMatch(html,/id="cm-owner-students"/);
+ assert.doesNotMatch(html,/abcdef/);
+ assert.equal(f.app.action("cm-toggle-owner-panel",{dataset:{panel:"code"}}),true);
+ assert.equal(f.app.action("cm-toggle-owner-panel",{dataset:{panel:"students"}}),true);
+ assert.doesNotMatch(f.app.page(),/id="cm-owner-code"|id="cm-owner-students"/);
+});
