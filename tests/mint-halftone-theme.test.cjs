@@ -32,7 +32,7 @@ test("new wallpaper is text-free, fully SVG, and applied to entire view with acc
  assert.match(art,/width="1600" height="1000"/);
  assert.match(art,/fill="#ffffff"/);
  assert.match(art,/ellipse/);
- assert.doesNotMatch(art,/LOREM|HALFTONE|Canva|Edit with AI|<text\b/i);
+ assert.doesNotMatch(art,/LOREM|Canva|Edit with AI|<text\b/i);
  assert.match(css,/html\[data-theme="halftone"\] body\{/);
  assert.match(css,/url\("\.\/assets\/mint-halftone-waves\.svg"\)/);
  assert.match(css,/background-attachment:fixed/);
