@@ -105,9 +105,9 @@ test("dashboard code and cache integrated without editing sync modules",()=>{
  const ci=read(".github/workflows/novastudy-tests.yml"),css=read("dashboard.css");
  assert.match(index,/src="\.\/dashboard\.js"/);
  assert.match(index,/href="\.\/dashboard\.css"/);
- assert.match(index,/NOVASTUDY OS <b>3\.5\.11<\/b>/);
+ assert.match(index,/NOVASTUDY OS <b>3\.5\.12<\/b>/);
  assert.match(views,/function dashboard\(\)\{return window\.NOVA_DASHBOARD\.render\(\)\}/);
- assert.match(sw,/novastudy-v3\.5\.11/);
+ assert.match(sw,/novastudy-v3\.5\.12/);
  assert.match(sw,/'\.\/dashboard\.js'/);
  assert.match(sw,/'\.\/dashboard\.css'/);
  assert.match(ci,/node --check dashboard\.js/);
