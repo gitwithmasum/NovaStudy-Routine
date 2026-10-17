@@ -66,7 +66,8 @@ function setTheme(next){
  if(themeName()===next){updateThemeControls();return}
  document.documentElement.dataset.theme=next;
  try{localStorage.setItem(THEME_KEY,next)}catch{}
- render();
+ // CSS-only theme update preserves live form values and avoids a full view rebuild.
+ updateThemeControls();
  toast(THEME_LABELS[next]+" theme enabled.");
 }
 function toggleTheme(){
@@ -137,7 +138,7 @@ window.addEventListener("storage",e=>{
   const next=THEMES.includes(e.newValue)?e.newValue:"cyber";
   if(next!==themeName()){
     document.documentElement.dataset.theme=next;
-    render();
+    updateThemeControls();
   }
 });
 window.addEventListener("hashchange",()=>{const p=location.hash.slice(1);if(["dashboard","schedule","planner","tasks","challenge","learning","subjects","exams","focus","attendance","reports","notifications","diagnostics","portability","settings"].includes(p)){page=p;if(p==="challenge")Hub.selectTab("challenge",true);else if(p==="learning")Hub.selectTab("overview",true);render();revealActiveNav()}});

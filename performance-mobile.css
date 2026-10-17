@@ -52,3 +52,13 @@ html{scroll-behavior:auto}
  .ui-dashboard-widget{animation:none}
  .panel{box-shadow:0 3px 12px #0001}
 }
+
+
+/* v3.5.16: long Course & Notes topic lists skip offscreen painting. */
+@supports (content-visibility:auto){
+ .cm-topic{content-visibility:auto;contain-intrinsic-size:auto 240px}
+}
+@media (hover:none) and (pointer:coarse){
+ .theme-option:hover{transform:none}
+ .theme-option{touch-action:manipulation}
+}

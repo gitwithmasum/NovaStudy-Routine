@@ -1,0 +1,25 @@
+/* NovaStudy v3.5.16 — final theme-aware contrast and mobile interaction polish. */
+html[data-ui-contrast="on"]{--muted:#d0e0f5;--line:#8498bd}
+html[data-theme="gold"][data-ui-contrast="on"]{--muted:#f4dbac;--line:#bfa176}
+html[data-theme="halftone"][data-ui-contrast="on"]{--muted:#2d6156;--line:#658f82}
+html[data-theme="neonwave"][data-ui-contrast="on"]{--muted:#e4d9ff;--line:#9f8cd0}
+.theme-gallery .theme-option{min-height:124px;touch-action:manipulation}
+.theme-option-name small{font-size:11px;line-height:1.45}
+.settings-tool-link,.settings-account-option{min-height:72px;touch-action:manipulation}
+.settings-utility-content :is(input,select,textarea,button):focus-visible,
+.cm-panel :is(input,select,textarea,button):focus-visible{
+ outline:2px solid var(--mint);outline-offset:2px
+}
+@media(max-width:660px){
+ .theme-gallery .theme-option{min-height:140px}
+ .theme-option-name small{font-size:11px}
+ .settings-tool-link,.settings-account-option{min-height:68px}
+ .panel,.cm-panel{box-shadow:0 2px 10px #00000017}
+}
+@media (hover:none) and (pointer:coarse){.theme-option:hover{transform:none}}
+@media(prefers-reduced-motion:reduce){
+ .theme-option{transition:none!important}
+ .theme-option:hover{transform:none}
+}
+html[data-ui-reduced-motion="on"] .theme-option{transition:none!important}
+html[data-ui-reduced-motion="on"] .theme-option:hover{transform:none}
