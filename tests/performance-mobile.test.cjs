@@ -89,9 +89,9 @@ test("mobile touch targets, iOS inputs, safe areas and reduced-motion settings a
 });
 test("v3.1 cache, version and offline assets are consistent without modifying sync sources",()=>{
  const html=read("index.html"),sw=read("sw.js"),views=read("views.js"),ci=read(".github/workflows/novastudy-tests.yml");
- assert.match(html,/NOVASTUDY OS <b>3\.5\.4<\/b>/);
+ assert.match(html,/NOVASTUDY OS <b>3\.5\.5<\/b>/);
  assert.match(html,/href="\.\/performance-mobile\.css"/);
- assert.match(sw,/novastudy-v3\.5\.4/);
+ assert.match(sw,/novastudy-v3\.5\.5/);
  assert.match(sw,/'\.\/performance-mobile\.css'/);
  assert.match(sw,/event\.request\.mode==='navigate'/);
  assert.match(views,/taskResults\(filter,search\)/);

@@ -58,3 +58,9 @@ This release is additive. **It does not migrate or replace** `novastudy_state_v1
 - The buttons are in the chapter's top-right on desktop and mobile, even when the chapter is collapsed. Topic count and title remain visible in the left heading.
 - Expanded chapter content is controlled with aria-expanded, aria-controls and the hidden attribute.
 - No academic data, course ownership permissions, or student submissions were modified.
+
+## v3.5.5 — Teacher course header tools
+- The course header places **Join Code**, **Enrolled Students (count)**, and **Refresh** together in that order at the top-right, with consistent gaps on desktop and mobile.
+- The first two buttons are visible only to the course owner. Join Code opens a copyable invite code. Enrolled Students opens the enrolled list and Remove action.
+- Only one information panel is expanded at a time; they are hidden by default. The former always-visible code box and native members disclosure are removed.
+- The owner-only controls never appear for signed-in enrolled students; all RLS permissions remain unchanged.
