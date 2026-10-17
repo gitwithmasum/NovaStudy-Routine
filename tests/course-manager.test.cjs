@@ -73,7 +73,7 @@ function courseFixture({asStudent=false}={}){
  return {app:window.NOVA_COURSES,rows};
 }
 test("teacher chapter has only one upload; topic has its own upload",async()=>{
- const f=courseFixture();await f.app.load();
+ const f=courseFixture();f.app.page();await f.app.load();
  const html=f.app.page();
  assert.equal((html.match(/data-cm-upload data-course="course-one" data-chapter="chapter-one" data-topic=""/g)||[]).length,1);
  assert.equal((html.match(/data-cm-upload data-course="course-one" data-chapter="chapter-one" data-topic="topic-one"/g)||[]).length,1);
@@ -89,7 +89,7 @@ test("teacher chapter has only one upload; topic has its own upload",async()=>{
  assert.doesNotMatch(f.app.page(),/data-cm-form="asset-edit"/);
 });
 test("student can open files but has no file edit/delete/upload controls",async()=>{
- const f=courseFixture({asStudent:true});await f.app.load();
+ const f=courseFixture({asStudent:true});f.app.page();await f.app.load();
  const html=f.app.page();
  assert.match(html,/data-action="cm-open-file"/);
  assert.doesNotMatch(html,/data-action="cm-edit-file"/);
