@@ -17,19 +17,55 @@ function tasks(filter,search){
 return heading("MISSION TRACKER / 03","Tasks & goals","Assignments, exam prep and personal to-dos.",button("+ New task","add-task"))+`<div class="toolbar"><div class="filter-row">${["all","pending","done"].map(x=>`<button class="filter-chip ${filter===x?"active":""}" data-action="filter" data-filter="${x}">${x.toUpperCase()}</button>`).join("")}</div><input type="search" placeholder="Search tasks…" id="taskSearch" aria-label="Search tasks" value="${E(search)}"></div><section class="panel" id="taskResults" aria-live="polite" aria-relevant="additions text">${taskResults(filter,search)}</section>`}
 function subjects(){const suggestions=N.subjectPreset().filter(x=>!s().subjects.some(z=>z.name.toLowerCase()===x.toLowerCase()));return heading("KNOWLEDGE LIBRARY / 04","Subject library","Choose subjects for your own academic level and curriculum.",button("+ Add subject","add-subject")+button("Import suggestions ("+suggestions.length+")","suggestions","secondary-btn"))+
 `<div class="flex-between"><b class="section-caption">MY SUBJECTS / ${s().subjects.length}</b><span class="chip">${E(I.t(C[s().profile.category].name))} • ${E(I.t(s().profile.track))}</span></div><div class="subject-grid">${s().subjects.length?s().subjects.map(x=>`<div class="subject-card" style="--subject-color:${E(N.colors.includes(x.color)?x.color:N.colors[0])}"><div class="subject-card-head"><div class="subject-initial">${E(x.name.slice(0,1))}</div>${button("Edit","edit-subject","tiny-btn",x.id)}</div><b>${E(x.name)}</b><small>${s().sessions.filter(t=>t.subjectId===x.id).length} weekly sessions</small></div>`).join(""):empty("Add your first course or import suggestions.")}</div><div class="hint-banner">Suggestions are customizable examples, not the official syllabus of any education board or university.</div>`}
+let dataNotificationsOpen=false;
+function toggleDataNotifications(){
+ dataNotificationsOpen=!dataNotificationsOpen;
+ return dataNotificationsOpen;
+}
+function dataNotificationsPanel(){
+ return `<section class="panel settings-data-panel" aria-label="Data & notifications"><div class="panel-header"><b class="panel-title">Data & notifications</b><span class="chip">LOCAL FIRST</span></div><div class="appearance-panel appearance-panel-v12">
+  <div class="appearance-copy">
+    <b>Choose your theme</b>
+    <small>Choose an interface style without changing your saved routine, tasks, or subjects.</small>
+  </div>
+  <div class="theme-gallery" role="group" aria-label="Appearance theme">
+    <button type="button" class="theme-option" data-action="theme-select" data-theme-value="cyber" aria-pressed="false" aria-label="Use Futuristic Cyber theme">
+      <span class="theme-preview theme-preview-cyber" aria-hidden="true"><span class="preview-top"></span><span class="preview-main"><i></i><b></b><em></em></span></span>
+      <span class="theme-option-bottom"><span class="theme-option-name"><strong>Futuristic Cyber</strong><small>Cyan + violet</small></span><span class="theme-check" aria-hidden="true">✓</span></span>
+    </button>
+    <button type="button" class="theme-option" data-action="theme-select" data-theme-value="gold" aria-pressed="false" aria-label="Use Black and Gold theme">
+      <span class="theme-preview theme-preview-gold" aria-hidden="true"><span class="preview-top"></span><span class="preview-main"><i></i><b></b><em></em></span></span>
+      <span class="theme-option-bottom"><span class="theme-option-name"><strong>Black & Gold</strong><small>Midnight + gold</small></span><span class="theme-check" aria-hidden="true">✓</span></span>
+    </button>
+    <button type="button" class="theme-option" data-action="theme-select" data-theme-value="halftone" aria-pressed="false" aria-label="Use Mint Halftone theme">
+      <span class="theme-preview theme-preview-halftone" aria-hidden="true"><span class="preview-top"></span><span class="preview-main"><i></i><b></b><em></em></span></span>
+      <span class="theme-option-bottom"><span class="theme-option-name"><strong>Mint Halftone</strong><small>White + mint wave</small></span><span class="theme-check" aria-hidden="true">✓</span></span>
+    </button>
+  </div>
+  <small class="theme-save-note">Your appearance preference is saved on this device, including after refresh.</small>
+</div><hr class="separator"><div class="appearance-panel language-panel"><div class="appearance-copy"><b>Language preference</b><small>The interface language is saved on this device. Your own subjects, notes and JSON backups will not be translated.</small></div><div class="language-options" role="group" aria-label="Select interface language"><button class="language-choice" type="button" data-action="language-select" data-lang="en" aria-pressed="false">English</button><button class="language-choice" type="button" data-action="language-select" data-lang="bn" aria-pressed="false">বাংলা</button></div></div><hr class="separator"><p class="panel-sub">Your routines are saved in THIS browser, not in a cloud database. Export regularly to avoid losing data.</p><div class="settings-actions">${button("⇩ Export JSON backup","export","secondary-btn")}<label class="import-label">⇧ Import backup<input type="file" id="importFile" accept=".json,application/json"></label></div><hr class="separator">
+${window.NOVA_REMINDERS.panel()}
+${window.NOVA_UI?.settingsPanel?.()||""}
+<div class="hint-banner">PWA works over HTTPS/localhost after first load. Installing does not create an Android APK or iOS IPA.</div></section>`;
+}
 function settingsTools(){
  const items=[
   {route:"notifications",icon:"♧",title:"Reminders & notifications",description:"Manage study alerts, deadlines and notification history.",bn:"পড়াশোনার রিমাইন্ডার, ডেডলাইন এবং নোটিফিকেশন দেখো।"},
   {route:"diagnostics",icon:"⌁",title:"App diagnostics",description:"Check app health, storage, PWA and troubleshooting.",bn:"অ্যাপের অবস্থা, স্টোরেজ, PWA ও সমস্যা যাচাই করো।"},
-  {route:"portability",icon:"⇩",title:"Backup & data portability",description:"Export, import and recover your study data.",bn:"পড়াশোনার ডেটা এক্সপোর্ট, ইমপোর্ট ও রিকভার করো।"}
+  {route:"portability",icon:"⇩",title:"Backup & data portability",description:"Export, import and recover your study data.",bn:"পড়াশোনার ডেটা এক্সপোর্ট, ইমপোর্ট ও রিকভার করো।"},
+  {route:"data",icon:"◈",title:"Data & notifications",description:"Appearance, language, local data and notification preferences.",bn:"থিম, ভাষা, লোকাল ডেটা ও নোটিফিকেশন সেটিংস।"}
  ];
  return '<section class="panel settings-tools" aria-labelledby="settingsToolsTitle">'+
  '<div class="panel-header"><div><b id="settingsToolsTitle" class="panel-title">'+I.t("Tools & utilities")+'</b>'+
  '<small class="panel-sub">'+I.t("Manage reminders, app health and data backups from your profile settings.")+'</small></div></div>'+
- '<div class="settings-tool-grid">'+items.map(x=>'<button type="button" class="settings-tool-link" data-nav="'+x.route+'">'+
+ '<div class="settings-tool-grid">'+items.map(x=>'<button type="button" class="settings-tool-link'+
+ (x.route==="data"&&dataNotificationsOpen?' is-selected':'')+'" '+
+ (x.route==="data"?'data-action="settings-data-toggle" aria-expanded="'+dataNotificationsOpen+'" aria-controls="settingsDataNotifications"':'data-nav="'+x.route+'"')+'>'+
  '<span class="settings-tool-icon" aria-hidden="true">'+x.icon+'</span>'+
  '<span class="settings-tool-copy"><strong>'+I.t(x.title)+'</strong><small>'+(I.language==="bn"?x.bn:x.description)+'</small></span>'+
- '<span class="settings-tool-arrow" aria-hidden="true">›</span></button>').join("")+'</div></section>';
+ '<span class="settings-tool-arrow" aria-hidden="true">›</span></button>').join("")+'</div>'+
+ '<div class="settings-data-content" id="settingsDataNotifications"'+(dataNotificationsOpen?'':' hidden')+'>'+
+ dataNotificationsPanel()+'</div></section>';
 }
 const accountServices=[
  {id:"auth",icon:"G",title:"Google Account",detail:"Google sign-in and identity",panel:()=>window.NOVA_AUTH.panel()},
@@ -67,29 +103,6 @@ settingsTools()+
 <div class="field wide"><label>Group / department</label><select id="profileTrack" name="track">${option(Object.keys(c.tracks),p.track)}</select></div>
 <div class="field wide"><label>Week begins</label><select name="weekStart">${option([[6,"Saturday"],[0,"Sunday"],[1,"Monday"]],p.weekStart)}</select></div><div class="wide"><button class="primary-btn" type="submit">Save profile →</button></div></form>
 <div class="hint-banner">Changing class or subject group never deletes existing routines, subjects or missions.</div></section>
-<section class="panel"><div class="panel-header"><b class="panel-title">Data & notifications</b><span class="chip">LOCAL FIRST</span></div><div class="appearance-panel appearance-panel-v12">
-  <div class="appearance-copy">
-    <b>Choose your theme</b>
-    <small>Choose an interface style without changing your saved routine, tasks, or subjects.</small>
-  </div>
-  <div class="theme-gallery" role="group" aria-label="Appearance theme">
-    <button type="button" class="theme-option" data-action="theme-select" data-theme-value="cyber" aria-pressed="false" aria-label="Use Futuristic Cyber theme">
-      <span class="theme-preview theme-preview-cyber" aria-hidden="true"><span class="preview-top"></span><span class="preview-main"><i></i><b></b><em></em></span></span>
-      <span class="theme-option-bottom"><span class="theme-option-name"><strong>Futuristic Cyber</strong><small>Cyan + violet</small></span><span class="theme-check" aria-hidden="true">✓</span></span>
-    </button>
-    <button type="button" class="theme-option" data-action="theme-select" data-theme-value="gold" aria-pressed="false" aria-label="Use Black and Gold theme">
-      <span class="theme-preview theme-preview-gold" aria-hidden="true"><span class="preview-top"></span><span class="preview-main"><i></i><b></b><em></em></span></span>
-      <span class="theme-option-bottom"><span class="theme-option-name"><strong>Black & Gold</strong><small>Midnight + gold</small></span><span class="theme-check" aria-hidden="true">✓</span></span>
-    </button>
-    <button type="button" class="theme-option" data-action="theme-select" data-theme-value="halftone" aria-pressed="false" aria-label="Use Mint Halftone theme">
-      <span class="theme-preview theme-preview-halftone" aria-hidden="true"><span class="preview-top"></span><span class="preview-main"><i></i><b></b><em></em></span></span>
-      <span class="theme-option-bottom"><span class="theme-option-name"><strong>Mint Halftone</strong><small>White + mint wave</small></span><span class="theme-check" aria-hidden="true">✓</span></span>
-    </button>
-  </div>
-  <small class="theme-save-note">Your appearance preference is saved on this device, including after refresh.</small>
-</div><hr class="separator"><div class="appearance-panel language-panel"><div class="appearance-copy"><b>Language preference</b><small>The interface language is saved on this device. Your own subjects, notes and JSON backups will not be translated.</small></div><div class="language-options" role="group" aria-label="Select interface language"><button class="language-choice" type="button" data-action="language-select" data-lang="en" aria-pressed="false">English</button><button class="language-choice" type="button" data-action="language-select" data-lang="bn" aria-pressed="false">বাংলা</button></div></div><hr class="separator"><p class="panel-sub">Your routines are saved in THIS browser, not in a cloud database. Export regularly to avoid losing data.</p><div class="settings-actions">${button("⇩ Export JSON backup","export","secondary-btn")}<label class="import-label">⇧ Import backup<input type="file" id="importFile" accept=".json,application/json"></label></div><hr class="separator">
-${window.NOVA_REMINDERS.panel()}
-${window.NOVA_UI?.settingsPanel?.()||""}
-<div class="hint-banner">PWA works over HTTPS/localhost after first load. Installing does not create an Android APK or iOS IPA.</div></section></div>`}
-window.NOVA_VIEWS={button,heading,empty,option,session,task,dashboard,schedule,tasks,taskResults,subjects,settings,selectAccountService};
+</div>`}
+window.NOVA_VIEWS={button,heading,empty,option,session,task,dashboard,schedule,tasks,taskResults,subjects,settings,selectAccountService,toggleDataNotifications};
 })();
