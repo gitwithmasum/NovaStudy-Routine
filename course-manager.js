@@ -5,7 +5,7 @@ const N=window.NOVA,Auth=window.NOVA_AUTH;
 const e=value=>N.escape(String(value??""));
 const tr=(en,bn)=>window.NOVA_I18N?.language==="bn"?bn:en;
 const empty=()=>({courses:[],enrollments:[],chapters:[],topics:[],assets:[],assignments:[],submissions:[]});
-let data=empty(),selected="",tab="courses",busy=false,loading=false,loadedUser="",message="",refresh=()=>{},toast=()=>{},editingAsset="",deletingAsset="";
+let data=empty(),selected="",tab="courses",busy=false,loading=false,loadedUser="",message="",refresh=()=>{},toast=()=>{},editingAsset="",deletingAsset="",openedChapters=null;
 const TABLES={courses:"ns_courses",enrollments:"ns_enrollments",chapters:"ns_chapters",topics:"ns_topics",assets:"ns_assets",assignments:"ns_assignments",submissions:"ns_submissions"};
 const bucket="novastudy-learning";
 const user=()=>Auth.getStatus()==="connected"?Auth.getUser():null;
@@ -14,6 +14,11 @@ const owner=c=>!!(user()&&c&&c.owner_id===user().id);
 const by=(key,id)=>data[key].filter(x=>x.course_id===id);
 const button=(label,action,extras="",cls="secondary-btn")=>'<button type="button" class="'+cls+'" data-action="cm-'+action+'" '+extras+'>'+label+'</button>';
 const msg=(text,isError=false)=>{message=String(text||"").slice(0,250);if(isError)toast(message);refresh()};
+function rememberOpenChapters(){
+ if(typeof document==="undefined")return;
+ const nodes=Array.from(document.querySelectorAll(".cm-chapter[data-chapter-id]"));
+ if(nodes.length)openedChapters=new Set(nodes.filter(node=>node.open).map(node=>node.dataset.chapterId));
+}
 function init(a){refresh=a.refresh||refresh;toast=a.toast||toast;}
 function authChanged(){loadedUser="";data=empty();selected="";if(!loading)refresh();}
 function page(){
@@ -40,7 +45,7 @@ async function load(){
   }));
   if(user()?.id!==uid)return;
   data=Object.fromEntries(entries);
-  if(!data.courses.some(c=>c.id===selected))selected=data.courses[0]?.id||"";
+  if(!data.courses.some(c=>c.id===selected)){selected=data.courses[0]?.id||"";openedChapters=null;}
   message="";
  }catch(err){if(user()?.id===uid)message=tr("Could not load courses: ","কোর্স লোড করা যায়নি: ")+String(err.message||err).slice(0,150)}
  finally{loading=false;refresh()}
@@ -91,7 +96,7 @@ function renderChapter(c,ch,index,isOwner){
  const topics=by("topics",c.id).filter(t=>t.chapter_id===ch.id).sort((a,b)=>a.position-b.position||a.created_at.localeCompare(b.created_at));
  const chfiles=fileList(c.id,ch.id,null,isOwner);
  const tools=isOwner?'<form class="cm-inline" data-cm-form="topic" data-course="'+c.id+'" data-chapter="'+ch.id+'"><input name="title" maxlength="150" required placeholder="'+tr("New topic","নতুন টপিক")+'"><button class="secondary-btn" type="submit">+ '+tr("Add Topic","টপিক যোগ")+'</button></form>':"";
- return '<details class="cm-chapter" '+(index===1?'open':'')+'><summary><strong>'+tr("Chapter","অধ্যায়")+' '+index+' — '+e(ch.title)+'</strong><span>'+topics.length+' '+tr("Topics","টপিক")+'</span></summary><div class="cm-chapter-inner"><b>'+tr("Chapter Notes & Files","অধ্যায়ের নোটস ও ফাইল")+'</b>'+
+ return '<details class="cm-chapter" data-chapter-id="'+e(ch.id)+'" '+((openedChapters?openedChapters.has(ch.id):index===1)?'open':'')+'><summary><strong>'+tr("Chapter","অধ্যায়")+' '+index+' — '+e(ch.title)+'</strong><span>'+topics.length+' '+tr("Topics","টপিক")+'</span></summary><div class="cm-chapter-inner"><b>'+tr("Chapter Notes & Files","অধ্যায়ের নোটস ও ফাইল")+'</b>'+
  chfiles+(isOwner?fileUpload(c.id,ch.id):"")+tools+
  '<div class="cm-topic-list">'+(topics.length?topics.map((t,i)=>'<article class="cm-topic"><b>'+tr("Topic","টপিক")+' '+(i+1)+': '+e(t.title)+'</b>'+
  (isOwner?'<form class="cm-form" data-cm-form="topic-body" data-topic="'+t.id+'"><textarea name="body" maxlength="20000" rows="3" placeholder="'+tr("Type your notes here…","এখানে নোটস লিখো…")+'">'+e(t.body)+'</textarea><button class="secondary-btn" type="submit">'+tr("Save Notes","নোটস সেভ")+'</button></form>':
@@ -132,6 +137,7 @@ async function submit(form){
  if(!type)return false;
  if(busy)return true;
  busy=true;
+ rememberOpenChapters();
  const fd=new FormData(form);
  try{
   if(type==="course"){
@@ -198,6 +204,7 @@ async function change(input){
  if(!input.matches?.("[data-cm-upload]"))return false;
  const file=input.files?.[0];input.value="";if(!file||busy)return true;
  busy=true;
+ rememberOpenChapters();
  let path="";
  try{
   path=await storageUpload(file,input.dataset.course,"notes");
@@ -219,21 +226,23 @@ function action(act,btn){
  if(!act?.startsWith("cm-"))return false;
  const type=act.slice(3),id=btn?.dataset.id;
  if(type==="tab"){tab=btn.dataset.tab;message="";refresh();return true}
- if(type==="select"){selected=id;message="";refresh();return true}
+ if(type==="select"){selected=id;message="";openedChapters=null;editingAsset="";deletingAsset="";refresh();return true}
  if(type==="login"){void Auth.signIn();return true}
  if(type==="copy"){if(navigator.clipboard?.writeText){void navigator.clipboard.writeText(id).then(()=>msg(tr("Join code copied.","Join Code কপি হয়েছে।"))).catch(()=>msg(id))}else msg(id);return true}
  if(type==="reload"){void reload();return true}
  if(type==="edit-file"||type==="request-delete-file"){
+  rememberOpenChapters();
   const asset=data.assets.find(x=>x.id===id);
   if(!asset||!owner(data.courses.find(c=>c.id===asset.course_id)))return true;
   if(type==="edit-file"){editingAsset=editingAsset===id?"":id;deletingAsset="";}
   else {deletingAsset=deletingAsset===id?"":id;editingAsset="";}
   refresh();return true;
  }
- if(type==="cancel-file"){editingAsset="";deletingAsset="";refresh();return true}
+ if(type==="cancel-file"){rememberOpenChapters();editingAsset="";deletingAsset="";refresh();return true}
  if(type==="confirm-delete-file"){
   const asset=data.assets.find(x=>x.id===id);
   if(!asset||deletingAsset!==id||!owner(data.courses.find(c=>c.id===asset.course_id))||busy)return true;
+  rememberOpenChapters();
   void (async()=>{
    busy=true;
    try{
