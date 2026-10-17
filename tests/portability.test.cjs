@@ -107,6 +107,15 @@ test("an invalid existing module prevents misleading combined export",()=>{
  assert.throws(()=>b.mod.makeBackup(),/Cannot export/);
  assert.equal(b.mod.download(),false);
 });
+test("combined backup accepts Mint Halftone without weakening enum validation",()=>{
+ const b=boot(),bundle=imported(b);
+ for(const theme of ["cyber","gold","halftone"]){
+  bundle.modules.theme=theme;
+  assert.equal(b.mod.validateBundle(bundle),true,theme+" must be accepted");
+ }
+ bundle.modules.theme="javascript:alert(1)";
+ assert.equal(b.mod.validateBundle(bundle),false);
+});
 test("theme and language enums are restricted",()=>{
  const b=boot(),p=imported(b);p.modules.theme="javascript:alert(1)";
  assert.equal(b.mod.validateBundle(p),false);
