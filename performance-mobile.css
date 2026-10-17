@@ -43,3 +43,12 @@
  .mobile-nav{scroll-behavior:auto}
 }
 html[data-ui-reduced-motion="on"] .mobile-nav{scroll-behavior:auto}
+
+/* v3.5.12 — responsive scrolling without forced smooth-scroll and snap delays */
+html{scroll-behavior:auto}
+.mobile-nav{scroll-snap-type:none}
+.mobile-nav button{scroll-snap-align:none}
+@media(max-width:660px){
+ .ui-dashboard-widget{animation:none}
+ .panel{box-shadow:0 3px 12px #0001}
+}
