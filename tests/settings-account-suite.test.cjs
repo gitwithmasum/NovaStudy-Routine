@@ -72,7 +72,8 @@ test("Bangla header and other settings sections remain intact with no storage wr
  const html=markup();
  assert.match(html,/অ্যাকাউন্ট ও ক্লাউড সার্ভিসেস/);
  assert.doesNotMatch(html,/Reminder preferences preserved/);
- assert.match(html,/Appearance preferences preserved/);
+ assert.match(html,/data-action="settings-data-toggle"/);
+ assert.match(read("views.js"),/window\.NOVA_UI\?\.settingsPanel/);
  assert.match(read("i18n.js"),/"Google Account Cloud Backup":"গুগল অ্যাকাউন্ট ক্লাউড ব্যাকআপ"/);
  assert.doesNotMatch(read("views.js"),/localStorage\.setItem|sessionStorage\.setItem/);
 });
