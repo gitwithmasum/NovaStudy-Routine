@@ -16,8 +16,8 @@ const button=(label,action,extras="",cls="secondary-btn")=>'<button type="button
 const msg=(text,isError=false)=>{message=String(text||"").slice(0,250);if(isError)toast(message);refresh()};
 function rememberOpenChapters(){
  if(typeof document==="undefined")return;
- const nodes=Array.from(document.querySelectorAll(".cm-chapter[data-chapter-id]"));
- if(nodes.length)openedChapters=new Set(nodes.filter(node=>node.open).map(node=>node.dataset.chapterId));
+ const nodes=Array.from(document.querySelectorAll(".cm-chapter-shell[data-chapter-id]"));
+ if(nodes.length)openedChapters=new Set(nodes.filter(node=>node.dataset.open==="true").map(node=>node.dataset.chapterId));
 }
 function resetEntityEditors(){editingChapter="";deletingChapter="";editingTopic="";deletingTopic="";editingNote="";deletingNote="";}
 function init(a){refresh=a.refresh||refresh;toast=a.toast||toast;}
@@ -153,13 +153,20 @@ function renderChapter(c,ch,index,isOwner){
  const topics=by("topics",c.id).filter(t=>t.chapter_id===ch.id).sort((a,b)=>a.position-b.position||a.created_at.localeCompare(b.created_at));
  const chfiles=fileList(c.id,ch.id,null,isOwner);
  const tools=isOwner?'<form class="cm-inline" data-cm-form="topic" data-course="'+e(c.id)+'" data-chapter="'+e(ch.id)+'"><input name="title" maxlength="150" required placeholder="'+tr("New topic","নতুন টপিক")+'"><button class="secondary-btn" type="submit">+ '+tr("Add Topic","টপিক যোগ")+'</button></form>':"";
- return '<div class="cm-chapter-shell"><details class="cm-chapter" data-chapter-id="'+e(ch.id)+'" '+((openedChapters?openedChapters.has(ch.id):index===1)?'open':'')+
- '><summary><strong>'+tr("Chapter","অধ্যায়")+' '+index+' — '+e(ch.title)+'</strong><span>'+topics.length+' '+tr("Topics","টপিক")+'</span></summary>'+
- '<div class="cm-chapter-inner">'+chapterControls(c,ch,topics,isOwner)+
+ const isOpen=openedChapters?openedChapters.has(ch.id):index===1;
+ const chapterId=e(ch.id),contentId="cm-chapter-content-"+chapterId;
+ return '<section class="cm-chapter-shell" data-chapter-id="'+chapterId+'" data-open="'+isOpen+'">'+
+ '<div class="cm-chapter-heading">'+
+ '<button type="button" class="cm-chapter-toggle" data-action="cm-toggle-chapter" data-id="'+chapterId+'" aria-expanded="'+isOpen+'" aria-controls="'+contentId+'" aria-label="'+tr("Toggle chapter: ","অধ্যায় খুলুন বা বন্ধ করুন: ")+e(ch.title)+'">'+
+ '<strong>'+tr("Chapter","অধ্যায়")+' '+index+' — '+e(ch.title)+'</strong>'+
+ '<span class="cm-chapter-topic-count">'+topics.length+' '+tr("Topics","টপিক")+'</span></button>'+
+ chapterHeaderActions(ch,isOwner)+'</div>'+
+ '<div class="cm-chapter-inner" id="'+contentId+'" '+(isOpen?'':'hidden')+'>'+
+ chapterControls(c,ch,topics,isOwner)+
  '<h3>'+tr("Chapter Notes & Files","অধ্যায়ের নোটস ও ফাইল")+'</h3>'+
  chfiles+(isOwner?fileUpload(c.id,ch.id):"")+tools+
  '<div class="cm-topic-list">'+(topics.length?topics.map((t,i)=>renderTopic(c,ch,t,i+1,isOwner)).join(""):'<p class="cm-muted">'+tr("Add a topic to begin.","শুরু করতে টপিক যোগ করো।")+'</p>')+
- '</div></div></details>'+chapterHeaderActions(ch,isOwner)+'</div>';
+ '</div></div></section>';
 }
 function renderHomework(){
  if(!data.courses.length)return noCourses();
@@ -356,6 +363,16 @@ function action(act,btn){
  if(type==="login"){void Auth.signIn();return true}
  if(type==="copy"){if(navigator.clipboard?.writeText){void navigator.clipboard.writeText(id).then(()=>msg(tr("Join code copied.","Join Code কপি হয়েছে।"))).catch(()=>msg(id))}else msg(id);return true}
  if(type==="reload"){void reload();return true}
+ if(type==="toggle-chapter"){
+  const ch=data.chapters.find(x=>x.id===id);
+  if(!ch||!data.courses.some(c=>c.id===ch.course_id))return true;
+  rememberOpenChapters();
+  if(!openedChapters){
+   openedChapters=new Set(data.chapters.filter((item,i)=>i===0).map(item=>item.id));
+  }
+  if(openedChapters.has(id))openedChapters.delete(id);else openedChapters.add(id);
+  refresh();return true;
+ }
 
  if(["edit-chapter","request-delete-chapter","edit-topic","request-delete-topic","edit-note","request-delete-note"].includes(type)){
   const key=type.includes("chapter")?"chapters":"topics";
