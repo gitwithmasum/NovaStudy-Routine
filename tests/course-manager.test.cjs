@@ -150,3 +150,36 @@ test("student cannot see or open chapter/topic or written-note edit and delete c
  assert.doesNotMatch(html,/data-cm-form="topic-edit"/);
  assert.doesNotMatch(html,/data-cm-form="topic-body"/);
 });
+
+test("short Edit/Delete labels align at the chapter top-right, topic header and note header",async()=>{
+ const f=courseFixture();f.app.page();await f.app.load();
+ f.rows.ns_topics[0].body="Example written notes";
+ const html=f.app.page();
+ // A chapter header's actions must stay outside the collapsible details content.
+ assert.match(html,/<div class="cm-chapter-shell"><details class="cm-chapter"[\s\S]*?<\/details><div class="cm-chapter-header-actions cm-compact-actions"[^>]*>/);
+ assert.match(html,/<summary><strong>Chapter 1 — Chapter 01<\/strong>/);
+ assert.match(html,/data-action="cm-edit-chapter"[^>]*>Edit<\/button>/);
+ assert.match(html,/data-action="cm-request-delete-chapter"[^>]*>Delete<\/button>/);
+ assert.match(html,/aria-label="Edit chapter: Chapter 01"/);
+ assert.match(html,/aria-label="Delete chapter: Chapter 01"/);
+ assert.doesNotMatch(html,/>Edit Chapter<\/button>|>Delete Chapter<\/button>/);
+ // Topic and written note controls belong to the same title row.
+ assert.match(html,/<div class="cm-section-heading"><b>Topic 1: Variables<\/b><div class="cm-section-actions cm-compact-actions"/);
+ assert.match(html,/<div class="cm-section-heading cm-note-heading"><strong>Written Notes<\/strong><div class="cm-section-actions cm-compact-actions"/);
+ assert.match(html,/data-action="cm-edit-topic"[^>]*>Edit<\/button>/);
+ assert.match(html,/data-action="cm-request-delete-topic"[^>]*>Delete<\/button>/);
+ assert.match(html,/data-action="cm-edit-note"[^>]*>Edit<\/button>/);
+ assert.match(html,/data-action="cm-request-delete-note"[^>]*>Delete<\/button>/);
+ assert.equal((html.match(/data-action="cm-edit-chapter"/g)||[]).length,1);
+ assert.equal((html.match(/data-action="cm-request-delete-chapter"/g)||[]).length,1);
+ assert.match(html,/class="cm-chapter-header-actions cm-compact-actions"/);
+ // Even when collapsed, the actions live outside <details>.
+ const shell=html.slice(html.indexOf('<div class="cm-chapter-shell">'));
+ assert.ok(shell.indexOf('</details>')<shell.indexOf('data-action="cm-edit-chapter"'));
+});
+test("empty written note exposes a compact Add action, not a destructive Delete",async()=>{
+ const f=courseFixture();f.app.page();await f.app.load();
+ const html=f.app.page();
+ assert.match(html,/data-action="cm-edit-note"[^>]*>Add<\/button>/);
+ assert.doesNotMatch(html,/data-action="cm-request-delete-note"/);
+});
