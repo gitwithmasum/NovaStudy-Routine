@@ -133,7 +133,8 @@ test("v3.4 scripts, app routes, offline cache, static audits and validation hook
  const html=read("index.html"),app=read("app.js"),sw=read("sw.js"),focus=read("focus-insights.js"),
  audit=read("scripts/release-audit.cjs"),ci=read(".github/workflows/novastudy-tests.yml");
  assert.match(html,/NOVASTUDY OS <b>3\.5\.5<\/b>/);
- assert.match(html,/data-nav="portability"/);
+ assert.doesNotMatch(html,/data-nav="portability"/);
+ assert.match(read("views.js"),/data-nav="portability"/);
  assert.match(html,/src="\.\/portability\.js"/);
  assert.match(html,/href="\.\/portability\.css"/);
  assert.match(app,/Portability\.page\(\)/);assert.match(app,/Portability\.change/);
