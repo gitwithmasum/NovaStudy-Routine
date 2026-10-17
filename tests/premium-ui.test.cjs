@@ -121,13 +121,13 @@ test("v3.0 integration includes dashboard, PWA cache, skip access and mobile key
  assert.match(html,/id="view" class="view" tabindex="-1"/);
  assert.match(html,/src="\.\/ui-personalization\.js"/);
  assert.match(html,/href="\.\/premium-ui\.css"/);
- assert.match(html,/NOVASTUDY OS <b>3\.5\.0<\/b>/);
+ assert.match(html,/NOVASTUDY OS <b>3\.5\.1<\/b>/);
  assert.match(app,/UI\.handle\(action,b\)/);assert.match(app,/UI\.handleChange\(e\.target\)/);
  assert.match(app,/revealActiveNav/);assert.match(app,/aria-current/);
  assert.match(app,/ArrowRight/);assert.match(app,/ArrowLeft/);
  assert.match(dash,/window\.NOVA_UI\?\.widgets/);
  assert.match(views,/window\.NOVA_UI\?\.settingsPanel/);
- assert.match(sw,/novastudy-v3\.5\.0/);
+ assert.match(sw,/novastudy-v3\.5\.1/);
  assert.match(sw,/'\.\/ui-personalization\.js'/);
  assert.match(css,/prefers-reduced-motion:reduce/);
  assert.match(css,/data-ui-contrast="on"/);
