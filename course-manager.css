@@ -295,3 +295,9 @@
   flex:1 1 125px;
  }
 }
+
+/* Course resources: responsive standalone file and folder pickers. */
+.cm-upload-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:8px 0 14px}
+.cm-upload-row .cm-upload{margin:0}
+.cm-upload-help{flex-basis:100%;color:var(--muted,#a8bac7);font-size:11px;line-height:1.5}
+@media(max-width:520px){.cm-upload-row .cm-upload{width:100%;justify-content:center;text-align:center}}

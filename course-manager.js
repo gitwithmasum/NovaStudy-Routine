@@ -8,6 +8,9 @@ const empty=()=>({courses:[],enrollments:[],chapters:[],topics:[],assets:[],assi
 let data=empty(),selected="",tab="courses",busy=false,loading=false,loadedUser="",message="",refresh=()=>{},toast=()=>{},editingAsset="",deletingAsset="",editingChapter="",deletingChapter="",editingTopic="",deletingTopic="",editingNote="",deletingNote="",openedChapters=null,ownerPanel="",editingCourse="",deletingCourse="";
 const TABLES={courses:"ns_courses",enrollments:"ns_enrollments",chapters:"ns_chapters",topics:"ns_topics",assets:"ns_assets",assignments:"ns_assignments",submissions:"ns_submissions"};
 const bucket="novastudy-learning";
+const MAX_COURSE_UPLOAD=20*1024*1024;
+const PREVIEW_MIMES=["application/pdf","image/jpeg","image/png","image/webp","image/gif"];
+const safeDownloadName=value=>String(value||"attachment").replace(/[\\/\u0000-\u001f\u007f]/g,"_").slice(0,250)||"attachment";
 const user=()=>Auth.getStatus()==="connected"?Auth.getUser():null;
 const client=()=>Auth.getClient?.();
 const owner=c=>!!(user()&&c&&c.owner_id===user().id);
@@ -95,14 +98,14 @@ function fileList(courseId,chapterId,topicId,isOwner=false){
  return '<div class="cm-files">'+attachments.map(a=>{
   const id=e(a.id),editing=isOwner&&editingAsset===a.id,deleting=isOwner&&deletingAsset===a.id;
   const actions='<div class="cm-file-actions">'+
-   button(tr("Open","খুলো"),"open-file",'data-path="'+e(a.file_path)+'"')+
+   button(PREVIEW_MIMES.includes(a.mime_type)?tr("Open","খুলো"):tr("Download","ডাউনলোড"),"open-file",'data-path="'+e(a.file_path)+'" data-name="'+e(a.file_name)+'" data-mime="'+e(a.mime_type||"")+'"')+
    (isOwner?button(tr("Edit","এডিট"),"edit-file",'data-id="'+id+'" aria-expanded="'+editing+'"')+
    button(tr("Delete","ডিলিট"),"request-delete-file",'data-id="'+id+'"', "danger-btn"):"")+'</div>';
   const editor=editing?'<form class="cm-asset-editor cm-form" data-cm-form="asset-edit" data-asset="'+id+'">'+
    '<label>'+tr("Display file name","ফাইলের নাম")+
    '<input name="file_name" maxlength="250" required value="'+e(a.file_name)+'"></label>'+
-   '<label>'+tr("Replace file (optional · PDF or image, max 10 MB)","ফাইল পরিবর্তন (ঐচ্ছিক · PDF বা ছবি, সর্বোচ্চ ১০ MB)")+
-   '<input type="file" name="replacement" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"></label>'+
+   '<label>'+tr("Replace with any file (max 20 MB)","যেকোনো ফাইল দিয়ে পরিবর্তন (সর্বোচ্চ ২০ MB)")+
+   '<input type="file" name="replacement"></label>'+
    '<div class="cm-file-actions"><button type="submit" class="primary-btn">'+tr("Save Changes","পরিবর্তন সেভ")+'</button>'+
    button(tr("Cancel","বাতিল"),"cancel-file")+'</div></form>':"";
   const confirmDelete=deleting?'<div class="cm-delete-confirm" role="group" aria-label="'+tr("Confirm file deletion","ফাইল মুছতে নিশ্চিত করো")+'">'+
@@ -115,7 +118,9 @@ function fileList(courseId,chapterId,topicId,isOwner=false){
  }).join("")+'</div>';
 }
 function fileUpload(courseId,chapterId,topicId=""){
- return '<label class="cm-upload">'+tr("⇧ Upload PDF / Image (max 10 MB)","⇧ PDF / ছবি আপলোড (সর্বোচ্চ ১০ MB)")+'<input type="file" data-cm-upload data-course="'+courseId+'" data-chapter="'+chapterId+'" data-topic="'+topicId+'" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"></label>';
+ return '<div class="cm-upload-row"><label class="cm-upload">'+tr("⇧ Upload any file (max 20 MB)","⇧ যেকোনো ফাইল আপলোড (সর্বোচ্চ ২০ MB)")+'<input type="file" data-cm-upload data-course="'+courseId+'" data-chapter="'+chapterId+'" data-topic="'+topicId+'"></label>'+
+ '<label class="cm-upload">'+tr("⇧ Upload a folder (20 MB total)","⇧ ফোল্ডার আপলোড (মোট ২০ MB)")+'<input type="file" data-cm-folder data-course="'+courseId+'" data-chapter="'+chapterId+'" data-topic="'+topicId+'" webkitdirectory directory multiple></label>'+
+ '<small class="cm-upload-help">'+tr("Folders are stored as ZIP with subfolders preserved. Private course files are shared with enrolled students.","সাবফোল্ডারসহ ফোল্ডার ZIP হিসেবে সেভ হবে। কোর্সের ফাইল ভর্তিকৃত শিক্ষার্থীরা পাবে।")+'</small></div>';
 }
 
 function chapterControls(c,ch,topics,isOwner){
@@ -164,7 +169,7 @@ function renderTopic(c,ch,t,index,isOwner){
  '<label>'+tr("Written notes","লিখিত নোটস")+'<textarea name="body" maxlength="20000" rows="5" placeholder="'+tr("Write notes here…","এখানে নোটস লেখো…")+'">'+e(t.body)+'</textarea></label>'+
  '<div class="cm-section-actions"><button class="primary-btn" type="submit">'+tr("Save Notes","নোটস সেভ")+'</button>'+button(tr("Cancel","বাতিল"),"cancel-entity")+'</div></form>':"";
  const noteDel=noteDeleting?'<div class="cm-delete-confirm" role="group" aria-label="'+tr("Confirm note deletion","নোটস মুছে ফেলা নিশ্চিত করো")+'"><p>'+
- tr("Delete only the written notes? This topic and its uploaded PDF/images will be preserved.","শুধু লিখিত নোটস মুছবে? টপিক এবং আপলোড করা PDF/ছবি অক্ষত থাকবে।")+'</p>'+
+ tr("Delete only the written notes? This topic and all uploaded files will be preserved.","শুধু লিখিত নোটস মুছবে? টপিক ও আপলোড করা সব ফাইল অক্ষত থাকবে।")+'</p>'+
  '<div class="cm-section-actions">'+button(tr("Yes, Delete Notes","হ্যাঁ, নোটস মুছো"),"confirm-delete-note",'data-id="'+topicId+'"',"danger-btn")+
  button(tr("Cancel","বাতিল"),"cancel-entity")+'</div></div>':"";
  return '<article class="cm-topic" data-topic-id="'+topicId+'"><div class="cm-section-heading"><b>'+
@@ -202,23 +207,86 @@ function renderHomework(){
 function renderAssignment(a,isOwner){
  const submissions=data.submissions.filter(s=>s.assignment_id===a.id);
  const mine=submissions.find(s=>s.student_id===user()?.id),deadline=a.due_at?new Date(a.due_at).toLocaleString(window.NOVA_I18N?.language==="bn"?"bn-BD":"en-GB"):"—";
- const files=()=>submissions.map(s=>'<div class="cm-submitted"><b>'+e(s.student_name||"Student")+'</b><small>'+e(new Date(s.submitted_at).toLocaleString())+'</small><p>'+e(s.answer)+'</p>'+(s.file_path?button(e(s.file_name||tr("Attachment","ফাইল")),"open-file",'data-path="'+e(s.file_path)+'"'):"")+'</div>').join("");
- const form='<form class="cm-form cm-answer" data-cm-form="submission" data-assignment="'+a.id+'" data-course="'+a.course_id+'"><label>'+tr("Your answer","তোমার উত্তর")+'<textarea name="answer" maxlength="12000" rows="3" placeholder="'+tr("Type your homework answer here…","এখানে হোমওয়ার্কের উত্তর লেখো…")+'">'+e(mine?.answer||"")+'</textarea></label><label>'+tr("Attach PDF or image (optional)","PDF বা ছবি যোগ করো (ঐচ্ছিক)")+'<input type="file" name="attachment" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"></label>'+(mine?.file_path?'<p class="cm-muted">'+tr("Current file: ","বর্তমান ফাইল: ")+e(mine.file_name||"File")+'</p>':"")+'<button type="submit" class="primary-btn">'+(mine?tr("Update Submission","সাবমিশন আপডেট"):tr("Submit Homework","হোমওয়ার্ক জমা দাও"))+'</button></form>';
+ const files=()=>submissions.map(s=>'<div class="cm-submitted"><b>'+e(s.student_name||"Student")+'</b><small>'+e(new Date(s.submitted_at).toLocaleString())+'</small><p>'+e(s.answer)+'</p>'+(s.file_path?button(e(s.file_name||tr("Attachment","ফাইল")),"open-file",'data-path="'+e(s.file_path)+'" data-name="'+e(s.file_name||"attachment")+'"'):"")+'</div>').join("");
+ const form='<form class="cm-form cm-answer" data-cm-form="submission" data-assignment="'+a.id+'" data-course="'+a.course_id+'"><label>'+tr("Your answer","তোমার উত্তর")+'<textarea name="answer" maxlength="12000" rows="3" placeholder="'+tr("Type your homework answer here…","এখানে হোমওয়ার্কের উত্তর লেখো…")+'">'+e(mine?.answer||"")+'</textarea></label><label>'+tr("Attach any file (optional, max 20 MB)","যেকোনো ফাইল সংযুক্ত করো (ঐচ্ছিক, সর্বোচ্চ ২০ MB)")+'<input type="file" name="attachment"></label>'+(mine?.file_path?'<p class="cm-muted">'+tr("Current file: ","বর্তমান ফাইল: ")+e(mine.file_name||"File")+'</p>':"")+'<button type="submit" class="primary-btn">'+(mine?tr("Update Submission","সাবমিশন আপডেট"):tr("Submit Homework","হোমওয়ার্ক জমা দাও"))+'</button></form>';
  return '<article class="cm-assignment"><div class="cm-flex"><h3>'+e(a.title)+'</h3><span class="cm-muted">'+tr("Due: ","শেষ সময়: ")+e(deadline)+'</span></div><p class="cm-body">'+e(a.instructions)+'</p>'+(isOwner?'<b>'+tr("Student Submissions","শিক্ষার্থীর জমা দেওয়া কাজ")+' ('+submissions.length+')</b>'+(submissions.length?files():'<p class="cm-muted">'+tr("No submissions yet.","কেউ এখনো জমা দেয়নি।")+'</p>'):form)+'</article>';
 }
 function checkFile(file){
  if(!file)return false;
- const types=["application/pdf","image/jpeg","image/png","image/webp"];
- if(!types.includes(file.type)||file.size<1||file.size>10485760)throw Error(tr("Only PDF, JPG, PNG, WEBP up to 10 MB are supported.","সর্বোচ্চ ১০ MB PDF/JPG/PNG/WEBP ফাইল দেওয়া যাবে।"));
+ if(typeof file.size!=="number"||!Number.isFinite(file.size)||file.size<0||file.size>MAX_COURSE_UPLOAD)
+  throw Error(tr("File must be 20 MB or smaller.","ফাইল সর্বোচ্চ ২০ MB হতে হবে।"));
+ if(typeof file.name!=="string"||!file.name.trim())throw Error(tr("Choose a valid file.","সঠিক ফাইল নির্বাচন করো।"));
  return true;
+}
+function safeSuffix(filename){
+ const match=String(filename||"").match(/\.([a-z0-9]{1,15})$/i);
+ return match?match[1].toLowerCase():"bin";
+}
+function uploadMime(file){
+ const type=String(file.type||"").toLowerCase();
+ if(!type||!/^[-\w.+]+\/[-\w.+]+$/.test(type))return "application/octet-stream";
+ // Unknown and active content is downloaded rather than executed by the browser.
+ if(!PREVIEW_MIMES.includes(type))return "application/octet-stream";
+ return type;
 }
 async function storageUpload(file,courseId,folder){
  checkFile(file);
- const suffix=({ "application/pdf":"pdf","image/jpeg":"jpg","image/png":"png","image/webp":"webp"})[file.type];
- const path=folder+"/"+courseId+"/"+user().id+"/"+crypto.randomUUID()+"."+suffix;
- const {error}=await client().storage.from(bucket).upload(path,file,{contentType:file.type,upsert:false});
+ const path=folder+"/"+courseId+"/"+user().id+"/"+crypto.randomUUID()+"."+safeSuffix(file.name);
+ const {error}=await client().storage.from(bucket).upload(path,file,{contentType:uploadMime(file),upsert:false});
  if(error)throw error;
  return path;
+}
+const crcTable=(()=>{
+ const table=new Uint32Array(256);
+ for(let i=0;i<256;i++){let c=i;for(let j=0;j<8;j++)c=(c&1)?0xedb88320^(c>>>1):(c>>>1);table[i]=c>>>0}
+ return table;
+})();
+function checksum(bytes){
+ let crc=0xffffffff;
+ for(const b of bytes)crc=crcTable[(crc^b)&255]^(crc>>>8);
+ return(crc^0xffffffff)>>>0;
+}
+function safeRelativePath(raw){
+ const path=String(raw||"").replaceAll("\\","/");
+ if(path.length>512||!path||/[\u0000-\u001f\u007f]/.test(path))return "";
+ return path.split("/").every(p=>p&&p!=="."&&p!==".."&&p.length<=200)?path:"";
+}
+async function archiveFolder(files){
+ if(!Array.isArray(files)||!files.length||files.length>10000)
+  throw Error(tr("Select one folder containing 1–10,000 files.","একটি ফোল্ডার নির্বাচন করো (১ থেকে ১০,০০০ ফাইল)।"));
+ const seen=new Set(),roots=new Set();let total=0;
+ const encoder=new TextEncoder(),localParts=[],directory=[];
+ let offset=0,dirSize=0;
+ for(const file of files){
+  checkFile(file);
+  total+=file.size;
+  if(total>MAX_COURSE_UPLOAD)throw Error(tr("Folder exceeds 20 MB in total.","ফোল্ডারের মোট আকার ২০ MB-এর বেশি।"));
+  const relative=safeRelativePath(file.webkitRelativePath);
+  if(!relative||!relative.includes("/")||seen.has(relative))
+   throw Error(tr("Invalid or duplicate folder path.","ফোল্ডারের ফাইল পাথ সঠিক নয় অথবা একই পাথ দুবার আছে।"));
+  seen.add(relative);roots.add(relative.split("/")[0]);
+  if(roots.size>1)throw Error(tr("Upload one folder at a time.","একবারে একটি ফোল্ডার আপলোড করো।"));
+  const name=encoder.encode(relative),bytes=new Uint8Array(await file.arrayBuffer()),crc=checksum(bytes);
+  if(name.length>65535||bytes.length!==file.size)throw Error("Invalid folder file data");
+  const header=new Uint8Array(30+name.length),hv=new DataView(header.buffer);
+  hv.setUint32(0,0x04034b50,true);hv.setUint16(4,20,true);hv.setUint16(6,0x0800,true);
+  hv.setUint32(14,crc,true);hv.setUint32(18,bytes.length,true);hv.setUint32(22,bytes.length,true);
+  hv.setUint16(26,name.length,true);header.set(name,30);
+  localParts.push(header,bytes);
+  const entry=new Uint8Array(46+name.length),dv=new DataView(entry.buffer);
+  dv.setUint32(0,0x02014b50,true);dv.setUint16(4,20,true);dv.setUint16(6,20,true);dv.setUint16(8,0x0800,true);
+  dv.setUint32(16,crc,true);dv.setUint32(20,bytes.length,true);dv.setUint32(24,bytes.length,true);
+  dv.setUint16(28,name.length,true);dv.setUint32(42,offset,true);entry.set(name,46);
+  directory.push(entry);offset+=header.length+bytes.length;dirSize+=entry.length;
+  if(offset+dirSize+22>MAX_COURSE_UPLOAD)throw Error(tr("Folder ZIP exceeds 20 MB; remove some files.","ফোল্ডার ZIP ২০ MB ছাড়িয়েছে; কিছু ফাইল কমাও।"));
+ }
+ const end=new Uint8Array(22),dv=new DataView(end.buffer);
+ dv.setUint32(0,0x06054b50,true);dv.setUint16(8,directory.length,true);dv.setUint16(10,directory.length,true);
+ dv.setUint32(12,dirSize,true);dv.setUint32(16,offset,true);
+ const name=Array.from(roots)[0]||"Course-Folder";
+ const zipped=new File([...localParts,...directory,end],name+".zip",{type:"application/zip"});
+ checkFile(zipped);
+ return zipped;
 }
 async function submit(form){
  const u=user(),sb=client();if(!u||!sb){msg(tr("Sign in required.","আগে লগইন করো।"),true);return true}
@@ -316,7 +384,7 @@ async function submit(form){
    try{
     if(hasReplacement){
      uploadedPath=await storageUpload(file,asset.course_id,"notes");
-     Object.assign(changes,{file_path:uploadedPath,mime_type:file.type,byte_size:file.size});
+     Object.assign(changes,{file_path:uploadedPath,mime_type:uploadMime(file),byte_size:file.size});
     }
     const {data:updated,error}=await sb.from(TABLES.assets).update(changes)
      .eq("id",asset.id).eq("course_id",asset.course_id).select("id").maybeSingle();
@@ -352,14 +420,22 @@ async function submit(form){
  return true;
 }
 async function change(input){
- if(!input.matches?.("[data-cm-upload]"))return false;
- const file=input.files?.[0];input.value="";if(!file||busy)return true;
+ if(!input.matches?.("[data-cm-upload], [data-cm-folder]"))return false;
+ const isFolder=input.matches("[data-cm-folder]"),selectedFiles=Array.from(input.files||[]);
+ input.value="";
+ if(!selectedFiles.length||busy)return true;
+ const course=data.courses.find(c=>c.id===input.dataset.course);
+ if(!owner(course)||selected!==course?.id){msg(tr("Only course owners can upload notes.","শুধু কোর্স মালিক নোটস আপলোড করতে পারবেন।"),true);return true}
+ const chapter=data.chapters.find(c=>c.id===input.dataset.chapter&&c.course_id===course.id);
+ const topic=input.dataset.topic?data.topics.find(t=>t.id===input.dataset.topic&&t.chapter_id===chapter?.id&&t.course_id===course.id):null;
+ if(!chapter||(input.dataset.topic&&!topic)){msg(tr("Invalid chapter or topic.","অধ্যায় বা টপিক সঠিক নয়।"),true);return true}
  busy=true;
  rememberOpenChapters();
  let path="";
  try{
+  const file=isFolder?await archiveFolder(selectedFiles):selectedFiles[0];
   path=await storageUpload(file,input.dataset.course,"notes");
-  const payload={course_id:input.dataset.course,chapter_id:input.dataset.chapter||null,topic_id:input.dataset.topic||null,file_name:file.name.slice(0,250),file_path:path,mime_type:file.type,byte_size:file.size};
+  const payload={course_id:input.dataset.course,chapter_id:input.dataset.chapter||null,topic_id:input.dataset.topic||null,file_name:file.name.slice(0,250),file_path:path,mime_type:uploadMime(file),byte_size:file.size};
   const {error}=await client().from(TABLES.assets).insert(payload);
   if(error){await client().storage.from(bucket).remove([path]);throw error}
   await reload();msg(tr("File uploaded.","ফাইল আপলোড হয়েছে।"));
@@ -367,11 +443,14 @@ async function change(input){
  finally{busy=false}
  return true;
 }
-async function openFile(path){
+async function openFile(path,name="",mime=""){
  if(!path)return;
- const {data:link,error}=await client().storage.from(bucket).createSignedUrl(path,120);
+ const preview=PREVIEW_MIMES.includes(mime)||(!mime&&/\.(pdf|png|jpe?g|webp|gif)$/i.test(name));
+ const options=preview?undefined:{download:safeDownloadName(name||"attachment")};
+ const {data:link,error}=await client().storage.from(bucket).createSignedUrl(path,120,options);
  if(error)throw error;
- const a=document.createElement("a");a.href=link.signedUrl;a.target="_blank";a.rel="noopener noreferrer";document.body.appendChild(a);a.click();a.remove();
+ const a=document.createElement("a");a.href=link.signedUrl;a.target="_blank";a.rel="noopener noreferrer";
+ document.body.appendChild(a);a.click();a.remove();
 }
 
 async function deleteCourseItem(kind,id){
@@ -517,7 +596,7 @@ function action(act,btn){
   })();
   return true;
  }
- if(type==="open-file"){void openFile(btn.dataset.path).catch(err=>msg(String(err.message||err),true));return true}
+ if(type==="open-file"){void openFile(btn.dataset.path,btn.dataset.name||"",btn.dataset.mime||"").catch(err=>msg(String(err.message||err),true));return true}
  if(type==="remove-student"&&owner(currentCourse())){
   if(window.confirm(tr("Remove this student from the course?","শিক্ষার্থীকে কোর্স থেকে সরাতে চাও?")))void (async()=>{const {error}=await client().from(TABLES.enrollments).delete().eq("course_id",id).eq("student_id",btn.dataset.student);if(error)msg(String(error.message),true);else await reload()})();
   return true;

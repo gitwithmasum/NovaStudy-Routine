@@ -76,3 +76,13 @@ This release is additive. **It does not migrate or replace** `novastudy_state_v1
 - The desktop layout is 4 columns, medium screens 2 columns, and mobile a vertical stack. The currently selected card is highlighted and exposes its complete existing controls below.
 - Only the selected detail panel is rendered; changing cards does not modify any existing cloud, authentication, smart sync or local user data. Defaults to Google Account on a fresh page load and preserves selection during in-app renders.
 - The four original modules, event handlers, privacy controls, and update semantics are unchanged. Bilingual labels and accessibility attributes are preserved.
+
+
+## v3.6.4 — Any File and Folder upload (20 MB)
+
+- Owners can upload PDF, code, ZIP, docs, images, or any binary type to chapter and topic notes. The single-file limit is 20 MiB (20 × 1024 × 1024 bytes). Existing uploaded materials remain intact.
+- Separate folder picker accepts at most 10,000 files and at most 20 MiB aggregated; browser-side uncompressed ZIP preserves subfolder paths and also must fit 20 MiB including overhead. Empty directories cannot be reconstructed.
+- Replacing an existing note attachment and student homework attachment also accept a single arbitrary file up to 20 MiB.
+- The private Supabase `novastudy-learning` bucket must permit all MIME types and 20 MiB. Existing RLS and course membership restrictions remain in place. HTML/scripts and unknown MIME types use `application/octet-stream` and download links; PDF and common images can still preview.
+- Files are stored in private cloud storage rather than local IndexedDB. Signed links expire, existing cleanup/deletion behavior is retained, and ZIP creation happens in the browser with no external ZIP service.
+- Verify folder uploading in a Chromium browser with directory selection support; test server-side bucket size/mime policy, signed links, boundary conditions and a storage quota rejection.
