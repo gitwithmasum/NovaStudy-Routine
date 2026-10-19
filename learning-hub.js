@@ -328,6 +328,11 @@ function skillAction(action,b){
 function selectTab(next,silent=false){if(!TABS.includes(next))return false;tab=next;if(!silent)refresh();return true}
 function handle(action,button){
  const id=button?.dataset?.id,section=button?.dataset?.section;
+ if(action==="hub-skill-cancel"){addingSkill=false;editingSkillId="";refresh();return true}
+ if(action==="hub-module-cancel"){addingModule=false;editingModuleId="";refresh();return true}
+ if(action==="hub-item-cancel"){addingItemModule="";editingItemId="";refresh();return true}
+ if(action==="hub-module-toggle"){openedSkillModule=openedSkillModule===id?"":id;refresh();return true}
+ if(action.startsWith("hub-skill-")||action.startsWith("hub-module-")||action.startsWith("hub-item-")||action==="hub-pdf-open")return skillAction(action,button);
  if(action==="hub-tab"){selectTab(button?.dataset?.tab);return true}
  if(action==="hub-practice-delete"){if(window.confirm(tr("Delete this problem?","এই Problem মুছবে?")))mutate(n=>{n.practice=n.practice.filter(x=>x.id!==id)});return true}
  if(action==="hub-project-delete"){if(window.confirm(tr("Delete this project and milestones?","এই Project ও Milestones মুছবে?")))mutate(n=>{n.projects=n.projects.filter(x=>x.id!==id)});return true}
@@ -364,6 +369,7 @@ function submit(form){
  if(form?.id==="hubProjectForm")return createProject(form);
  if(form?.id==="hubMilestoneForm")return addMilestone(form);
  if(form?.id==="hubResourceForm")return createResource(form);
+ if(["hubSkillForm","hubModuleForm","hubItemForm"].includes(form?.id))return saveSkillForm(form);
  return false;
 }
 function download(content,filename){
@@ -399,6 +405,103 @@ const progressOptions=(value="todo")=>LEVELS.map(s=>'<option value="'+s+'"'+(s==
  {todo:"Not started",learning:"Learning",practiced:"Practiced",completed:"Completed",review:"Review again"}[s],
  {todo:"শুরু হয়নি",learning:"শিখছি",practiced:"অনুশীলন করেছি",completed:"সম্পন্ন",review:"আবার রিভিশন"}[s]))+'</option>').join("");
 const btn=(text,action,attr="",style="secondary-btn")=>'<button type="button" class="'+style+'" data-action="'+action+'" '+attr+'>'+text+'</button>';
+let openedSkillModule="";
+
+function skillForm(skill=null){
+ return '<form id="hubSkillForm" class="hub-form hub-skills-form" data-skill="'+E(skill?.id||"")+'">'+
+ '<label>'+tr("Skill name","স্কিলের নাম")+'<input name="title" maxlength="140" required value="'+E(skill?.title||"")+'" placeholder="e.g. Cybersecurity"></label>'+
+ '<label class="hub-wide">'+tr("Description","বিবরণ")+'<textarea name="description" maxlength="700" rows="2">'+E(skill?.description||"")+'</textarea></label>'+
+ '<button type="submit" class="primary-btn">'+tr(skill?"Save Skill":"Add Skill",skill?"স্কিল সেভ":"স্কিল যোগ")+'</button>'+
+ btn(tr("Cancel","বাতিল"),"hub-skill-cancel")+'</form>';
+}
+function moduleForm(skill,module=null){
+ return '<form id="hubModuleForm" class="hub-form hub-skills-form" data-skill="'+E(skill.id)+'" data-module="'+E(module?.id||"")+'">'+
+ '<label>'+tr("Module title","মডিউলের নাম")+'<input name="title" maxlength="160" required value="'+E(module?.title||"")+'" placeholder="Module 01 — Foundations"></label>'+
+ '<label class="hub-wide">'+tr("Module description","মডিউলের বিবরণ")+'<textarea name="description" maxlength="700" rows="2">'+E(module?.description||"")+'</textarea></label>'+
+ '<button class="primary-btn" type="submit">'+tr(module?"Save Module":"Add Module",module?"মডিউল সেভ":"মডিউল যোগ")+'</button>'+
+ btn(tr("Cancel","বাতিল"),"hub-module-cancel")+'</form>';
+}
+function itemForm(skill,module,item=null){
+ const kind=item?.kind||"topic";
+ return '<form id="hubItemForm" class="hub-form hub-skills-form" data-skill="'+E(skill.id)+'" data-module="'+E(module.id)+'" data-item="'+E(item?.id||"")+'">'+
+ '<label>'+tr("Resource title","রিসোর্সের নাম")+'<input name="title" maxlength="160" required value="'+E(item?.title||"")+'"></label>'+
+ '<label>'+tr("Content type","কনটেন্ট টাইপ")+'<select name="kind">'+
+ skillKinds.map(k=>'<option value="'+k+'"'+(kind===k?" selected":"")+'>'+E({topic:tr("Topic / Notes","টপিক / নোটস"),code:tr("Code Snippet","কোড"),pdf:tr("PDF","পিডিএফ")}[k])+'</option>').join("")+'</select></label>'+
+ '<label class="hub-wide">'+tr("Notes / Code","নোটস / কোড")+'<textarea name="body" maxlength="12000" rows="5" placeholder="'+tr("Write lesson notes or paste your code here","নোটস লিখো অথবা কোড পেস্ট করো")+'">'+E(item?.body||"")+'</textarea></label>'+
+ '<label class="hub-wide">'+tr("PDF link (optional, HTTPS)","পিডিএফ লিংক (ঐচ্ছিক)")+'<input name="url" type="url" maxlength="500" value="'+E(item?.url||"")+'" placeholder="https://.../notes.pdf"></label>'+
+ '<label class="hub-wide">'+tr("Or upload a local PDF (8 MB max)","অথবা লোকাল PDF আপলোড করো (সর্বোচ্চ ৮ MB)")+
+ '<input name="pdf_file" type="file" accept=".pdf,application/pdf"><small>'+tr("Only for PDF type. Local files remain on this browser and are NOT included in JSON backup. Use PDF links for cross-device access.","শুধু PDF টাইপের জন্য। Local PDF এই Browser-এ থাকবে, JSON Backup-এ থাকবে না। অন্য Device-এর জন্য PDF Link ব্যবহার করো।")+'</small></label>'+
+ (item?.localId?'<p class="hub-wide hub-note">'+tr("Existing local attachment: ","বর্তমান Local File: ")+E(item.fileName)+'</p>':"")+
+ '<button type="submit" class="primary-btn">'+tr(item?"Save Resource":"Add Resource",item?"রিসোর্স সেভ":"রিসোর্স যোগ")+'</button>'+
+ btn(tr("Cancel","বাতিল"),"hub-item-cancel")+'</form>';
+}
+function skillCard(skill){
+ const count=skill.modules.reduce((sum,m)=>sum+m.items.length,0),done=skill.modules.reduce((sum,m)=>sum+m.items.filter(i=>i.done).length,0);
+ const name=tr(skill.bn||skill.title,skill.bn||skill.title);
+ return '<button class="hub-skill-card" type="button" data-action="hub-skill-open" data-id="'+E(skill.id)+'">'+
+ '<span class="hub-skill-icon" aria-hidden="true">◈</span><strong>'+E(name)+'</strong>'+
+ '<small>'+E(skill.description||tr("Organize your learning into modules","মডিউলে পড়াশোনা সাজাও"))+'</small>'+
+ '<span class="hub-skill-meta">'+E(I.number(skill.modules.length))+' '+tr("modules","মডিউল")+' · '+E(I.number(done))+'/'+E(I.number(count))+' '+tr("completed","সম্পন্ন")+'</span>'+
+ progressBar(done,count)+'</button>';
+}
+function skillsCatalog(compact=false){
+ const cards=activeSkills(state).map(skillCard).join("");
+ return '<section class="panel hub-skill-section"><div class="panel-header"><div><b class="panel-title">'+tr("My Skills & Modules","আমার স্কিল ও মডিউল")+'</b>'+
+ '<small class="panel-sub">'+tr("Open any skill to manage modules, lessons, PDFs and code.","যেকোনো স্কিল খুলে মডিউল, টপিক, PDF ও কোড সাজাও।")+'</small></div>'+
+ (compact?btn(tr("Manage Skills","স্কিল ম্যানেজ"),"hub-tab",'data-tab="skills"'):btn(tr("+ Add Skill","+ স্কিল যোগ"),"hub-skill-add"))+
+ '</div><div class="hub-skill-grid">'+(cards||'<p class="hub-note">'+tr("No skills yet. Add your first skill.","এখনো কোনো স্কিল নেই। প্রথমটি যোগ করো।")+'</p>')+'</div>'+
+ (!compact&&addingSkill?skillForm():"")+'</section>';
+}
+function skillItemView(skill,module,item){
+ const attrs='data-id="'+E(item.id)+'" data-skill="'+E(skill.id)+'" data-module="'+E(module.id)+'"';
+ const symbol={topic:"▤",code:"{ }",pdf:"▣"}[item.kind];
+ return '<article class="hub-skill-item"><div class="hub-skill-item-heading">'+
+ '<span class="hub-skill-kind" aria-hidden="true">'+symbol+'</span><div class="hub-skill-item-copy"><strong>'+E(item.title)+'</strong>'+
+ '<small>'+E({topic:tr("Topic / Notes","টপিক / নোটস"),code:tr("Code","কোড"),pdf:tr("PDF","পিডিএফ")}[item.kind])+'</small></div>'+
+ '<div class="hub-skill-controls">'+
+ btn(item.done?tr("✓ Done","✓ সম্পন্ন"):tr("Mark done","সম্পন্ন করো"),"hub-item-done",attrs,"tiny-btn")+
+ btn(tr("Edit","এডিট"),"hub-item-edit",attrs,"tiny-btn")+
+ btn(tr("Delete","ডিলিট"),"hub-item-delete",attrs,"tiny-btn")+'</div></div>'+
+ (item.body?(item.kind==="code"?'<pre class="hub-code"><code>'+E(item.body)+'</code></pre>':'<p class="hub-skill-item-body">'+E(item.body)+'</p>'):"")+
+ (item.kind==="pdf"?'<div class="hub-skill-links">'+
+ (item.url?'<a href="'+E(item.url)+'" target="_blank" rel="noopener noreferrer">'+tr("Open PDF link ↗","PDF লিংক খোলো ↗")+'</a>':"")+
+ (item.localId?btn(tr("Download local PDF","লোকাল PDF ডাউনলোড"),"hub-pdf-open",attrs):"")+'</div>':"")+
+ (editingItemId===item.id?itemForm(skill,module,item):"")+'</article>';
+}
+function skillWorkspace(){
+ const skill=findSkill(activeSkillId);
+ if(!skill)return skillsCatalog(false);
+ const total=skill.modules.reduce((n,m)=>n+m.items.length,0),done=skill.modules.reduce((n,m)=>n+m.items.filter(i=>i.done).length,0);
+ return '<section class="panel hub-skill-detail">'+
+ '<div class="hub-skill-detail-header"><div>'+btn("← "+tr("All Skills","সব স্কিল"),"hub-skill-back")+
+ '<h2>'+E(tr(skill.title,skill.bn||skill.title))+'</h2>'+
+ (skill.description?'<p class="hub-note">'+E(skill.description)+'</p>':"")+
+ '<small>'+E(I.number(skill.modules.length))+' '+tr("modules","মডিউল")+' · '+E(I.number(done))+'/'+E(I.number(total))+' '+tr("resources complete","রিসোর্স সম্পন্ন")+'</small></div>'+
+ '<div class="hub-skill-controls">'+btn(tr("Edit Skill","স্কিল এডিট"),"hub-skill-edit",'data-id="'+E(skill.id)+'"')+
+ btn(tr("Delete Skill","স্কিল ডিলিট"),"hub-skill-delete",'data-id="'+E(skill.id)+'"',"danger-btn")+'</div></div>'+
+ (editingSkillId===skill.id?skillForm(skill):"")+
+ '<div class="hub-skill-module-top"><h3>'+tr("Course Modules","কোর্স মডিউল")+'</h3>'+
+ btn(tr("+ Add Module","+ মডিউল যোগ"),"hub-module-add",'data-skill="'+E(skill.id)+'"')+'</div>'+
+ (addingModule?moduleForm(skill):"")+
+ '<div class="hub-skill-modules">'+(skill.modules.length?skill.modules.map((module,index)=>{
+ const count=module.items.filter(x=>x.done).length,open=openedSkillModule===module.id;
+ return '<section class="hub-skill-module"><div class="hub-skill-module-header">'+
+ '<button type="button" class="hub-skill-module-toggle" data-action="hub-module-toggle" data-id="'+E(module.id)+'" data-skill="'+E(skill.id)+'" aria-expanded="'+open+'" aria-controls="hub-module-content-'+E(module.id)+'">'+
+ '<span class="hub-skill-number">'+E(I.number(index+1))+'</span><span><strong>'+E(module.title)+'</strong>'+
+ '<small>'+E(I.number(count))+'/'+E(I.number(module.items.length))+' '+tr("completed","সম্পন্ন")+'</small></span><span aria-hidden="true">'+(open?"▾":"▸")+'</span></button>'+
+ '<div class="hub-skill-controls">'+btn(tr("Edit","এডিট"),"hub-module-edit",'data-id="'+E(module.id)+'" data-skill="'+E(skill.id)+'"',"tiny-btn")+
+ btn(tr("Delete","ডিলিট"),"hub-module-delete",'data-id="'+E(module.id)+'" data-skill="'+E(skill.id)+'"',"tiny-btn")+'</div></div>'+
+ (editingModuleId===module.id?moduleForm(skill,module):"")+
+ '<div class="hub-skill-module-content" id="hub-module-content-'+E(module.id)+'"'+(open?"":" hidden")+">"+
+ (module.description?'<p class="hub-note">'+E(module.description)+'</p>':"")+
+ '<div class="hub-skill-item-list">'+module.items.map(item=>skillItemView(skill,module,item)).join("")+'</div>'+
+ (module.items.length?"":'<p class="hub-note">'+tr("No resources yet. Add a topic, code snippet or PDF.","এখনো কোনো রিসোর্স নেই। টপিক, কোড বা PDF যোগ করো।")+'</p>')+
+ btn(tr("+ Add Topic / Code / PDF","+ টপিক / কোড / PDF যোগ"),"hub-item-add",'data-skill="'+E(skill.id)+'" data-module="'+E(module.id)+'"')+
+ (addingItemModule===module.id?itemForm(skill,module):"")+'</div></section>';
+ }).join(""):'<p class="hub-note">'+tr("Start by adding a module. You can then organize topics, source code and PDFs.","প্রথমে একটি মডিউল যোগ করো। তারপর টপিক, কোড ও PDF সাজাও।")+'</p>')+'</div>'+
+ '<p class="hub-note">'+tr("Skill metadata and code are included in Learning Hub JSON backups. Locally uploaded PDF binaries remain on this device; external PDF links work across devices.","স্কিল, মডিউল ও কোড Learning Hub JSON Backup-এ থাকবে। লোকাল PDF ফাইল শুধু এই ডিভাইসে থাকবে; বাইরের PDF লিংক অন্য ডিভাইসেও কাজ করবে।")+'</p></section>';
+}
+
 function top(){
  return '<div class="page-head"><div><span class="eyebrow">'+tr("FUTURE ENGINEER / SKILL WORKSPACE","ফিউচার ইঞ্জিনিয়ার / স্কিল ওয়ার্কস্পেস")+'</span>'+
  '<h1 class="view-title">'+tr("CSE Learning Hub","সিএসই লার্নিং হাব")+'</h1><p class="subheading">'+tr(
@@ -499,12 +602,12 @@ function resources(){
  (rows||'<div class="empty-state">'+tr("No saved links yet.","এখনো কোনো Link Save করা হয়নি।")+'</div>')+'</div></section>';
 }
 function page(){
- const content=tab==="challenge"?C.view():tab==="overview"?overview():tab==="practice"?practice():
+ const content=tab==="challenge"?C.view():tab==="overview"?overview()+skillsCatalog(true):tab==="skills"?skillWorkspace():tab==="practice"?practice():
  ["dsa","ai","fullstack"].includes(tab)?roadmap(tab):tab==="projects"?projects():resources();
  return '<div class="hub-root">'+top()+(error?'<p class="hub-alert" role="alert">'+E(error)+'</p>':"")+
  '<div class="hub-content">'+content+'</div></div>';
 }
 function init(opts={}){toast=opts.toast||(()=>{});refresh=opts.refresh||(()=>{})}
 window.NOVA_LEARNING_HUB={KEY,TABS,ROADMAPS,init,page,selectTab,handle,handleChange,submit,importData,
- valid,save,adopt,analytics,exportData,get:()=>copy(state),getTab:()=>tab,createPractice,createProject,addMilestone,createResource};
+ valid,validSkills,save,adopt,analytics,exportData,get:()=>copy(state),getTab:()=>tab,createPractice,createProject,addMilestone,createResource,skillSeed,activeSkills:()=>copy(activeSkills(state))};
 })();
