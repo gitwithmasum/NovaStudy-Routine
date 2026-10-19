@@ -35,7 +35,8 @@ test("six existing skills are available as modular cards, without replacing road
  assert.match(markup,/data-action="hub-skill-add"/);
  assert.match(markup,/Skills & Modules/);
  assert.ok(b.hub.TABS.includes("challenge"));
- assert.ok(b.hub.TABS.includes("fullstack"));
+ assert.equal(b.hub.TABS.includes("fullstack"),false);
+ for(const old of ["ai","projects","resources"])assert.equal(b.hub.TABS.includes(old),false);
  assert.equal(b.hub.TABS.includes("dsa"),false);
  const dsa=skills.find(s=>s.id==="skill-dsa");
  assert.equal(dsa.modules.length,14);
@@ -74,7 +75,7 @@ test("built-in skill supports module CRUD and expandable Ostad-style resource li
  b.hub.handle("hub-module-add",{dataset:{skill:"skill-fullstack"}});
  assert.match(b.hub.page(),/id="hubModuleForm"/);
  assert.equal(await b.hub.submit(moduleForm("skill-fullstack")),true);
- const m=b.hub.activeSkills().find(x=>x.id==="skill-fullstack").modules[0];
+ const m=b.hub.activeSkills().find(x=>x.id==="skill-fullstack").modules.at(-1);
  assert.ok(m);
  let html=b.hub.page();assert.match(html,/data-action="hub-module-toggle"/);
  b.hub.handle("hub-module-toggle",{dataset:{id:m.id}});
@@ -84,9 +85,9 @@ test("built-in skill supports module CRUD and expandable Ostad-style resource li
  b.hub.handle("hub-module-edit",{dataset:{id:m.id,skill:"skill-fullstack"}});
  assert.equal(await b.hub.submit(moduleForm("skill-fullstack","Module 01 — Advanced",m.id)),true);
  assert.match(b.hub.page(),/Module 01 — Advanced/);
- assert.equal(b.hub.activeSkills().find(x=>x.id==="skill-fullstack").modules.length,1);
+ assert.equal(b.hub.activeSkills().find(x=>x.id==="skill-fullstack").modules.length,15);
  b.hub.handle("hub-module-delete",{dataset:{id:m.id,skill:"skill-fullstack"}});
- assert.equal(b.hub.activeSkills().find(x=>x.id==="skill-fullstack").modules.length,0);
+ assert.equal(b.hub.activeSkills().find(x=>x.id==="skill-fullstack").modules.length,14);
 });
 test("add topic, safe code and PDF URL; edit progress; all stay in validated Learning Hub backup",async()=>{
  const b=boot();b.hub.selectTab("skills");
@@ -113,7 +114,7 @@ test("add topic, safe code and PDF URL; edit progress; all stay in validated Lea
 });
 test("reject malicious PDFs, oversized local uploads and invalid nested skill data",async()=>{
  const b=boot();await b.hub.submit(moduleForm("skill-ai","Machine Learning"));
- const mod=b.hub.activeSkills().find(x=>x.id==="skill-ai").modules[0];
+ const mod=b.hub.activeSkills().find(x=>x.id==="skill-ai").modules.at(-1);
  assert.equal(await b.hub.submit(itemForm("skill-ai",mod.id,{title:"Unsafe",kind:"pdf",url:"javascript:alert(1)"})),false);
  assert.equal(await b.hub.submit(itemForm("skill-ai",mod.id,{title:"Missing",kind:"pdf"})),false);
  assert.equal(await b.hub.submit(itemForm("skill-ai",mod.id,{title:"Big",kind:"pdf",pdf_file:{size:9000000,type:"application/pdf",name:"test.pdf"}})),false);
@@ -176,4 +177,54 @@ test("older backups without a skills field get all DSA topics on import",()=>{
  assert.equal(b.hub.save(old,{replace:true}),true);
  assert.equal(b.hub.activeSkills().find(s=>s.id==="skill-dsa").modules.length,14);
  assert.equal(b.hub.get().roadmaps.dsa.arrays,"learning");
+});
+
+test("AI and Full Stack seed fourteen modules with original milestone dropdowns",()=>{
+ const b=boot(),skills=b.hub.activeSkills();
+ for(const [id,roadmap] of [["skill-ai","ai"],["skill-fullstack","fullstack"]]){
+  const skill=skills.find(x=>x.id===id);assert.equal(skill.modules.length,14);
+  b.hub.handle("hub-skill-open",{dataset:{id}});
+  const html=b.hub.page();
+  assert.match(html,new RegExp('data-hub-progress="'+roadmap+'"'));
+  assert.match(html,/data-action="hub-module-edit"/);
+  assert.match(html,/data-action="hub-module-delete"/);
+  assert.equal(b.hub.handleChange({dataset:{hubProgress:roadmap,topicId:b.hub.ROADMAPS[roadmap][0][0]},value:"completed"}),true);
+  assert.equal(b.hub.get().roadmaps[roadmap][b.hub.ROADMAPS[roadmap][0][0]],"completed");
+ }
+});
+test("Projects and Resources are modules that retain functional legacy data managers",()=>{
+ const b=boot();
+ for(const [name,module,formId] of [["skill-projects","projects-workspace","hubProjectForm"],["skill-resources","resources-library","hubResourceForm"]]){
+  b.hub.handle("hub-skill-open",{dataset:{id:name}});
+  assert.ok(b.hub.activeSkills().find(s=>s.id===name).modules.some(m=>m.id===module));
+  assert.match(b.hub.page(),new RegExp('id="'+formId+'"'));
+ }
+ assert.equal(b.hub.submit(form("hubProjectForm",{name:"Existing software",stack:"Python",repo:"",live:""})),true);
+ assert.equal(b.hub.submit(form("hubResourceForm",{title:"Existing docs",url:"https://docs.python.org",category:"general"})),true);
+ assert.equal(b.hub.get().projects[0].name,"Existing software");
+ assert.equal(b.hub.get().resources[0].title,"Existing docs");
+ const copy=boot(b.records.get(b.key));
+ copy.hub.handle("hub-skill-open",{dataset:{id:"skill-projects"}});
+ assert.match(copy.hub.page(),/Existing software/);
+ copy.hub.handle("hub-skill-open",{dataset:{id:"skill-resources"}});
+ assert.match(copy.hub.page(),/Existing docs/);
+});
+test("older v3.6.1 backups migrate once without losing progress or custom AI modules",()=>{
+ const b=boot(),legacy=b.hub.get();
+ legacy.skills.find(s=>s.id==="skill-ai").modules=[{id:"my-ai",title:"Personal AI",description:"",items:[]}];
+ for(const name of ["skill-fullstack","skill-projects","skill-resources"])legacy.skills.find(s=>s.id===name).modules=[];
+ legacy.roadmaps.ai.math="review";legacy.roadmaps.fullstack.js="completed";
+ delete legacy.skillModulesV2;
+ const updated=boot(JSON.stringify(legacy)),state=updated.hub.get();
+ assert.equal(state.skillModulesV2,true);
+ assert.equal(state.skills.find(s=>s.id==="skill-ai").modules.length,15);
+ assert.equal(state.skills.find(s=>s.id==="skill-fullstack").modules.length,14);
+ assert.equal(state.skills.find(s=>s.id==="skill-projects").modules.length,1);
+ assert.equal(state.skills.find(s=>s.id==="skill-resources").modules.length,1);
+ assert.equal(state.roadmaps.ai.math,"review");
+ assert.equal(state.roadmaps.fullstack.js,"completed");
+ updated.hub.handle("hub-module-delete",{dataset:{skill:"skill-ai",id:"ai-python"}});
+ const restored=boot(updated.records.get(updated.key));
+ assert.equal(restored.hub.activeSkills().find(s=>s.id==="skill-ai").modules.length,14);
+ assert.equal(restored.hub.activeSkills().find(s=>s.id==="skill-ai").modules.some(m=>m.id==="ai-python"),false);
 });
