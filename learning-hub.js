@@ -4,7 +4,7 @@
 "use strict";
 const N=window.NOVA,I=window.NOVA_I18N,E=N.escape,C=window.NOVA_CHALLENGE;
 const KEY="novastudy_learning_hub_v1";
-const TABS=["overview","skills","challenge","practice","ai","fullstack","projects","resources"];
+const TABS=["overview","skills","challenge","practice"];
 const LEVELS=["todo","learning","practiced","completed","review"];
 const STAGES=["idea","building","testing","completed"];
 const DIFFICULTY=["easy","medium","hard"];
@@ -38,7 +38,14 @@ const ROADMAPS={
  ["deploy","Vercel / Netlify / CI","ডিপ্লয়মেন্ট ও সিআই"],["capstone","Full Stack Capstone","ফুল স্ট্যাক প্রজেক্ট"]]
 };
 const DSA_MODULES=ROADMAPS.dsa.map(([id,title])=>({id:"dsa-"+id,title,description:"",items:[]}));
-const stateFresh=()=>({version:1,dsaModulesV1:true,practice:[],roadmaps:{dsa:{},ai:{},fullstack:{}},projects:[],resources:[],skills:skillSeed()});
+const MODULE_PRESETS={
+ "skill-dsa":DSA_MODULES,
+ "skill-ai":ROADMAPS.ai.map(([id,title])=>({id:"ai-"+id,title,description:"",items:[]})),
+ "skill-fullstack":ROADMAPS.fullstack.map(([id,title])=>({id:"fullstack-"+id,title,description:"",items:[]})),
+ "skill-projects":[{id:"projects-workspace",title:"Project Tracker & Milestones",description:"Manage your saved projects and milestones, and add module notes, code and PDFs.",items:[]}],
+ "skill-resources":[{id:"resources-library",title:"Saved Learning Resources",description:"Your saved resource links are accessible below. Add module notes, code and PDFs here.",items:[]}]
+};
+const stateFresh=()=>({version:1,dsaModulesV1:true,skillModulesV2:true,practice:[],roadmaps:{dsa:{},ai:{},fullstack:{}},projects:[],resources:[],skills:skillSeed()});
 const uid=()=>N.uid(),kind=(s,allowed)=>allowed.includes(s);
 const safeUrl=value=>{
  const s=String(value||"").trim();
@@ -65,23 +72,35 @@ const DEFAULT_SKILLS=[
  ["skill-projects","Projects","প্রজেক্ট"],
  ["skill-resources","Resources","রিসোর্স"]
 ];
-const skillSeed=()=>DEFAULT_SKILLS.map(([id,title,bn])=>({id,title,bn,description:"",modules:id==="skill-dsa"?DSA_MODULES.map(m=>({...m,items:[]})):[]}));
+const skillSeed=()=>DEFAULT_SKILLS.map(([id,title,bn])=>({id,title,bn,description:"",modules:(MODULE_PRESETS[id]||[]).map(m=>({...m,items:[]}))}));
+/* One-time additive upgrade: existing user modules and status values are preserved.
+   The markers keep deliberate module removals from reappearing after reload. */
 function upgradeDsaModules(data){
- if(data.dsaModulesV1)return data;
+ if(data.dsaModulesV1&&data.skillModulesV2)return data;
  if(!Array.isArray(data.skills))data.skills=skillSeed();
- const dsa=data.skills.find(s=>s.id==="skill-dsa");
- if(dsa){
-  const titles=new Set(dsa.modules.map(m=>m.title.trim().toLowerCase()));
-  for(const m of DSA_MODULES){
-   if(dsa.modules.length>=40)break;
-   if(dsa.modules.some(x=>x.id===m.id)||titles.has(m.title.toLowerCase()))continue;
-   dsa.modules.push({...m,items:[]});
+ function append(skillId,modules){
+  const skill=data.skills.find(s=>s.id===skillId);
+  if(!skill)return;
+  const titles=new Set(skill.modules.map(m=>m.title.trim().toLowerCase()));
+  for(const mod of modules){
+   if(skill.modules.length>=40)break;
+   if(skill.modules.some(m=>m.id===mod.id)||titles.has(mod.title.toLowerCase()))continue;
+   skill.modules.push({...mod,items:[]});
   }
  }
- data.dsaModulesV1=true;
+ if(!data.dsaModulesV1)append("skill-dsa",MODULE_PRESETS["skill-dsa"]);
+ if(!data.skillModulesV2){
+  for(const key of ["skill-ai","skill-fullstack","skill-projects","skill-resources"])append(key,MODULE_PRESETS[key]);
+ }
+ data.dsaModulesV1=true;data.skillModulesV2=true;
  return data;
 }
-const dsaModuleTopic=m=>ROADMAPS.dsa.find(([id,en])=>m.id==="dsa-"+id||m.title.trim().toLowerCase()===en.toLowerCase());
+function skillRoadmapTopic(skillId,module){
+ const area={"skill-dsa":"dsa","skill-ai":"ai","skill-fullstack":"fullstack"}[skillId];
+ if(!area)return null;
+ const match=ROADMAPS[area].find(([id,title])=>module.id===area+"-"+id||module.title.trim().toLowerCase()===title.toLowerCase());
+ return match?{area,id:match[0],en:match[1],bn:match[2],builtIn:module.id===area+"-"+match[0]}:null;
+}
 const activeSkills=s=>Array.isArray(s.skills)?s.skills:skillSeed();
 const findSkill=(id)=>activeSkills(state).find(x=>x.id===id);
 const skillKinds=["topic","code","pdf"];
@@ -101,7 +120,8 @@ function valid(v){
  v.practice.length>500||v.projects.length>80||v.resources.length>120||
  !unique(v.practice)||!unique(v.projects)||!unique(v.resources)||
  !v.practice.every(validPractice)||!v.projects.every(validProject)||!v.resources.every(validResource)||
- (v.skills!==undefined&&!validSkills(v.skills))||(v.dsaModulesV1!==undefined&&typeof v.dsaModulesV1!=="boolean"))return false;
+ (v.skills!==undefined&&!validSkills(v.skills))||(v.dsaModulesV1!==undefined&&typeof v.dsaModulesV1!=="boolean")||
+ (v.skillModulesV2!==undefined&&typeof v.skillModulesV2!=="boolean"))return false;
  for(const k of ["dsa","ai","fullstack"]){
   let r=v.roadmaps[k];if(!r||typeof r!=="object"||Array.isArray(r))return false;
   const ids=ROADMAPS[k].map(x=>x[0]);
@@ -129,12 +149,12 @@ function save(next,{replace=false}={}){
  }catch{error=tr("Could not save learning records. Previously saved data is unchanged.","লার্নিং রেকর্ড Save হয়নি। আগের সংরক্ষিত ডেটা অক্ষত আছে।");refresh();return false}
 }
 // Upgrade only valid previous Hub records, leaving other stores untouched.
-if(!locked&&!state.dsaModulesV1)save(copy(state));
+if(!locked&&(!state.dsaModulesV1||!state.skillModulesV2))save(copy(state));
 function adopt(textValue){
  if(textValue===null)return false;
  try{const candidate=JSON.parse(textValue);if(!valid(candidate))return false;
   state=candidate;raw=textValue;locked=false;error="";
-  if(!candidate.dsaModulesV1)return save(copy(candidate));
+  if(!candidate.dsaModulesV1||!candidate.skillModulesV2)return save(copy(candidate));
   refresh();return true
  }catch{return false}
 }
@@ -290,7 +310,9 @@ async function saveSkillForm(form){
 function skillAction(action,b){
  const id=b?.dataset?.id,skillId=b?.dataset?.skill,moduleId=b?.dataset?.module;
  if(action==="hub-skill-add"){addingSkill=!addingSkill;editingSkillId="";refresh();return true}
- if(action==="hub-skill-open"){activeSkillId=id;tab="skills";editingSkillId="";editingModuleId="";addingItemModule="";refresh();return true}
+ if(action==="hub-skill-open"){activeSkillId=id;tab="skills";editingSkillId="";editingModuleId="";addingItemModule="";
+  openedSkillModule=id==="skill-projects"?"projects-workspace":id==="skill-resources"?"resources-library":"";
+  refresh();return true}
  if(action==="hub-skill-back"){activeSkillId="";editingSkillId="";editingModuleId="";addingItemModule="";refresh();return true}
  if(action==="hub-skill-edit"){if(findSkill(id)){editingSkillId=editingSkillId===id?"":id;addingSkill=false;refresh()}return true}
  if(action==="hub-skill-delete"){
@@ -347,7 +369,19 @@ function skillAction(action,b){
  return false;
 }
 
-function selectTab(next,silent=false){if(!TABS.includes(next))return false;tab=next;if(!silent)refresh();return true}
+function selectTab(next,silent=false){
+ const old={dsa:"skill-dsa",ai:"skill-ai",fullstack:"skill-fullstack",projects:"skill-projects",resources:"skill-resources"};
+ if(old[next]){
+  tab="skills";activeSkillId=old[next];
+  openedSkillModule=next==="projects"?"projects-workspace":next==="resources"?"resources-library":"";
+ }else{
+  if(!TABS.includes(next))return false;
+  tab=next;
+  if(next==="overview"||next==="skills")activeSkillId="";
+ }
+ if(!silent)refresh();
+ return true;
+}
 function handle(action,button){
  const id=button?.dataset?.id,section=button?.dataset?.section;
  if(action==="hub-skill-cancel"){addingSkill=false;editingSkillId="";refresh();return true}
@@ -460,7 +494,9 @@ function itemForm(skill,module,item=null){
 function skillCard(skill){
  const count=skill.modules.reduce((sum,m)=>sum+m.items.length,0),done=skill.modules.reduce((sum,m)=>sum+m.items.filter(i=>i.done).length,0);
  const name=tr(skill.title,skill.bn||skill.title);
- const dsaProgress=skill.id==="skill-dsa"?" · "+E(I.number(analytics().roadmaps.dsa.completed))+"/"+E(I.number(ROADMAPS.dsa.length))+" "+tr("roadmap topics","রোডম্যাপ টপিক"):"";
+ const area={"skill-dsa":"dsa","skill-ai":"ai","skill-fullstack":"fullstack"}[skill.id];
+ const summary=area?analytics().roadmaps[area]:null;
+ const dsaProgress=summary?" · "+E(I.number(summary.completed))+"/"+E(I.number(summary.total))+" "+tr("roadmap topics","রোডম্যাপ টপিক"):"";
  return '<button class="hub-skill-card" type="button" data-action="hub-skill-open" data-id="'+E(skill.id)+'">'+
  '<span class="hub-skill-icon" aria-hidden="true">◈</span><strong>'+E(name)+'</strong>'+
  '<small>'+E(skill.description||tr("Organize your learning into modules","মডিউলে পড়াশোনা সাজাও"))+'</small>'+
@@ -507,13 +543,13 @@ function skillWorkspace(){
  btn(tr("+ Add Module","+ মডিউল যোগ"),"hub-module-add",'data-skill="'+E(skill.id)+'"')+'</div>'+
  (addingModule?moduleForm(skill):"")+
  '<div class="hub-skill-modules">'+(skill.modules.length?skill.modules.map((module,index)=>{
- const count=module.items.filter(x=>x.done).length,open=openedSkillModule===module.id,topic=skill.id==="skill-dsa"?dsaModuleTopic(module):null;
+ const count=module.items.filter(x=>x.done).length,open=openedSkillModule===module.id,topic=skillRoadmapTopic(skill.id,module);
  return '<section class="hub-skill-module"><div class="hub-skill-module-header">'+
  '<button type="button" class="hub-skill-module-toggle" data-action="hub-module-toggle" data-id="'+E(module.id)+'" data-skill="'+E(skill.id)+'" aria-expanded="'+open+'" aria-controls="hub-module-content-'+E(module.id)+'">'+
- '<span class="hub-skill-number">'+E(I.number(index+1))+'</span><span><strong>'+E(topic&&module.id==="dsa-"+topic[0]&&module.title===topic[1]?tr(topic[1],topic[2]):module.title)+'</strong>'+
+ '<span class="hub-skill-number">'+E(I.number(index+1))+'</span><span><strong>'+E(topic&&topic.builtIn&&module.title===topic.en?tr(topic.en,topic.bn):module.title)+'</strong>'+
  '<small>'+E(I.number(count))+'/'+E(I.number(module.items.length))+' '+tr("completed","সম্পন্ন")+'</small></span><span aria-hidden="true">'+(open?"▾":"▸")+'</span></button>'+
  '<div class="hub-skill-controls">'+
- (topic?'<label class="hub-dsa-module-progress"><span class="sr-only">'+tr("Topic progress","টপিকের অগ্রগতি")+'</span><select data-hub-progress="dsa" data-topic-id="'+E(topic[0])+'" aria-label="'+tr("Topic progress","টপিকের অগ্রগতি")+'">'+progressOptions(state.roadmaps.dsa[topic[0]])+'</select></label>':"")+
+ (topic?'<label class="hub-dsa-module-progress"><span class="sr-only">'+tr("Topic progress","টপিকের অগ্রগতি")+'</span><select data-hub-progress="'+E(topic.area)+'" data-topic-id="'+E(topic.id)+'" aria-label="'+tr("Topic progress","টপিকের অগ্রগতি")+'">'+progressOptions(state.roadmaps[topic.area][topic.id])+'</select></label>':"")+
  btn(tr("Edit","এডিট"),"hub-module-edit",'data-id="'+E(module.id)+'" data-skill="'+E(skill.id)+'"',"tiny-btn")+
  btn(tr("Delete","ডিলিট"),"hub-module-delete",'data-id="'+E(module.id)+'" data-skill="'+E(skill.id)+'"',"tiny-btn")+'</div></div>'+
  (editingModuleId===module.id?moduleForm(skill,module):"")+
@@ -522,8 +558,12 @@ function skillWorkspace(){
  '<div class="hub-skill-item-list">'+module.items.map(item=>skillItemView(skill,module,item)).join("")+'</div>'+
  (module.items.length?"":'<p class="hub-note">'+tr("No resources yet. Add a topic, code snippet or PDF.","এখনো কোনো রিসোর্স নেই। টপিক, কোড বা PDF যোগ করো।")+'</p>')+
  btn(tr("+ Add Topic / Code / PDF","+ টপিক / কোড / PDF যোগ"),"hub-item-add",'data-skill="'+E(skill.id)+'" data-module="'+E(module.id)+'"')+
- (addingItemModule===module.id?itemForm(skill,module):"")+'</div></section>';
+ (addingItemModule===module.id?itemForm(skill,module):"")+
+ (module.id==="projects-workspace"&&skill.id==="skill-projects"?projects():"")+
+ (module.id==="resources-library"&&skill.id==="skill-resources"?resources():"")+'</div></section>';
  }).join(""):'<p class="hub-note">'+tr("Start by adding a module. You can then organize topics, source code and PDFs.","প্রথমে একটি মডিউল যোগ করো। তারপর টপিক, কোড ও PDF সাজাও।")+'</p>')+'</div>'+
+ (skill.id==="skill-projects"&&!skill.modules.some(m=>m.id==="projects-workspace")?projects():"")+
+ (skill.id==="skill-resources"&&!skill.modules.some(m=>m.id==="resources-library")?resources():"")+
  '<p class="hub-note">'+tr("Skill metadata and code are included in Learning Hub JSON backups. Locally uploaded PDF binaries remain on this device; external PDF links work across devices.","স্কিল, মডিউল ও কোড Learning Hub JSON Backup-এ থাকবে। লোকাল PDF ফাইল শুধু এই ডিভাইসে থাকবে; বাইরের PDF লিংক অন্য ডিভাইসেও কাজ করবে।")+'</p></section>';
 }
 
@@ -628,7 +668,7 @@ function resources(){
 }
 function page(){
  const content=tab==="challenge"?C.view():tab==="overview"?overview()+skillsCatalog(true):tab==="skills"?skillWorkspace():tab==="practice"?practice():
- ["dsa","ai","fullstack"].includes(tab)?roadmap(tab):tab==="projects"?projects():resources();
+ practice();
  return '<div class="hub-root">'+top()+(error?'<p class="hub-alert" role="alert">'+E(error)+'</p>':"")+
  '<div class="hub-content">'+content+'</div></div>';
 }

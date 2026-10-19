@@ -118,3 +118,8 @@ html[data-theme="gold"] .hub-tab.is-active{border-color:var(--mint);color:var(--
 .hub-dsa-module-progress{display:flex;min-width:142px;max-width:200px;flex:0 1 190px}
 .hub-dsa-module-progress select{width:100%;min-height:42px;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--panel2);color:var(--text);font:inherit;font-size:12px}
 @media(max-width:660px){.hub-dsa-module-progress{flex:1 1 140px;max-width:none}.hub-skill-module-header>.hub-skill-controls{justify-content:flex-start}}
+
+/* Previously separate Projects/Resources managers now sit within expandable course modules. */
+.hub-skill-module-content>.panel{margin-top:14px;min-width:0}
+.hub-skill-module-content>.panel .hub-form{max-width:100%}
+@media(max-width:660px){.hub-skill-module-content>.panel{padding:12px}}
