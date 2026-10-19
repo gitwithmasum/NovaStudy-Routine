@@ -165,6 +165,166 @@ function createResource(form){
   n.resources.push({id:uid(),title,url,category});
  });
 }
+
+/* Course-style skill workspace. Metadata is part of Learning Hub's existing validated JSON
+   backup; optional local PDF binaries are isolated in IndexedDB and are not part of JSON backups. */
+let activeSkillId="",editingSkillId="",editingModuleId="",editingItemId="",addingSkill=false,addingModule=false,addingItemModule="";
+const ensureSkills=n=>(n.skills||(n.skills=skillSeed()));
+const skillLocation=(skillId,moduleId,itemId)=>{
+ const skill=findSkill(skillId),module=skill?.modules.find(m=>m.id===moduleId);
+ return {skill,module,item:module?.items.find(x=>x.id===itemId)};
+};
+const field=(form,name,max)=>formText(form,name,max);
+function skillUpsert(form){
+ const id=form.dataset.skill||"",title=requireValue(formValue(form,"title"),140,"Skill title"),
+  description=field(form,"description",700);
+ const ok=mutate(n=>{
+  const skills=ensureSkills(n);
+  if(id){const x=skills.find(s=>s.id===id);if(!x)throw Error("Skill not found");x.title=title;x.description=description}
+  else{
+   if(skills.length>=48)throw Error("Maximum 48 skills");
+   if(skills.some(s=>s.title.toLowerCase()===title.toLowerCase()))throw Error("Skill already exists");
+   skills.push({id:uid(),title,bn:"",description,modules:[]});
+  }
+ });
+ if(ok){addingSkill=false;editingSkillId="";if(id)activeSkillId=id}
+ return ok;
+}
+function moduleUpsert(form){
+ const skillId=form.dataset.skill,id=form.dataset.module||"",
+ title=requireValue(formValue(form,"title"),160,"Module title"),description=field(form,"description",700);
+ const ok=mutate(n=>{
+  const skill=ensureSkills(n).find(x=>x.id===skillId);
+  if(!skill)throw Error("Skill not found");
+  if(id){const m=skill.modules.find(x=>x.id===id);if(!m)throw Error("Module not found");m.title=title;m.description=description}
+  else{if(skill.modules.length>=40)throw Error("Maximum 40 modules per skill");skill.modules.push({id:uid(),title,description,items:[]})}
+ });
+ if(ok){addingModule=false;editingModuleId=""}
+ return ok;
+}
+function pdfDatabase(){
+ return new Promise((resolve,reject)=>{
+  if(!window.indexedDB){reject(Error("This browser does not support local PDF storage. Use a PDF URL instead."));return}
+  const req=window.indexedDB.open("novastudy-skill-pdfs",1);
+  req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains("files"))req.result.createObjectStore("files")};
+  req.onerror=()=>reject(req.error||Error("PDF database unavailable"));
+  req.onsuccess=()=>resolve(req.result);
+ });
+}
+async function pdfStorage(mode,id,blob){
+ const db=await pdfDatabase();
+ try{return await new Promise((resolve,reject)=>{
+  const tx=db.transaction("files",mode==="get"?"readonly":"readwrite"),store=tx.objectStore("files");
+  let value=null,req;
+  if(mode==="put")req=store.put(blob,id);
+  else if(mode==="delete")req=store.delete(id);
+  else req=store.get(id);
+  req.onsuccess=()=>{value=req.result};
+  tx.oncomplete=()=>resolve(value);
+  tx.onerror=()=>reject(tx.error||Error("PDF storage failed"));
+  tx.onabort=()=>reject(tx.error||Error("PDF storage aborted"));
+ })}finally{db.close()}
+}
+async function itemUpsert(form){
+ const skillId=form.dataset.skill,moduleId=form.dataset.module,id=form.dataset.item||"";
+ const title=requireValue(formValue(form,"title"),160,"Item title"),
+ kind=field(form,"kind",8),body=field(form,"body",12000),url=field(form,"url",500);
+ if(!skillKinds.includes(kind))throw Error("Invalid resource type");
+ if(url&&!safeUrl(url))throw Error("Only HTTPS or HTTP links are supported");
+ const old=skillLocation(skillId,moduleId,id).item;
+ const file=formValue(form,"pdf_file");
+ const uploading=kind==="pdf"&&file&&typeof file.size==="number"&&file.size>0;
+ if(uploading&&(file.size>8*1024*1024||!(/\.pdf$/i.test(file.name||"")||file.type==="application/pdf")))
+  throw Error("Choose a PDF no larger than 8 MB");
+ if(kind==="pdf"&&!uploading&&!url&&!(old?.kind==="pdf"&&old.localId))
+  throw Error("Add a PDF link or choose a local PDF file");
+ let localId=kind==="pdf"?(old?.localId||""):"",fileName=kind==="pdf"?(old?.fileName||""):"";
+ if(uploading){
+  localId=uid();fileName=String(file.name||"document.pdf").slice(0,200);
+  await pdfStorage("put",localId,file);
+ }
+ const ok=mutate(n=>{
+  const skill=ensureSkills(n).find(x=>x.id===skillId),module=skill?.modules.find(x=>x.id===moduleId);
+  if(!module)throw Error("Module not found");
+  const row={id:id||uid(),kind,title,body,url:kind==="pdf"?url:"",localId,fileName,done:old?.done||false};
+  if(id){const i=module.items.findIndex(x=>x.id===id);if(i<0)throw Error("Item not found");module.items[i]=row}
+  else{if(module.items.length>=80)throw Error("Maximum 80 resources per module");module.items.push(row)}
+ });
+ if(!ok&&uploading){try{await pdfStorage("delete",localId)}catch{}}
+ if(ok){
+  if(old?.localId&&old.localId!==localId)void pdfStorage("delete",old.localId).catch(()=>{});
+  editingItemId="";addingItemModule="";
+ }
+ return ok;
+}
+async function saveSkillForm(form){
+ try{
+  if(form.id==="hubSkillForm")return skillUpsert(form);
+  if(form.id==="hubModuleForm")return moduleUpsert(form);
+  if(form.id==="hubItemForm")return await itemUpsert(form);
+  return false;
+ }catch(err){error=String(err.message||err);refresh();return false}
+}
+function skillAction(action,b){
+ const id=b?.dataset?.id,skillId=b?.dataset?.skill,moduleId=b?.dataset?.module;
+ if(action==="hub-skill-add"){addingSkill=!addingSkill;editingSkillId="";refresh();return true}
+ if(action==="hub-skill-open"){activeSkillId=id;tab="skills";editingSkillId="";editingModuleId="";addingItemModule="";refresh();return true}
+ if(action==="hub-skill-back"){activeSkillId="";editingSkillId="";editingModuleId="";addingItemModule="";refresh();return true}
+ if(action==="hub-skill-edit"){if(findSkill(id)){editingSkillId=editingSkillId===id?"":id;addingSkill=false;refresh()}return true}
+ if(action==="hub-skill-delete"){
+  const skill=findSkill(id);if(!skill)return true;
+  if(!window.confirm(tr("Permanently delete this skill and all modules/resources?","এই Skill এবং সব Module/Resource স্থায়ীভাবে মুছবে?")))return true;
+  const ids=skill.modules.flatMap(m=>m.items.map(i=>i.localId).filter(Boolean));
+  if(mutate(n=>{n.skills=ensureSkills(n).filter(x=>x.id!==id)})){
+   activeSkillId="";editingSkillId="";
+   ids.forEach(k=>{void pdfStorage("delete",k).catch(()=>{})});
+  }
+  return true;
+ }
+ if(action==="hub-module-add"){if(findSkill(skillId)){addingModule=!addingModule;editingModuleId="";refresh()}return true}
+ if(action==="hub-module-edit"){
+  const m=skillLocation(skillId,id).module;
+  if(m){editingModuleId=editingModuleId===id?"":id;addingModule=false;refresh()}
+  return true;
+ }
+ if(action==="hub-module-delete"){
+  const m=skillLocation(skillId,id).module;
+  if(!m||!window.confirm(tr("Delete this module and all its resources?","এই মডিউল ও সব রিসোর্স মুছবে?")))return true;
+  if(mutate(n=>{const x=ensureSkills(n).find(s=>s.id===skillId);x.modules=x.modules.filter(o=>o.id!==id)}))
+   m.items.map(i=>i.localId).filter(Boolean).forEach(k=>{void pdfStorage("delete",k).catch(()=>{})});
+  editingModuleId="";return true;
+ }
+ if(action==="hub-item-add"){addingItemModule=addingItemModule===moduleId?"":moduleId;editingItemId="";refresh();return true}
+ if(action==="hub-item-edit"){const item=skillLocation(skillId,moduleId,id).item;if(item){editingItemId=editingItemId===id?"":id;addingItemModule="";refresh()}return true}
+ if(action==="hub-item-delete"){
+  const item=skillLocation(skillId,moduleId,id).item;
+  if(!item||!window.confirm(tr("Delete this topic/resource?","এই টপিক/রিসোর্স মুছবে?")))return true;
+  if(mutate(n=>{
+   const m=ensureSkills(n).find(s=>s.id===skillId)?.modules.find(x=>x.id===moduleId);
+   if(!m)return false;m.items=m.items.filter(x=>x.id!==id);
+  })&&item.localId)void pdfStorage("delete",item.localId).catch(()=>{});
+  editingItemId="";return true;
+ }
+ if(action==="hub-item-done"){
+  mutate(n=>{
+   const item=ensureSkills(n).find(s=>s.id===skillId)?.modules.find(m=>m.id===moduleId)?.items.find(x=>x.id===id);
+   if(!item)return false;item.done=!item.done;
+  });return true;
+ }
+ if(action==="hub-pdf-open"){
+  const item=skillLocation(skillId,moduleId,id).item;
+  if(!item?.localId)return true;
+  void pdfStorage("get",item.localId).then(file=>{
+   if(!file)throw Error("PDF is unavailable on this browser. Please upload it again.");
+   const href=URL.createObjectURL(file),a=document.createElement("a");
+   a.href=href;a.download=item.fileName||"lesson.pdf";document.body.appendChild(a);a.click();a.remove();
+   setTimeout(()=>URL.revokeObjectURL(href),2500);
+  }).catch(err=>{error=String(err.message||err);refresh()});
+  return true;
+ }
+ return false;
+}
+
 function selectTab(next,silent=false){if(!TABS.includes(next))return false;tab=next;if(!silent)refresh();return true}
 function handle(action,button){
  const id=button?.dataset?.id,section=button?.dataset?.section;
