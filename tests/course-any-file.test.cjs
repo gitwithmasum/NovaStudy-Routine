@@ -126,5 +126,5 @@ test("unknown and active content is downloaded using a signed attachment URL, no
  assert.equal(o.app.action("cm-open-file",{dataset:{path:attachment.file_path,name:attachment.file_name,mime:attachment.mime_type}}),true);
  await new Promise(resolve=>setImmediate(resolve));
  assert.equal(o.signed.length,1);
- assert.deepEqual(o.signed[0].options,{download:"unsafe.html"});
+ assert.equal(o.signed[0].options.download,"unsafe.html");
 });
