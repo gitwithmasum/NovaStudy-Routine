@@ -4,14 +4,14 @@
 "use strict";
 const N=window.NOVA,I=window.NOVA_I18N,E=N.escape,C=window.NOVA_CHALLENGE;
 const KEY="novastudy_learning_hub_v1";
-const TABS=["overview","challenge","practice","dsa","ai","fullstack","projects","resources"];
+const TABS=["overview","skills","challenge","practice","dsa","ai","fullstack","projects","resources"];
 const LEVELS=["todo","learning","practiced","completed","review"];
 const STAGES=["idea","building","testing","completed"];
 const DIFFICULTY=["easy","medium","hard"];
 const LANGS=["Python","C","C++","Java","JavaScript","TypeScript","SQL","Other"];
 const tr=(en,bn)=>I.language==="bn"?bn:en,copy=o=>JSON.parse(JSON.stringify(o));
 const today=()=>N.date(new Date());
-const labelTab={overview:["Overview","ওভারভিউ"],challenge:["CSE 100 Challenge","CSE ১০০ চ্যালেঞ্জ"],
+const labelTab={overview:["Overview","ওভারভিউ"],skills:["Skills & Modules","স্কিল ও মডিউল"],challenge:["CSE 100 Challenge","CSE ১০০ চ্যালেঞ্জ"],
  practice:["Programming Practice","প্রোগ্রামিং অনুশীলন"],dsa:["DSA & CP","ডিএসএ ও সিপি"],
  ai:["AI & ML","এআই ও এমএল"],fullstack:["Full Stack","ফুল স্ট্যাক"],
  projects:["Projects","প্রজেক্ট"],resources:["Resources","রিসোর্স"]};
@@ -37,7 +37,7 @@ const ROADMAPS={
  ["auth","Authentication & Security","অথেন্টিকেশন ও সিকিউরিটি"],["tests","Testing & Debugging","টেস্টিং ও ডিবাগিং"],
  ["deploy","Vercel / Netlify / CI","ডিপ্লয়মেন্ট ও সিআই"],["capstone","Full Stack Capstone","ফুল স্ট্যাক প্রজেক্ট"]]
 };
-const stateFresh=()=>({version:1,practice:[],roadmaps:{dsa:{},ai:{},fullstack:{}},projects:[],resources:[]});
+const stateFresh=()=>({version:1,practice:[],roadmaps:{dsa:{},ai:{},fullstack:{}},projects:[],resources:[],skills:skillSeed()});
 const uid=()=>N.uid(),kind=(s,allowed)=>allowed.includes(s);
 const safeUrl=value=>{
  const s=String(value||"").trim();
@@ -56,11 +56,35 @@ const validProject=p=>p&&bounded(p.id,128)&&p.id&&bounded(p.name,140)&&p.name.tr
  p.milestones.every(m=>m&&bounded(m.id,128)&&m.id&&bounded(m.title,130)&&m.title.trim()&&typeof m.done==="boolean");
 const validResource=r=>r&&bounded(r.id,128)&&r.id&&bounded(r.title,150)&&r.title.trim()&&
  bounded(r.url,500)&&r.url&&safeUrl(r.url)&&kind(r.category,["dsa","ai","fullstack","general"]);
+const DEFAULT_SKILLS=[
+ ["skill-programming","Programming Practice","প্রোগ্রামিং অনুশীলন"],
+ ["skill-dsa","DSA & CP","ডিএসএ ও সিপি"],
+ ["skill-ai","AI & ML","এআই ও এমএল"],
+ ["skill-fullstack","Full Stack","ফুল স্ট্যাক"],
+ ["skill-projects","Projects","প্রজেক্ট"],
+ ["skill-resources","Resources","রিসোর্স"]
+];
+const skillSeed=()=>DEFAULT_SKILLS.map(([id,title,bn])=>({id,title,bn,description:"",modules:[]}));
+const activeSkills=s=>Array.isArray(s.skills)?s.skills:skillSeed();
+const findSkill=(id)=>activeSkills(state).find(x=>x.id===id);
+const skillKinds=["topic","code","pdf"];
+const validSkillItem=x=>x&&bounded(x.id,128)&&!!x.id&&skillKinds.includes(x.kind)&&
+ bounded(x.title,160)&&!!x.title.trim()&&bounded(x.body,12000)&&
+ bounded(x.url,500)&&safeUrl(x.url)&&bounded(x.fileName,200)&&bounded(x.localId,128)&&
+ typeof x.done==="boolean"&&
+ (x.kind!=="pdf"||!!x.url||!!x.localId);
+const validSkillModule=x=>x&&bounded(x.id,128)&&!!x.id&&bounded(x.title,160)&&!!x.title.trim()&&
+ bounded(x.description,700)&&Array.isArray(x.items)&&x.items.length<=80&&unique(x.items)&&x.items.every(validSkillItem);
+const validSkill=x=>x&&bounded(x.id,128)&&!!x.id&&bounded(x.title,140)&&!!x.title.trim()&&
+ bounded(x.bn,140)&&bounded(x.description,700)&&Array.isArray(x.modules)&&x.modules.length<=40&&
+ unique(x.modules)&&x.modules.every(validSkillModule);
+const validSkills=x=>Array.isArray(x)&&x.length<=48&&unique(x)&&x.every(validSkill);
 function valid(v){
  if(!v||v.version!==1||!Array.isArray(v.practice)||!Array.isArray(v.projects)||!Array.isArray(v.resources)||!v.roadmaps ||
  v.practice.length>500||v.projects.length>80||v.resources.length>120||
  !unique(v.practice)||!unique(v.projects)||!unique(v.resources)||
- !v.practice.every(validPractice)||!v.projects.every(validProject)||!v.resources.every(validResource))return false;
+ !v.practice.every(validPractice)||!v.projects.every(validProject)||!v.resources.every(validResource)||
+ (v.skills!==undefined&&!validSkills(v.skills)))return false;
  for(const k of ["dsa","ai","fullstack"]){
   let r=v.roadmaps[k];if(!r||typeof r!=="object"||Array.isArray(r))return false;
   const ids=ROADMAPS[k].map(x=>x[0]);
