@@ -159,13 +159,13 @@ test("v2.9 route, notification bell and PWA cache integration without background
  assert.match(html,/id="reminderBadge"/);
  assert.match(html,/src="\.\/reminders\.js"/);
  assert.match(html,/href="\.\/reminders\.css"/);
- assert.match(html,/NOVASTUDY OS <b>3\.6\.2<\/b>/);
+ assert.match(html,/NOVASTUDY OS <b>3\.6\.3<\/b>/);
  assert.match(app,/Reminders\.handle\(action,b\)/);
  assert.match(app,/Reminders\.init/);
  assert.doesNotMatch(app,/setInterval\(remind,25000\)/);
  assert.doesNotMatch(views,/NOVA_REMINDERS\.panel/);
  assert.match(read("reminders.js"),/function panel\(\)/);
- assert.match(sw,/novastudy-v3\.6\.2/);
+ assert.match(sw,/novastudy-v3\.6\.3/);
  assert.match(sw,/'\.\/reminders\.js'/);
  assert.doesNotMatch(sw,/push['"]/);
  assert.match(ci,/node --check reminders\.js/);

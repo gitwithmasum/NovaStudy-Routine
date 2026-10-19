@@ -149,11 +149,11 @@ test("existing #challenge bookmark maps into learning navigation and CSE remains
  assert.doesNotMatch(html,/data-nav="challenge"/);
  assert.match(html,/href="\.\/learning-hub\.css"/);
  assert.match(html,/src="\.\/learning-hub\.js"/);
- assert.match(html,/NOVASTUDY OS <b>3\.6\.2<\/b>/);
+ assert.match(html,/NOVASTUDY OS <b>3\.6\.3<\/b>/);
  assert.match(app,/Hub\.selectTab\("challenge",true\)/);
  assert.match(app,/Hub\.page\(\)/);
  assert.match(app,/Hub\.handleChange/);
- assert.match(sw,/novastudy-v3\.6\.2/);
+ assert.match(sw,/novastudy-v3\.6\.3/);
  assert.match(sw,/'\.\/learning-hub\.js'/);
  assert.match(ci,/node --check learning-hub\.js/);
  for(const f of ["learning-hub.js","app.js","core.js","challenge.js","sw.js"])
