@@ -180,7 +180,7 @@ function skillUpsert(form){
   description=field(form,"description",700);
  const ok=mutate(n=>{
   const skills=ensureSkills(n);
-  if(id){const x=skills.find(s=>s.id===id);if(!x)throw Error("Skill not found");x.title=title;x.description=description}
+  if(id){const x=skills.find(s=>s.id===id);if(!x)throw Error("Skill not found");x.title=title;x.bn="";x.description=description}
   else{
    if(skills.length>=48)throw Error("Maximum 48 skills");
    if(skills.some(s=>s.title.toLowerCase()===title.toLowerCase()))throw Error("Skill already exists");
@@ -437,7 +437,7 @@ function itemForm(skill,module,item=null){
 }
 function skillCard(skill){
  const count=skill.modules.reduce((sum,m)=>sum+m.items.length,0),done=skill.modules.reduce((sum,m)=>sum+m.items.filter(i=>i.done).length,0);
- const name=tr(skill.bn||skill.title,skill.bn||skill.title);
+ const name=tr(skill.title,skill.bn||skill.title);
  return '<button class="hub-skill-card" type="button" data-action="hub-skill-open" data-id="'+E(skill.id)+'">'+
  '<span class="hub-skill-icon" aria-hidden="true">◈</span><strong>'+E(name)+'</strong>'+
  '<small>'+E(skill.description||tr("Organize your learning into modules","মডিউলে পড়াশোনা সাজাও"))+'</small>'+
