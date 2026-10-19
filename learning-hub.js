@@ -4,7 +4,7 @@
 "use strict";
 const N=window.NOVA,I=window.NOVA_I18N,E=N.escape,C=window.NOVA_CHALLENGE;
 const KEY="novastudy_learning_hub_v1";
-const TABS=["overview","skills","challenge","practice","dsa","ai","fullstack","projects","resources"];
+const TABS=["overview","skills","challenge","practice","ai","fullstack","projects","resources"];
 const LEVELS=["todo","learning","practiced","completed","review"];
 const STAGES=["idea","building","testing","completed"];
 const DIFFICULTY=["easy","medium","hard"];
@@ -37,7 +37,8 @@ const ROADMAPS={
  ["auth","Authentication & Security","অথেন্টিকেশন ও সিকিউরিটি"],["tests","Testing & Debugging","টেস্টিং ও ডিবাগিং"],
  ["deploy","Vercel / Netlify / CI","ডিপ্লয়মেন্ট ও সিআই"],["capstone","Full Stack Capstone","ফুল স্ট্যাক প্রজেক্ট"]]
 };
-const stateFresh=()=>({version:1,practice:[],roadmaps:{dsa:{},ai:{},fullstack:{}},projects:[],resources:[],skills:skillSeed()});
+const DSA_MODULES=ROADMAPS.dsa.map(([id,title])=>({id:"dsa-"+id,title,description:"",items:[]}));
+const stateFresh=()=>({version:1,dsaModulesV1:true,practice:[],roadmaps:{dsa:{},ai:{},fullstack:{}},projects:[],resources:[],skills:skillSeed()});
 const uid=()=>N.uid(),kind=(s,allowed)=>allowed.includes(s);
 const safeUrl=value=>{
  const s=String(value||"").trim();
@@ -64,7 +65,23 @@ const DEFAULT_SKILLS=[
  ["skill-projects","Projects","প্রজেক্ট"],
  ["skill-resources","Resources","রিসোর্স"]
 ];
-const skillSeed=()=>DEFAULT_SKILLS.map(([id,title,bn])=>({id,title,bn,description:"",modules:[]}));
+const skillSeed=()=>DEFAULT_SKILLS.map(([id,title,bn])=>({id,title,bn,description:"",modules:id==="skill-dsa"?DSA_MODULES.map(m=>({...m,items:[]})):[]}));
+function upgradeDsaModules(data){
+ if(data.dsaModulesV1)return data;
+ if(!Array.isArray(data.skills))data.skills=skillSeed();
+ const dsa=data.skills.find(s=>s.id==="skill-dsa");
+ if(dsa){
+  const titles=new Set(dsa.modules.map(m=>m.title.trim().toLowerCase()));
+  for(const m of DSA_MODULES){
+   if(dsa.modules.length>=40)break;
+   if(dsa.modules.some(x=>x.id===m.id)||titles.has(m.title.toLowerCase()))continue;
+   dsa.modules.push({...m,items:[]});
+  }
+ }
+ data.dsaModulesV1=true;
+ return data;
+}
+const dsaModuleTopic=m=>ROADMAPS.dsa.find(([id,en])=>m.id==="dsa-"+id||m.title.trim().toLowerCase()===en.toLowerCase());
 const activeSkills=s=>Array.isArray(s.skills)?s.skills:skillSeed();
 const findSkill=(id)=>activeSkills(state).find(x=>x.id===id);
 const skillKinds=["topic","code","pdf"];
@@ -84,7 +101,7 @@ function valid(v){
  v.practice.length>500||v.projects.length>80||v.resources.length>120||
  !unique(v.practice)||!unique(v.projects)||!unique(v.resources)||
  !v.practice.every(validPractice)||!v.projects.every(validProject)||!v.resources.every(validResource)||
- (v.skills!==undefined&&!validSkills(v.skills)))return false;
+ (v.skills!==undefined&&!validSkills(v.skills))||(v.dsaModulesV1!==undefined&&typeof v.dsaModulesV1!=="boolean"))return false;
  for(const k of ["dsa","ai","fullstack"]){
   let r=v.roadmaps[k];if(!r||typeof r!=="object"||Array.isArray(r))return false;
   const ids=ROADMAPS[k].map(x=>x[0]);
@@ -97,6 +114,7 @@ try{raw=localStorage.getItem(KEY);if(raw!==null){const s=JSON.parse(raw);if(!val
 catch{locked=true;error=tr("Saved learning records could not be read. Original bytes are protected; export a raw copy before resetting.","সেভ করা লার্নিং ডেটা পড়া যায়নি। পুরোনো ডেটা অপরিবর্তিত রয়েছে।")}
 function save(next,{replace=false}={}){
  if(!valid(next)){error=tr("Invalid learning data. Nothing saved.","লার্নিং ডেটা ভুল। কিছু Save হয়নি।");refresh();return false}
+ next=upgradeDsaModules(copy(next));
  if(locked&&!replace){error=tr("Learning records are protected. Export raw storage before resetting.","লার্নিং রেকর্ড সুরক্ষিত। Reset করার আগে Raw Data Export করো।");refresh();return false}
  try{
   const latest=localStorage.getItem(KEY);
@@ -110,10 +128,14 @@ function save(next,{replace=false}={}){
   state=next;raw=textValue;locked=false;error="";refresh();return true;
  }catch{error=tr("Could not save learning records. Previously saved data is unchanged.","লার্নিং রেকর্ড Save হয়নি। আগের সংরক্ষিত ডেটা অক্ষত আছে।");refresh();return false}
 }
+// Upgrade only valid previous Hub records, leaving other stores untouched.
+if(!locked&&!state.dsaModulesV1)save(copy(state));
 function adopt(textValue){
  if(textValue===null)return false;
  try{const candidate=JSON.parse(textValue);if(!valid(candidate))return false;
-  state=candidate;raw=textValue;locked=false;error="";refresh();return true
+  state=candidate;raw=textValue;locked=false;error="";
+  if(!candidate.dsaModulesV1)return save(copy(candidate));
+  refresh();return true
  }catch{return false}
 }
 const requireValue=(x,max,name)=>{
@@ -438,10 +460,11 @@ function itemForm(skill,module,item=null){
 function skillCard(skill){
  const count=skill.modules.reduce((sum,m)=>sum+m.items.length,0),done=skill.modules.reduce((sum,m)=>sum+m.items.filter(i=>i.done).length,0);
  const name=tr(skill.title,skill.bn||skill.title);
+ const dsaProgress=skill.id==="skill-dsa"?" · "+E(I.number(analytics().roadmaps.dsa.completed))+"/"+E(I.number(ROADMAPS.dsa.length))+" "+tr("roadmap topics","রোডম্যাপ টপিক"):"";
  return '<button class="hub-skill-card" type="button" data-action="hub-skill-open" data-id="'+E(skill.id)+'">'+
  '<span class="hub-skill-icon" aria-hidden="true">◈</span><strong>'+E(name)+'</strong>'+
  '<small>'+E(skill.description||tr("Organize your learning into modules","মডিউলে পড়াশোনা সাজাও"))+'</small>'+
- '<span class="hub-skill-meta">'+E(I.number(skill.modules.length))+' '+tr("modules","মডিউল")+' · '+E(I.number(done))+'/'+E(I.number(count))+' '+tr("completed","সম্পন্ন")+'</span>'+
+ '<span class="hub-skill-meta">'+E(I.number(skill.modules.length))+' '+tr("modules","মডিউল")+dsaProgress+' · '+E(I.number(done))+'/'+E(I.number(count))+' '+tr("completed","সম্পন্ন")+'</span>'+
  progressBar(done,count)+'</button>';
 }
 function skillsCatalog(compact=false){
@@ -484,12 +507,14 @@ function skillWorkspace(){
  btn(tr("+ Add Module","+ মডিউল যোগ"),"hub-module-add",'data-skill="'+E(skill.id)+'"')+'</div>'+
  (addingModule?moduleForm(skill):"")+
  '<div class="hub-skill-modules">'+(skill.modules.length?skill.modules.map((module,index)=>{
- const count=module.items.filter(x=>x.done).length,open=openedSkillModule===module.id;
+ const count=module.items.filter(x=>x.done).length,open=openedSkillModule===module.id,topic=skill.id==="skill-dsa"?dsaModuleTopic(module):null;
  return '<section class="hub-skill-module"><div class="hub-skill-module-header">'+
  '<button type="button" class="hub-skill-module-toggle" data-action="hub-module-toggle" data-id="'+E(module.id)+'" data-skill="'+E(skill.id)+'" aria-expanded="'+open+'" aria-controls="hub-module-content-'+E(module.id)+'">'+
- '<span class="hub-skill-number">'+E(I.number(index+1))+'</span><span><strong>'+E(module.title)+'</strong>'+
+ '<span class="hub-skill-number">'+E(I.number(index+1))+'</span><span><strong>'+E(topic&&module.id==="dsa-"+topic[0]&&module.title===topic[1]?tr(topic[1],topic[2]):module.title)+'</strong>'+
  '<small>'+E(I.number(count))+'/'+E(I.number(module.items.length))+' '+tr("completed","সম্পন্ন")+'</small></span><span aria-hidden="true">'+(open?"▾":"▸")+'</span></button>'+
- '<div class="hub-skill-controls">'+btn(tr("Edit","এডিট"),"hub-module-edit",'data-id="'+E(module.id)+'" data-skill="'+E(skill.id)+'"',"tiny-btn")+
+ '<div class="hub-skill-controls">'+
+ (topic?'<label class="hub-dsa-module-progress"><span class="sr-only">'+tr("Topic progress","টপিকের অগ্রগতি")+'</span><select data-hub-progress="dsa" data-topic-id="'+E(topic[0])+'" aria-label="'+tr("Topic progress","টপিকের অগ্রগতি")+'">'+progressOptions(state.roadmaps.dsa[topic[0]])+'</select></label>':"")+
+ btn(tr("Edit","এডিট"),"hub-module-edit",'data-id="'+E(module.id)+'" data-skill="'+E(skill.id)+'"',"tiny-btn")+
  btn(tr("Delete","ডিলিট"),"hub-module-delete",'data-id="'+E(module.id)+'" data-skill="'+E(skill.id)+'"',"tiny-btn")+'</div></div>'+
  (editingModuleId===module.id?moduleForm(skill,module):"")+
  '<div class="hub-skill-module-content" id="hub-module-content-'+E(module.id)+'"'+(open?"":" hidden")+">"+

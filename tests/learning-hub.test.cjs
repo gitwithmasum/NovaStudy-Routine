@@ -137,7 +137,7 @@ test("Bengali tabs, legacy CSE tab, dashboards and mobile-friendly markup",()=>{
  const b=boot();
  const en=b.Hub.page();assert.match(en,/CSE Learning Hub/);
  assert.match(en,/data-tab="challenge"/);
- assert.match(en,/data-tab="dsa"/);
+ assert.doesNotMatch(en,/data-tab="dsa"/);
  b.w.NOVA_I18N.language="bn";
  assert.match(b.Hub.page(),/সিএসই লার্নিং হাব/);
  b.Hub.selectTab("ai");assert.match(b.Hub.page(),/এআই ও এমএল/);
@@ -149,11 +149,11 @@ test("existing #challenge bookmark maps into learning navigation and CSE remains
  assert.doesNotMatch(html,/data-nav="challenge"/);
  assert.match(html,/href="\.\/learning-hub\.css"/);
  assert.match(html,/src="\.\/learning-hub\.js"/);
- assert.match(html,/NOVASTUDY OS <b>3\.6\.0<\/b>/);
+ assert.match(html,/NOVASTUDY OS <b>3\.6\.1<\/b>/);
  assert.match(app,/Hub\.selectTab\("challenge",true\)/);
  assert.match(app,/Hub\.page\(\)/);
  assert.match(app,/Hub\.handleChange/);
- assert.match(sw,/novastudy-v3\.6\.0/);
+ assert.match(sw,/novastudy-v3\.6\.1/);
  assert.match(sw,/'\.\/learning-hub\.js'/);
  assert.match(ci,/node --check learning-hub\.js/);
  for(const f of ["learning-hub.js","app.js","core.js","challenge.js","sw.js"])

@@ -36,6 +36,11 @@ test("six existing skills are available as modular cards, without replacing road
  assert.match(markup,/Skills & Modules/);
  assert.ok(b.hub.TABS.includes("challenge"));
  assert.ok(b.hub.TABS.includes("fullstack"));
+ assert.equal(b.hub.TABS.includes("dsa"),false);
+ const dsa=skills.find(s=>s.id==="skill-dsa");
+ assert.equal(dsa.modules.length,14);
+ b.hub.handle("hub-skill-open",{dataset:{id:"skill-dsa"}});
+ assert.match(b.hub.page(),/data-hub-progress="dsa"/);
  assert.equal(JSON.stringify(b.w.NOVA.get()),JSON.stringify(orig));
 });
 test("add/edit/delete user Skill; old six remain and edited text is escaped",async()=>{
@@ -140,4 +145,35 @@ test("app submission delegation, PWA shell and combined JSON include validated l
  assert.match(css,/hub-skill-grid/);
  assert.match(css,/hub-skill-module-toggle/);
  assert.match(css,/hub-code/);
+});
+
+test("DSA migration preserves statuses and old custom module data",()=>{
+ const fresh=boot(),legacy=fresh.hub.get(),dsa=legacy.skills.find(s=>s.id==="skill-dsa");
+ dsa.modules=[{id:"custom",title:"My Notes",description:"",items:[]}];
+ legacy.roadmaps.dsa={arrays:"completed",hash:"review"};
+ delete legacy.dsaModulesV1;
+ const b=boot(JSON.stringify(legacy));
+ const saved=b.hub.get(),mods=saved.skills.find(s=>s.id==="skill-dsa").modules;
+ assert.equal(mods.length,15);
+ assert.equal(saved.dsaModulesV1,true);
+ assert.equal(saved.roadmaps.dsa.arrays,"completed");
+ assert.equal(saved.roadmaps.dsa.hash,"review");
+ b.hub.selectTab("skills");
+ b.hub.handle("hub-skill-open",{dataset:{id:"skill-dsa"}});
+ assert.match(b.hub.page(),/data-topic-id="arrays"/);
+ assert.equal(b.hub.handleChange({dataset:{hubProgress:"dsa",topicId:"hash"},value:"practiced"}),true);
+ assert.equal(b.hub.get().roadmaps.dsa.hash,"practiced");
+ b.hub.handle("hub-module-delete",{dataset:{id:"dsa-arrays",skill:"skill-dsa"}});
+ const reloaded=boot(b.records.get(b.key)),after=reloaded.hub.activeSkills().find(s=>s.id==="skill-dsa").modules;
+ assert.equal(after.length,14);
+ assert.equal(after.some(m=>m.id==="dsa-arrays"),false);
+ assert.equal(after.some(m=>m.id==="custom"),true);
+});
+test("older backups without a skills field get all DSA topics on import",()=>{
+ const b=boot(),old=b.hub.get();
+ delete old.skills;delete old.dsaModulesV1;
+ old.roadmaps.dsa.arrays="learning";
+ assert.equal(b.hub.save(old,{replace:true}),true);
+ assert.equal(b.hub.activeSkills().find(s=>s.id==="skill-dsa").modules.length,14);
+ assert.equal(b.hub.get().roadmaps.dsa.arrays,"learning");
 });
