@@ -33,7 +33,7 @@ function setup({teacher=true,failMetadata=false}={}){
   NOVA:{escape:esc},NOVA_AUTH:{getStatus:()=>"connected",getUser:()=>({id:userId}),getClient:()=>sb},
   NOVA_I18N:{language:"en"},NOVA_VIEWS:{subjects:()=>"<p>legacy</p>"}
  };
- const doc={body:{appendChild(){}},createElement(){return {href:"",download:"",target:"",rel:"",click(){},remove(){}}}};
+ const doc={querySelectorAll:()=>[],body:{appendChild(){}},createElement(){return {href:"",download:"",target:"",rel:"",click(){},remove(){}}}};
  const ctx={window:w,document:doc,File:BrowserFile,Blob,Uint8Array,Uint32Array,TextEncoder,DataView,
   FormData:class{constructor(form){this.fields=form.fields||{}}get(k){return this.fields[k]??null}},
   crypto:{randomUUID:()=>"id123"},queueMicrotask:()=>{},console,Date,Promise,Set,Array};
