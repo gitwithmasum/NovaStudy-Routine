@@ -151,7 +151,7 @@ test("v3.4 scripts, app routes, offline cache, static audits and validation hook
  assert.match(focus,/NOVA_FOCUS_INSIGHTS=\{KEY,valid/);
  assert.match(sw,/novastudy-v3\.6\.1/);
  assert.match(sw,/'\.\/portability\.js'/);
- assert.match(audit,/novastudy-v3\\\.6\\\.0/);
+ assert.ok(audit.includes(String.raw`novastudy-v3\.6\.1`));
  assert.match(ci,/node --check portability\.js/);
  for(const p of ["portability.js","app.js","sw.js"])assert.doesNotThrow(()=>new vm.Script(read(p),{filename:p}));
 });
