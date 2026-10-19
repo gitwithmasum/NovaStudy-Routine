@@ -6,7 +6,7 @@ function boot(initial){
  const key="novastudy_learning_hub_v1",records=new Map(initial?[[key,initial]]:[]);
  let blocked=false,confirm=true,renderCount=0;
  const localStorage={getItem:k=>records.get(k)??null,setItem(k,v){if(blocked)throw Error("quota");records.set(k,String(v))}};
- const w={NOVA_I18N:{language:"en",number:v=>String(v),displayDate:v=>v,t:x=>x},confirm:()=>confirm};
+ const w={NOVA_CATALOG:{university:{tracks:{"CSE / Software Engineering":["Python","Mathematics"]}}},NOVA_COLORS:["#12aaab"],NOVA_I18N:{language:"en",number:v=>String(v),displayDate:v=>v,t:x=>x},confirm:()=>confirm};
  const ctx={window:w,localStorage,Date,JSON,Math,Set,Map,Number,String,Array,Object,URL,
  crypto:{randomUUID:()=>String(++counter)},
  queueMicrotask:()=>{},
