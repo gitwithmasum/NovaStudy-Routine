@@ -120,7 +120,7 @@ test("teacher can edit chapter/title, edit topic/title, and edit or delete only 
  assert.doesNotMatch(f.app.page(),/data-cm-form="topic-body"/);
  assert.equal(f.app.action("cm-request-delete-note",{dataset:{id:"topic-one"}}),true);
  assert.match(f.app.page(),/Delete only the written notes/);
- assert.match(f.app.page(),/uploaded PDF\/images will be preserved/);
+ assert.match(f.app.page(),/all uploaded files will be preserved/);
  assert.doesNotMatch(f.app.page(),/data-action="cm-confirm-delete-topic"/);
 });
 test("owner deletion confirmation explains chapter/topic cascading data loss",async()=>{
