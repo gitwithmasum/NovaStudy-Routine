@@ -35,10 +35,12 @@ function boot(){
  }};
  const w={indexedDB,NOVA_CATALOG:{university:{tracks:{"CSE / Software Engineering":["Python"]}}},
   NOVA_COLORS:["#12aaab"],NOVA_I18N:{language:"en",number:v=>String(v),displayDate:v=>v,t:x=>x},confirm:()=>true};
- const url={createObjectURL:blob=>{downloads.push(blob);return"blob:test"},revokeObjectURL(){}};
+ class TestURL extends URL{}
+ TestURL.createObjectURL=blob=>{downloads.push(blob);return "blob:test"};
+ TestURL.revokeObjectURL=()=>{};
  const document={body:{appendChild(){}},createElement(){return{download:"",click(){names.push(this.download)},remove(){}}}};
  const ctx={window:w,localStorage:{getItem:k=>records.get(k)??null,setItem(k,v){if(quota)throw Error("quota");records.set(k,String(v))}},
-  Date,JSON,Math,Set,Map,Number,String,Array,Object,URL:{...URL,...url},Uint8Array,DataView,TextEncoder,Blob,
+  Date,JSON,Math,Set,Map,Number,String,Array,Object,URL:TestURL,Uint8Array,DataView,TextEncoder,Blob,
   document,setTimeout:()=>{},crypto:{randomUUID:()=>String(++seq)},
   FormData:class{constructor(form){this.form=form}get(key){return this.form.fields?.[key]??null}getAll(key){return this.form.folder?.[key]||[]}}
  };
