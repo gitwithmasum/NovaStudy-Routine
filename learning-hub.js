@@ -103,12 +103,17 @@ function skillRoadmapTopic(skillId,module){
 }
 const activeSkills=s=>Array.isArray(s.skills)?s.skills:skillSeed();
 const findSkill=(id)=>activeSkills(state).find(x=>x.id===id);
-const skillKinds=["topic","code","pdf"];
+const MAX_UPLOAD=20*1024*1024;
+const skillKinds=["topic","code","pdf","file","folder"];
 const validSkillItem=x=>x&&bounded(x.id,128)&&!!x.id&&skillKinds.includes(x.kind)&&
  bounded(x.title,160)&&!!x.title.trim()&&bounded(x.body,12000)&&
  bounded(x.url,500)&&safeUrl(x.url)&&bounded(x.fileName,200)&&bounded(x.localId,128)&&
  typeof x.done==="boolean"&&
- (x.kind!=="pdf"||!!x.url||!!x.localId);
+ (x.fileCount===undefined||(Number.isInteger(x.fileCount)&&x.fileCount>=0&&x.fileCount<=10000))&&
+ (x.totalBytes===undefined||(Number.isSafeInteger(x.totalBytes)&&x.totalBytes>=0&&x.totalBytes<=MAX_UPLOAD))&&
+ (x.kind!=="pdf"||!!x.url||!!x.localId)&&
+ (!["file","folder"].includes(x.kind)||!!x.localId)&&
+ (x.kind!=="folder"||x.fileCount>=1);
 const validSkillModule=x=>x&&bounded(x.id,128)&&!!x.id&&bounded(x.title,160)&&!!x.title.trim()&&
  bounded(x.description,700)&&Array.isArray(x.items)&&x.items.length<=80&&unique(x.items)&&x.items.every(validSkillItem);
 const validSkill=x=>x&&bounded(x.id,128)&&!!x.id&&bounded(x.title,140)&&!!x.title.trim()&&
@@ -246,7 +251,7 @@ function moduleUpsert(form){
 }
 function pdfDatabase(){
  return new Promise((resolve,reject)=>{
-  if(!window.indexedDB){reject(Error("This browser does not support local PDF storage. Use a PDF URL instead."));return}
+  if(!window.indexedDB){reject(Error("Local attachment storage is unavailable. Use another browser or an external PDF link."));return}
   const req=window.indexedDB.open("novastudy-skill-pdfs",1);
   req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains("files"))req.result.createObjectStore("files")};
   req.onerror=()=>reject(req.error||Error("PDF database unavailable"));
@@ -267,6 +272,18 @@ async function pdfStorage(mode,id,blob){
   tx.onabort=()=>reject(tx.error||Error("PDF storage aborted"));
  })}finally{db.close()}
 }
+
+const isUpload=f=>f&&typeof f.name==="string"&&!!f.name&&Number.isSafeInteger(f.size)&&f.size>=0;
+const safePath=value=>{
+ const str=String(value||"").replaceAll("\\","/");
+ if(!str||str.length>512||/[\u0000-\u001f\u007f]/.test(str))return "";
+ return str.split("/").every(s=>s&&s!=="."&&s!==".."&&s.length<=200)?str:"";
+};
+const folderFiles=form=>{
+ const input=form?.elements?.namedItem?.("folder_files");
+ const data=input?.files||new FormData(form).getAll?.("folder_files")||[];
+ return Array.from(data).filter(f=>f&&f.name);
+};
 async function itemUpsert(form){
  const skillId=form.dataset.skill,moduleId=form.dataset.module,id=form.dataset.item||"";
  const title=requireValue(formValue(form,"title"),160,"Item title"),
@@ -274,30 +291,93 @@ async function itemUpsert(form){
  if(!skillKinds.includes(kind))throw Error("Invalid resource type");
  if(url&&!safeUrl(url))throw Error("Only HTTPS or HTTP links are supported");
  const old=skillLocation(skillId,moduleId,id).item;
- const file=formValue(form,"pdf_file");
- const uploading=kind==="pdf"&&file&&typeof file.size==="number"&&file.size>0;
- if(uploading&&(file.size>8*1024*1024||!(/\.pdf$/i.test(file.name||"")||file.type==="application/pdf")))
-  throw Error("Choose a PDF no larger than 8 MB");
- if(kind==="pdf"&&!uploading&&!url&&!(old?.kind==="pdf"&&old.localId))
-  throw Error("Add a PDF link or choose a local PDF file");
- let localId=kind==="pdf"?(old?.localId||""):"",fileName=kind==="pdf"?(old?.fileName||""):"";
- if(uploading){
-  localId=uid();fileName=String(file.name||"document.pdf").slice(0,200);
-  await pdfStorage("put",localId,file);
+ const single=kind==="pdf"?formValue(form,"pdf_file"):kind==="file"?formValue(form,"upload_file"):null;
+ const selected=isUpload(single);
+ const folder=kind==="folder"?folderFiles(form):[];
+ let blob=null,totalBytes=0,fileCount=0,fileName="";
+ if(selected){
+  if(single.size>MAX_UPLOAD)throw Error("The file exceeds the 20 MB limit");
+  if(kind==="pdf"&&!(/\.pdf$/i.test(single.name)||single.type==="application/pdf"))throw Error("Choose a PDF file");
+  blob=single;totalBytes=single.size;fileCount=1;fileName=single.name;
+ }
+ if(folder.length){
+  if(folder.length>10000)throw Error("Folder has too many files (10,000 max)");
+  const names=new Set(),files=[];
+  for(const file of folder){
+   if(!isUpload(file))throw Error("Invalid folder file");
+   totalBytes+=file.size;
+   if(totalBytes>MAX_UPLOAD)throw Error("The folder exceeds 20 MB in total");
+   const path=safePath(file.webkitRelativePath);
+   if(!path||!path.includes("/")||names.has(path))throw Error("Invalid folder path");
+   names.add(path);files.push({path,file});
+  }
+  const roots=new Set(files.map(x=>x.path.split("/")[0]));
+  if(roots.size!==1)throw Error("Select one folder at a time");
+  blob={type:"novastudy-folder-v1",files};
+  fileName=files[0].path.split("/")[0];fileCount=files.length;
+ }
+ if(kind==="pdf"&&!blob&&!url&&!(old?.kind==="pdf"&&old.localId))throw Error("Add a PDF link or choose a local PDF");
+ if(["file","folder"].includes(kind)&&!blob&&!(old?.kind===kind&&old.localId))
+  throw Error(kind==="folder"?"Select a folder to upload":"Select a file to upload");
+ const same=old?.kind===kind&&!blob;
+ let localId=same?(old.localId||""):"";
+ fileName=same?(old.fileName||""):fileName;
+ fileCount=same?(old.fileCount||0):fileCount;
+ totalBytes=same?(old.totalBytes||0):totalBytes;
+ if(blob){
+  localId=uid();fileName=fileName.slice(0,200);
+  await pdfStorage("put",localId,blob);
  }
  const ok=mutate(n=>{
-  const skill=ensureSkills(n).find(x=>x.id===skillId),module=skill?.modules.find(x=>x.id===moduleId);
-  if(!module)throw Error("Module not found");
+  const module=ensureSkills(n).find(x=>x.id===skillId)?.modules.find(x=>x.id===moduleId);
+  if(!module)return false;
   const row={id:id||uid(),kind,title,body,url:kind==="pdf"?url:"",localId,fileName,done:old?.done||false};
-  if(id){const i=module.items.findIndex(x=>x.id===id);if(i<0)throw Error("Item not found");module.items[i]=row}
+  if(["file","folder"].includes(kind)||blob){row.fileCount=fileCount;row.totalBytes=totalBytes}
+  if(id){const index=module.items.findIndex(x=>x.id===id);if(index<0)return false;module.items[index]=row}
   else{if(module.items.length>=80)throw Error("Maximum 80 resources per module");module.items.push(row)}
  });
- if(!ok&&uploading){try{await pdfStorage("delete",localId)}catch{}}
+ if(!ok&&blob)await pdfStorage("delete",localId).catch(()=>{});
  if(ok){
   if(old?.localId&&old.localId!==localId)void pdfStorage("delete",old.localId).catch(()=>{});
   editingItemId="";addingItemModule="";
  }
  return ok;
+}
+function crc32(bytes){
+ let c=0xffffffff;
+ for(const byte of bytes){c^=byte;for(let i=0;i<8;i++)c=(c>>>1)^((c&1)?0xedb88320:0)}
+ return(c^0xffffffff)>>>0;
+}
+async function zipFolder(folder){
+ if(folder?.type!=="novastudy-folder-v1"||!Array.isArray(folder.files)||!folder.files.length||folder.files.length>10000)
+  throw Error("Folder is unavailable in this browser");
+ const parts=[],central=[],encoder=new TextEncoder();
+ let offset=0,size=0,total=0;
+ for(const entry of folder.files){
+  const path=safePath(entry.path),file=entry.file;
+  if(!path||!path.includes("/")||!file||!Number.isSafeInteger(file.size))throw Error("Invalid folder contents");
+  total+=file.size;if(total>MAX_UPLOAD)throw Error("Stored folder exceeds 20 MB");
+  const name=encoder.encode(path),data=new Uint8Array(await file.arrayBuffer()),crc=crc32(data);
+  if(name.length>65535)throw Error("Filename too long");
+  const local=new Uint8Array(30+name.length),v=new DataView(local.buffer);
+  v.setUint32(0,0x04034b50,true);v.setUint16(4,20,true);v.setUint16(6,0x800,true);
+  v.setUint32(14,crc,true);v.setUint32(18,data.length,true);v.setUint32(22,data.length,true);
+  v.setUint16(26,name.length,true);local.set(name,30);parts.push(local,data);
+  const dir=new Uint8Array(46+name.length),d=new DataView(dir.buffer);
+  d.setUint32(0,0x02014b50,true);d.setUint16(4,20,true);d.setUint16(6,20,true);d.setUint16(8,0x800,true);
+  d.setUint32(16,crc,true);d.setUint32(20,data.length,true);d.setUint32(24,data.length,true);
+  d.setUint16(28,name.length,true);d.setUint32(42,offset,true);dir.set(name,46);
+  central.push(dir);size+=dir.length;offset+=local.length+data.length;
+ }
+ const end=new Uint8Array(22),view=new DataView(end.buffer);
+ view.setUint32(0,0x06054b50,true);view.setUint16(8,central.length,true);view.setUint16(10,central.length,true);
+ view.setUint32(12,size,true);view.setUint32(16,offset,true);
+ return new Blob([...parts,...central,end],{type:"application/zip"});
+}
+function saveDownload(blob,name){
+ const url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),2500);
 }
 async function saveSkillForm(form){
  try{
@@ -355,15 +435,17 @@ function skillAction(action,b){
    if(!item)return false;item.done=!item.done;
   });return true;
  }
- if(action==="hub-pdf-open"){
+ if(action==="hub-pdf-open"||action==="hub-attachment-download"){
   const item=skillLocation(skillId,moduleId,id).item;
   if(!item?.localId)return true;
-  void pdfStorage("get",item.localId).then(file=>{
-   if(!file)throw Error("PDF is unavailable on this browser. Please upload it again.");
-   const href=URL.createObjectURL(file),a=document.createElement("a");
-   a.href=href;a.download=item.fileName||"lesson.pdf";document.body.appendChild(a);a.click();a.remove();
-   setTimeout(()=>URL.revokeObjectURL(href),2500);
-  }).catch(err=>{error=String(err.message||err);refresh()});
+  void pdfStorage("get",item.localId).then(async data=>{
+   if(!data)throw Error("Local attachment missing. Upload again on this device.");
+   if(item.kind==="folder")saveDownload(await zipFolder(data),(item.fileName||"folder")+".zip");
+   else{
+    if(data?.type==="novastudy-folder-v1")throw Error("Expected a single file");
+    saveDownload(data,item.fileName||"attachment");
+   }
+  }).catch(ex=>{error=String(ex.message||ex);refresh()});
   return true;
  }
  return false;
@@ -388,7 +470,7 @@ function handle(action,button){
  if(action==="hub-module-cancel"){addingModule=false;editingModuleId="";refresh();return true}
  if(action==="hub-item-cancel"){addingItemModule="";editingItemId="";refresh();return true}
  if(action==="hub-module-toggle"){openedSkillModule=openedSkillModule===id?"":id;refresh();return true}
- if(action.startsWith("hub-skill-")||action.startsWith("hub-module-")||action.startsWith("hub-item-")||action==="hub-pdf-open")return skillAction(action,button);
+ if(action.startsWith("hub-skill-")||action.startsWith("hub-module-")||action.startsWith("hub-item-")||action==="hub-pdf-open"||action==="hub-attachment-download")return skillAction(action,button);
  if(action==="hub-tab"){selectTab(button?.dataset?.tab);return true}
  if(action==="hub-practice-delete"){if(window.confirm(tr("Delete this problem?","এই Problem মুছবে?")))mutate(n=>{n.practice=n.practice.filter(x=>x.id!==id)});return true}
  if(action==="hub-project-delete"){if(window.confirm(tr("Delete this project and milestones?","এই Project ও Milestones মুছবে?")))mutate(n=>{n.projects=n.projects.filter(x=>x.id!==id)});return true}
@@ -401,6 +483,10 @@ function handle(action,button){
 }
 function handleChange(target){
  const ds=target?.dataset||{};
+ if(target?.name==="kind"&&target?.form?.id==="hubItemForm"){
+  target.form.querySelectorAll("[data-skill-upload]").forEach(el=>{el.hidden=el.dataset.skillUpload!==target.value});
+  return true;
+ }
  if(ds.hubMilestone){
   mutate(n=>{const p=n.projects.find(x=>x.id===ds.section),m=p?.milestones.find(x=>x.id===ds.hubMilestone);
    if(!m)return false;m.done=Boolean(target.checked)});return true;
@@ -478,17 +564,19 @@ function moduleForm(skill,module=null){
  btn(tr("Cancel","বাতিল"),"hub-module-cancel")+'</form>';
 }
 function itemForm(skill,module,item=null){
- const kind=item?.kind||"topic";
+ const kind=item?.kind||"topic",show=k=>' data-skill-upload="'+k+'"'+(kind===k?"":" hidden");
  return '<form id="hubItemForm" class="hub-form hub-skills-form" data-skill="'+E(skill.id)+'" data-module="'+E(module.id)+'" data-item="'+E(item?.id||"")+'">'+
  '<label>'+tr("Resource title","রিসোর্সের নাম")+'<input name="title" maxlength="160" required value="'+E(item?.title||"")+'"></label>'+
  '<label>'+tr("Content type","কনটেন্ট টাইপ")+'<select name="kind">'+
- skillKinds.map(k=>'<option value="'+k+'"'+(kind===k?" selected":"")+'>'+E({topic:tr("Topic / Notes","টপিক / নোটস"),code:tr("Code Snippet","কোড"),pdf:tr("PDF","পিডিএফ")}[k])+'</option>').join("")+'</select></label>'+
- '<label class="hub-wide">'+tr("Notes / Code","নোটস / কোড")+'<textarea name="body" maxlength="12000" rows="5" placeholder="'+tr("Write lesson notes or paste your code here","নোটস লিখো অথবা কোড পেস্ট করো")+'">'+E(item?.body||"")+'</textarea></label>'+
- '<label class="hub-wide">'+tr("PDF link (optional, HTTPS)","পিডিএফ লিংক (ঐচ্ছিক)")+'<input name="url" type="url" maxlength="500" value="'+E(item?.url||"")+'" placeholder="https://.../notes.pdf"></label>'+
- '<label class="hub-wide">'+tr("Or upload a local PDF (8 MB max)","অথবা লোকাল PDF আপলোড করো (সর্বোচ্চ ৮ MB)")+
- '<input name="pdf_file" type="file" accept=".pdf,application/pdf"><small>'+tr("Only for PDF type. Local files remain on this browser and are NOT included in JSON backup. Use PDF links for cross-device access.","শুধু PDF টাইপের জন্য। Local PDF এই Browser-এ থাকবে, JSON Backup-এ থাকবে না। অন্য Device-এর জন্য PDF Link ব্যবহার করো।")+'</small></label>'+
- (item?.localId?'<p class="hub-wide hub-note">'+tr("Existing local attachment: ","বর্তমান Local File: ")+E(item.fileName)+'</p>':"")+
- '<button type="submit" class="primary-btn">'+tr(item?"Save Resource":"Add Resource",item?"রিসোর্স সেভ":"রিসোর্স যোগ")+'</button>'+
+ skillKinds.map(k=>'<option value="'+k+'"'+(kind===k?" selected":"")+'>'+E({topic:tr("Topic / Notes","টপিক / নোটস"),code:tr("Code Snippet","কোড"),pdf:tr("PDF","পিডিএফ"),file:tr("Any File","যেকোনো ফাইল"),folder:tr("Folder","ফোল্ডার")}[k])+'</option>').join("")+'</select></label>'+
+ '<label class="hub-wide">'+tr("Notes / Code","নোটস / কোড")+'<textarea name="body" maxlength="12000" rows="5">'+E(item?.body||"")+'</textarea></label>'+
+ '<label class="hub-wide"'+show("pdf")+'>'+tr("PDF link (optional)","PDF লিংক (ঐচ্ছিক)")+'<input name="url" type="url" maxlength="500" value="'+E(item?.url||"")+'"></label>'+
+ '<label class="hub-wide"'+show("pdf")+'>'+tr("Upload PDF (max 20 MB)","PDF আপলোড (সর্বোচ্চ ২০ MB)")+'<input name="pdf_file" type="file" accept=".pdf,application/pdf"></label>'+
+ '<label class="hub-wide"'+show("file")+'>'+tr("Upload any file (max 20 MB)","যেকোনো ফাইল (সর্বোচ্চ ২০ MB)")+'<input name="upload_file" type="file"></label>'+
+ '<label class="hub-wide"'+show("folder")+'>'+tr("Upload folder (max 20 MB total)","ফোল্ডার আপলোড (মোট ২০ MB)")+'<input name="folder_files" type="file" webkitdirectory directory multiple><small>'+tr("Select one folder; download later as ZIP with subfolders preserved.","একটি ফোল্ডার বাছাই করো; পরে সাবফোল্ডারসহ ZIP ডাউনলোড করা যাবে।")+'</small></label>'+
+ (item?.localId?'<p class="hub-wide hub-note">'+tr("Current attachment: ","বর্তমান ফাইল: ")+E(item.fileName)+'</p>':"")+
+ '<p class="hub-wide hub-note">'+tr("Uploaded bytes remain in this browser, usable offline, and are not in JSON backup or cloud sync. Keep the original files.","আপলোড এই ব্রাউজারে অফলাইনে থাকবে। JSON Backup বা Cloud Sync-এ থাকবে না। মূল ফাইল সংরক্ষণ করো।")+'</p>'+
+ '<button type="submit" class="primary-btn">'+tr(item?"Save Resource":"Add Resource",item?"সেভ করো":"যোগ করো")+'</button>'+
  btn(tr("Cancel","বাতিল"),"hub-item-cancel")+'</form>';
 }
 function skillCard(skill){
@@ -513,10 +601,10 @@ function skillsCatalog(compact=false){
 }
 function skillItemView(skill,module,item){
  const attrs='data-id="'+E(item.id)+'" data-skill="'+E(skill.id)+'" data-module="'+E(module.id)+'"';
- const symbol={topic:"▤",code:"{ }",pdf:"▣"}[item.kind];
+ const symbol={topic:"▤",code:"{ }",pdf:"▣",file:"▥",folder:"▤"}[item.kind];
  return '<article class="hub-skill-item"><div class="hub-skill-item-heading">'+
  '<span class="hub-skill-kind" aria-hidden="true">'+symbol+'</span><div class="hub-skill-item-copy"><strong>'+E(item.title)+'</strong>'+
- '<small>'+E({topic:tr("Topic / Notes","টপিক / নোটস"),code:tr("Code","কোড"),pdf:tr("PDF","পিডিএফ")}[item.kind])+'</small></div>'+
+ '<small>'+E({topic:tr("Topic / Notes","টপিক / নোটস"),code:tr("Code","কোড"),pdf:tr("PDF","পিডিএফ"),file:tr("File","ফাইল"),folder:tr("Folder","ফোল্ডার")}[item.kind])+'</small></div>'+
  '<div class="hub-skill-controls">'+
  btn(item.done?tr("✓ Done","✓ সম্পন্ন"):tr("Mark done","সম্পন্ন করো"),"hub-item-done",attrs,"tiny-btn")+
  btn(tr("Edit","এডিট"),"hub-item-edit",attrs,"tiny-btn")+
@@ -525,6 +613,10 @@ function skillItemView(skill,module,item){
  (item.kind==="pdf"?'<div class="hub-skill-links">'+
  (item.url?'<a href="'+E(item.url)+'" target="_blank" rel="noopener noreferrer">'+tr("Open PDF link ↗","PDF লিংক খোলো ↗")+'</a>':"")+
  (item.localId?btn(tr("Download local PDF","লোকাল PDF ডাউনলোড"),"hub-pdf-open",attrs):"")+'</div>':"")+
+ (["file","folder"].includes(item.kind)?'<div class="hub-skill-links"><span class="hub-attachment-meta">'+E(item.fileName||"")+
+ ' · '+E(item.kind==="folder"?String(item.fileCount||0)+" files":"1 file")+
+ ' · '+E(((item.totalBytes||0)/1048576).toFixed(2))+' MB</span>'+
+ btn(item.kind==="folder"?tr("Download folder ZIP","ফোল্ডার ZIP ডাউনলোড"):tr("Download file","ফাইল ডাউনলোড"),"hub-attachment-download",attrs)+'</div>':"")+
  (editingItemId===item.id?itemForm(skill,module,item):"")+'</article>';
 }
 function skillWorkspace(){
@@ -557,14 +649,14 @@ function skillWorkspace(){
  (module.description?'<p class="hub-note">'+E(module.description)+'</p>':"")+
  '<div class="hub-skill-item-list">'+module.items.map(item=>skillItemView(skill,module,item)).join("")+'</div>'+
  (module.items.length?"":'<p class="hub-note">'+tr("No resources yet. Add a topic, code snippet or PDF.","এখনো কোনো রিসোর্স নেই। টপিক, কোড বা PDF যোগ করো।")+'</p>')+
- btn(tr("+ Add Topic / Code / PDF","+ টপিক / কোড / PDF যোগ"),"hub-item-add",'data-skill="'+E(skill.id)+'" data-module="'+E(module.id)+'"')+
+ btn(tr("+ Add Topic / Code / PDF / File / Folder","+ টপিক / কোড / PDF / ফাইল / ফোল্ডার"),"hub-item-add",'data-skill="'+E(skill.id)+'" data-module="'+E(module.id)+'"')+
  (addingItemModule===module.id?itemForm(skill,module):"")+
  (module.id==="projects-workspace"&&skill.id==="skill-projects"?projects():"")+
  (module.id==="resources-library"&&skill.id==="skill-resources"?resources():"")+'</div></section>';
  }).join(""):'<p class="hub-note">'+tr("Start by adding a module. You can then organize topics, source code and PDFs.","প্রথমে একটি মডিউল যোগ করো। তারপর টপিক, কোড ও PDF সাজাও।")+'</p>')+'</div>'+
  (skill.id==="skill-projects"&&!skill.modules.some(m=>m.id==="projects-workspace")?projects():"")+
  (skill.id==="skill-resources"&&!skill.modules.some(m=>m.id==="resources-library")?resources():"")+
- '<p class="hub-note">'+tr("Skill metadata and code are included in Learning Hub JSON backups. Locally uploaded PDF binaries remain on this device; external PDF links work across devices.","স্কিল, মডিউল ও কোড Learning Hub JSON Backup-এ থাকবে। লোকাল PDF ফাইল শুধু এই ডিভাইসে থাকবে; বাইরের PDF লিংক অন্য ডিভাইসেও কাজ করবে।")+'</p></section>';
+ '<p class="hub-note">'+tr("Skill metadata and code are included in Learning Hub JSON backups. Uploaded PDF, file and folder bytes stay only in this browser; external links work across devices.","স্কিল, মডিউল ও কোড JSON Backup-এ থাকবে। PDF, ফাইল ও ফোল্ডার এই ব্রাউজারে থাকবে; ব্যাকআপ বা সিঙ্কে যাবে না।")+'</p></section>';
 }
 
 function top(){

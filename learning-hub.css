@@ -99,6 +99,8 @@ html[data-theme="gold"] .hub-tab.is-active{border-color:var(--mint);color:var(--
 .hub-skill-links a{color:var(--mint);text-decoration:underline}
 .hub-skills-form{margin:14px 0;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
 .hub-skills-form textarea,.hub-skills-form input,.hub-skills-form select{max-width:100%}
+.hub-skills-form [data-skill-upload][hidden]{display:none!important}
+.hub-attachment-meta{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
 .hub-skills-form small{font-size:11px;color:var(--muted);line-height:1.6}
 @media(max-width:660px){
  .hub-skill-grid{grid-template-columns:1fr 1fr;gap:9px}
