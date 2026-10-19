@@ -1,0 +1,114 @@
+"use strict";
+const {test}=require("node:test"),assert=require("node:assert/strict");
+const fs=require("node:fs"),vm=require("node:vm"),path=require("node:path");
+const read=f=>fs.readFileSync(path.join(__dirname,"..",f),"utf8");
+let seq=0;
+const tick=()=>new Promise(resolve=>setImmediate(resolve));
+function boot(){
+ const records=new Map(),blobs=new Map(),downloads=[],names=[];
+ let quota=false;
+ const indexedDB={open(){
+  const req={};
+  queueMicrotask(()=>{
+   req.result={objectStoreNames:{contains:()=>true},close(){},
+    transaction(){
+     const tx={oncomplete:null,onerror:null,onabort:null,objectStore(){return{
+      put(value,key){return schedule("put",key,value)},
+      get(key){return schedule("get",key)},
+      delete(key){return schedule("delete",key)}
+     }}};
+     function schedule(op,key,value){
+      const event={result:undefined};
+      queueMicrotask(()=>{
+       if(op==="put")blobs.set(key,value);
+       if(op==="get")event.result=blobs.get(key);
+       if(op==="delete")blobs.delete(key);
+       event.onsuccess?.();queueMicrotask(()=>tx.oncomplete?.());
+      });
+      return event;
+     }
+     return tx;
+    }};
+   req.onsuccess?.();
+  });
+  return req;
+ }};
+ const w={indexedDB,NOVA_CATALOG:{university:{tracks:{"CSE / Software Engineering":["Python"]}}},
+  NOVA_COLORS:["#12aaab"],NOVA_I18N:{language:"en",number:v=>String(v),displayDate:v=>v,t:x=>x},confirm:()=>true};
+ const url={createObjectURL:blob=>{downloads.push(blob);return"blob:test"},revokeObjectURL(){}};
+ const document={body:{appendChild(){}},createElement(){return{download:"",click(){names.push(this.download)},remove(){}}}};
+ const ctx={window:w,localStorage:{getItem:k=>records.get(k)??null,setItem(k,v){if(quota)throw Error("quota");records.set(k,String(v))}},
+  Date,JSON,Math,Set,Map,Number,String,Array,Object,URL:{...URL,...url},Uint8Array,DataView,TextEncoder,Blob,
+  document,setTimeout:()=>{},crypto:{randomUUID:()=>String(++seq)},
+  FormData:class{constructor(form){this.form=form}get(key){return this.form.fields?.[key]??null}getAll(key){return this.form.folder?.[key]||[]}}
+ };
+ for(const f of ["challenge-data.js","core.js","challenge.js","learning-hub.js"])vm.runInNewContext(read(f),ctx,{filename:f});
+ const hub=w.NOVA_LEARNING_HUB;hub.init({refresh:()=>{},toast:()=>{}});
+ const form=(kind,fields={},folder=[])=>({id:"hubItemForm",dataset:{skill:"skill-dsa",module:"dsa-arrays",item:""},
+  fields:{title:"Study material",kind,body:"",url:"",pdf_file:null,upload_file:null,...fields},folder:{folder_files:folder}});
+ const items=()=>hub.activeSkills().find(s=>s.id==="skill-dsa").modules[0].items;
+ return {hub,form,items,blobs,downloads,names,setQuota:v=>quota=v};
+}
+function file(name,content,relative=""){
+ const bytes=new TextEncoder().encode(content);
+ return{name,size:bytes.length,type:"application/octet-stream",webkitRelativePath:relative,
+  arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)};
+}
+test("modules expose PDF, file and directory selection with 20 MB limit",()=>{
+ const b=boot();b.hub.selectTab("skills");b.hub.handle("hub-skill-open",{dataset:{id:"skill-dsa"}});
+ b.hub.handle("hub-item-add",{dataset:{skill:"skill-dsa",module:"dsa-arrays"}});
+ const html=b.hub.page();
+ for(const x of ['value="file"','value="folder"','name="upload_file"','webkitdirectory','20 MB'])
+  assert.ok(html.includes(x),x);
+});
+test("arbitrary files save, download and keep local metadata",async()=>{
+ const b=boot(),f=file("algorithm.cpp","int main(){}");
+ assert.equal(await b.hub.submit(b.form("file",{upload_file:f})),true);
+ const item=b.items()[0];
+ assert.equal(item.fileName,"algorithm.cpp");
+ assert.equal(item.totalBytes,f.size);
+ assert.equal(b.blobs.get(item.localId),f);
+ assert.equal(b.hub.valid(b.hub.get()),true);
+ b.hub.handle("hub-attachment-download",{dataset:{skill:"skill-dsa",module:"dsa-arrays",id:item.id}});
+ await tick();await tick();
+ assert.equal(b.names[0],"algorithm.cpp");
+ assert.equal(b.downloads.length,1);
+});
+test("folder upload produces ZIP with nested relative paths",async()=>{
+ const b=boot(),folder=[file("main.py","print(1)","Course/src/main.py"),
+  file("notes.md","# topic","Course/notes.md")];
+ assert.equal(await b.hub.submit(b.form("folder",{},folder)),true);
+ const item=b.items()[0];
+ assert.equal(item.fileCount,2);
+ assert.equal(item.totalBytes,folder.reduce((n,x)=>n+x.size,0));
+ assert.equal(b.blobs.get(item.localId).files[0].path,"Course/src/main.py");
+ b.hub.handle("hub-attachment-download",{dataset:{skill:"skill-dsa",module:"dsa-arrays",id:item.id}});
+ await tick();await tick();
+ assert.equal(b.names[0],"Course.zip");
+ const binary=new Uint8Array(await b.downloads[0].arrayBuffer()),view=new DataView(binary.buffer);
+ assert.equal(view.getUint32(0,true),0x04034b50);
+ assert.equal(view.getUint32(binary.length-22,true),0x06054b50);
+ const text=Buffer.from(binary).toString("latin1");
+ assert.ok(text.includes("Course/src/main.py"));assert.ok(text.includes("Course/notes.md"));
+});
+test("20 MB caps, unsafe paths and quota rollback preserve existing learning state",async()=>{
+ const b=boot(),huge={...file("oversized.zip","hi"),size:20*1024*1024+1};
+ assert.equal(await b.hub.submit(b.form("file",{upload_file:huge})),false);
+ assert.equal(await b.hub.submit(b.form("pdf",{pdf_file:{...huge,name:"course.pdf"}})),false);
+ const bigFolder=[{...file("a","a","Folder/a"),size:11*1024*1024},
+  {...file("b","b","Folder/b"),size:10*1024*1024}];
+ assert.equal(await b.hub.submit(b.form("folder",{},bigFolder)),false);
+ assert.equal(await b.hub.submit(b.form("folder",{},[file("evil","x","Folder/../evil")])),false);
+ b.setQuota(true);
+ assert.equal(await b.hub.submit(b.form("file",{upload_file:file("safe.py","print(1)")})),false);
+ assert.equal(b.items().length,0);assert.equal(b.blobs.size,0);
+});
+test("original PDF links and local PDF files remain compatible",async()=>{
+ const b=boot();
+ assert.equal(await b.hub.submit(b.form("pdf",{url:"https://example.com/course.pdf"})),true);
+ assert.equal(await b.hub.submit(b.form("pdf",{pdf_file:file("guide.pdf","%PDF-1.7")})),true);
+ assert.equal(b.items().length,2);
+ assert.equal(b.items()[0].localId,"");
+ assert.ok(b.items()[1].localId);
+ assert.equal(b.hub.valid(b.hub.get()),true);
+});
