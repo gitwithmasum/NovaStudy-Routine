@@ -19,7 +19,7 @@ function boot(opts={}){
  const nav={onLine:true,standalone:false,serviceWorker:{getRegistration:async()=>({active:{},waiting:null})},
   clipboard:{writeText:async text=>{printed.push(text)}}};
  win.navigator=nav;
- const cachesMock={keys:async()=>["novastudy-v3.6.2"],match:async()=>({ok:true})};
+ const cachesMock={keys:async()=>["novastudy-v3.6.3"],match:async()=>({ok:true})};
  const urlCalls=[];
  const URLMock={createObjectURL:()=>{urlCalls.push("create");return "blob:diag"},revokeObjectURL:()=>urlCalls.push("revoke")};
  const ctx={window:win,navigator:nav,document:doc,localStorage:storage,caches:cachesMock,
@@ -35,7 +35,7 @@ test("fresh diagnostics are not collected automatically and contain no study rec
 });
 test("explicit checks report secure origin, cache, worker and keyboard readiness",async()=>{
  const b=boot();const data=await b.d.collect();
- assert.equal(data.version,"3.6.2");
+ assert.equal(data.version,"3.6.3");
  assert.equal(data.secureContext,true);
  for(const id of ["storage","worker","cache","keyboard","navlabels","notifications","viewport","installed","motion"])
   assert.ok(data.checks.some(c=>c.id===id),id);
@@ -108,7 +108,7 @@ test("v3.3 integration keeps original data modules, adds diagnostics navigation 
  assert.match(views,/route:"diagnostics"/);
  assert.match(html,/src="\.\/diagnostics\.js"/);
  assert.match(html,/href="\.\/diagnostics\.css"/);
- assert.match(html,/NOVASTUDY OS <b>3\.6\.2<\/b>/);
+ assert.match(html,/NOVASTUDY OS <b>3\.6\.3<\/b>/);
  assert.match(app,/Diagnostics\.page\(\)/);
  assert.match(app,/Diagnostics\.init/);
  assert.match(app,/Diagnostics\.setIssue/);
@@ -117,11 +117,11 @@ test("v3.3 integration keeps original data modules, adds diagnostics navigation 
  assert.match(editors,/aria-label="Close editor"/);
  assert.match(editors,/previousFocus/);
  assert.match(editors,/\.focus\(\{preventScroll:true\}\)/);
- assert.match(sw,/novastudy-v3\.6\.2/);
+ assert.match(sw,/novastudy-v3\.6\.3/);
  assert.match(sw,/'\.\/diagnostics\.js'/);
  assert.match(sw,/'\.\/diagnostics\.css'/);
  assert.match(css,/focus-visible/);
- assert.ok(audit.includes(String.raw`novastudy-v3\.6\.2`));
+ assert.ok(audit.includes(String.raw`novastudy-v3\.6\.3`));
  for(const f of ["diagnostics.js","editors.js","app.js","sw.js"])
   assert.doesNotThrow(()=>new vm.Script(read(f),{filename:f}));
 });

@@ -118,9 +118,9 @@ test("exam page offers preparation entry point and bilingual escaped panel",()=>
 test("v2.5 PWA, CSS, app, and CI include new preparation module without sync edits",()=>{
  const h=read("index.html"),a=read("app.js"),sw=read("sw.js"),ci=read(".github/workflows/novastudy-tests.yml");
  assert.match(h,/src="\.\/exam-prep\.js"/);assert.match(h,/href="\.\/exam-prep\.css"/);
- assert.match(h,/NOVASTUDY OS <b>3\.6\.2<\/b>/);
+ assert.match(h,/NOVASTUDY OS <b>3\.6\.3<\/b>/);
  assert.match(a,/Prep\.handle\(action,id\)/);assert.match(a,/Prep\.handleChange/);
- assert.match(sw,/novastudy-v3\.6\.2/);assert.match(sw,/'\.\/exam-prep\.js'/);
+ assert.match(sw,/novastudy-v3\.6\.3/);assert.match(sw,/'\.\/exam-prep\.js'/);
  assert.match(ci,/node --check exam-prep\.js/);
  for(const f of ["core.js","exams.js","exam-prep.js","app.js"])
   assert.doesNotThrow(()=>new vm.Script(read(f),{filename:f}));
