@@ -37,7 +37,19 @@ const ROADMAPS={
  ["auth","Authentication & Security","অথেন্টিকেশন ও সিকিউরিটি"],["tests","Testing & Debugging","টেস্টিং ও ডিবাগিং"],
  ["deploy","Vercel / Netlify / CI","ডিপ্লয়মেন্ট ও সিআই"],["capstone","Full Stack Capstone","ফুল স্ট্যাক প্রজেক্ট"]]
 };
-const DSA_MODULES=ROADMAPS.dsa.map(([id,title])=>({id:"dsa-"+id,title,description:"",items:[]}));
+/* Additive Python CP roadmap, keeping the original fourteen DSA modules. */
+const CP_PHASES=[["basics","Python CP Basics","পাইথন সিপি বেসিকস","Must",["Fast I/O: input() and sys.stdin.buffer","Loops and conditionals","Lists and array traversal","Strings and characters","Dictionaries and frequency maps","Sets and unique values","Big-O time and space complexity","collections, itertools and functools","bisect, heapq and math"]],["core","Core Problem Solving","মূল সমস্যা সমাধান","Must",["Implementation and simulation","Basic mathematics","Brute-force enumeration","Sorting and custom keys","Frequency counting and counting arrays"]],["thinking","Algorithmic Thinking","অ্যালগরিদমিক চিন্তাধারা","Must",["Greedy algorithms","Constructive algorithms","Prefix sums","Two pointers"]],["search","Search Techniques","সার্চ কৌশল","High",["Binary search","Binary search on answer","Sliding window"]],["math","Mathematics","গণিত","High",["GCD and Euclidean algorithm","LCM and divisibility","Prime numbers and factorization","Sieve of Eratosthenes","Modular arithmetic","Combinatorics"]],["structures","Data Structures","ডেটা স্ট্রাকচার","High",["Stack","Queue","Deque","Heap (heapq)","Hash map","Priority queue"]],["dp","Dynamic Programming","ডাইনামিক প্রোগ্রামিং","High",["Memoization","1D DP","2D DP","0/1 Knapsack","Longest Increasing Subsequence (LIS)","Grid DP"]],["graphs","Graph Algorithms","গ্রাফ অ্যালগরিদম","High",["BFS","DFS","Shortest path algorithms","Connected components","Disjoint Set Union (DSU)"]],["advanced","Advanced Topics","অ্যাডভান্সড টপিক","Later",["Trees and traversals","Bitmask DP","Fenwick Tree","Segment Tree","Sparse Table"]],["expert","Expert Topics","এক্সপার্ট টপিক","Later",["Advanced graph algorithms","String algorithms (KMP, Z-function)","Digit DP","Advanced combinatorics"]]];
+ROADMAPS.dsa.push(...CP_PHASES.map(([id,title,bn],i)=>["cp-"+id,"CP "+String(i+1).padStart(2,"0")+" — "+title,"সিপি "+String(i+1).padStart(2,"0")+" — "+bn]));
+const DSA_MODULES=ROADMAPS.dsa.map(([id,title])=>{
+ const p=CP_PHASES.find(x=>id==="cp-"+x[0]);
+ if(!p)return {id:"dsa-"+id,title,description:"",items:[]};
+ const [,name,,priority,topics]=p;
+ return {id:"dsa-"+id,title,description:"Python Competitive Programming | Priority: "+priority+" | "+name+". Study each topic and practice Codeforces problems.",
+  items:topics.map((topic,i)=>({id:"dsa-"+id+"-topic-"+String(i+1).padStart(2,"0"),kind:"topic",title:topic,
+   body:"Learn "+topic+"; dry-run sample inputs, analyze time complexity and solve related Codeforces practice problems.",
+   url:"",fileName:"",localId:"",done:false}))};
+});
+const CP_MODULES=DSA_MODULES.filter(x=>x.id.startsWith("dsa-cp-"));
 const MODULE_PRESETS={
  "skill-dsa":DSA_MODULES,
  "skill-ai":ROADMAPS.ai.map(([id,title])=>({id:"ai-"+id,title,description:"",items:[]})),
@@ -45,7 +57,7 @@ const MODULE_PRESETS={
  "skill-projects":[{id:"projects-workspace",title:"Project Tracker & Milestones",description:"Manage your saved projects and milestones, and add module notes, code and PDFs.",items:[]}],
  "skill-resources":[{id:"resources-library",title:"Saved Learning Resources",description:"Your saved resource links are accessible below. Add module notes, code and PDFs here.",items:[]}]
 };
-const stateFresh=()=>({version:1,dsaModulesV1:true,skillModulesV2:true,practice:[],roadmaps:{dsa:{},ai:{},fullstack:{}},projects:[],resources:[],skills:skillSeed()});
+const stateFresh=()=>({version:1,dsaModulesV1:true,skillModulesV2:true,cpRoadmapV1:true,practice:[],roadmaps:{dsa:{},ai:{},fullstack:{}},projects:[],resources:[],skills:skillSeed()});
 const uid=()=>N.uid(),kind=(s,allowed)=>allowed.includes(s);
 const safeUrl=value=>{
  const s=String(value||"").trim();
@@ -72,11 +84,11 @@ const DEFAULT_SKILLS=[
  ["skill-projects","Projects","প্রজেক্ট"],
  ["skill-resources","Resources","রিসোর্স"]
 ];
-const skillSeed=()=>DEFAULT_SKILLS.map(([id,title,bn])=>({id,title,bn,description:"",modules:(MODULE_PRESETS[id]||[]).map(m=>({...m,items:[]}))}));
+const skillSeed=()=>DEFAULT_SKILLS.map(([id,title,bn])=>({id,title,bn,description:"",modules:(MODULE_PRESETS[id]||[]).map(m=>({...m,items:(m.items||[]).map(item=>({...item}))}))}));
 /* One-time additive upgrade: existing user modules and status values are preserved.
    The markers keep deliberate module removals from reappearing after reload. */
 function upgradeDsaModules(data){
- if(data.dsaModulesV1&&data.skillModulesV2)return data;
+ if(data.dsaModulesV1&&data.skillModulesV2&&data.cpRoadmapV1)return data;
  if(!Array.isArray(data.skills))data.skills=skillSeed();
  function append(skillId,modules){
   const skill=data.skills.find(s=>s.id===skillId);
@@ -85,14 +97,15 @@ function upgradeDsaModules(data){
   for(const mod of modules){
    if(skill.modules.length>=40)break;
    if(skill.modules.some(m=>m.id===mod.id)||titles.has(mod.title.toLowerCase()))continue;
-   skill.modules.push({...mod,items:[]});
+   skill.modules.push({...mod,items:(mod.items||[]).map(item=>({...item}))});
   }
  }
  if(!data.dsaModulesV1)append("skill-dsa",MODULE_PRESETS["skill-dsa"]);
  if(!data.skillModulesV2){
   for(const key of ["skill-ai","skill-fullstack","skill-projects","skill-resources"])append(key,MODULE_PRESETS[key]);
  }
- data.dsaModulesV1=true;data.skillModulesV2=true;
+ if(!data.cpRoadmapV1)append("skill-dsa",CP_MODULES);
+ data.dsaModulesV1=true;data.skillModulesV2=true;data.cpRoadmapV1=true;
  return data;
 }
 function skillRoadmapTopic(skillId,module){
@@ -126,7 +139,8 @@ function valid(v){
  !unique(v.practice)||!unique(v.projects)||!unique(v.resources)||
  !v.practice.every(validPractice)||!v.projects.every(validProject)||!v.resources.every(validResource)||
  (v.skills!==undefined&&!validSkills(v.skills))||(v.dsaModulesV1!==undefined&&typeof v.dsaModulesV1!=="boolean")||
- (v.skillModulesV2!==undefined&&typeof v.skillModulesV2!=="boolean"))return false;
+ (v.skillModulesV2!==undefined&&typeof v.skillModulesV2!=="boolean")||
+  (v.cpRoadmapV1!==undefined&&typeof v.cpRoadmapV1!=="boolean"))return false;
  for(const k of ["dsa","ai","fullstack"]){
   let r=v.roadmaps[k];if(!r||typeof r!=="object"||Array.isArray(r))return false;
   const ids=ROADMAPS[k].map(x=>x[0]);
@@ -154,12 +168,12 @@ function save(next,{replace=false}={}){
  }catch{error=tr("Could not save learning records. Previously saved data is unchanged.","লার্নিং রেকর্ড Save হয়নি। আগের সংরক্ষিত ডেটা অক্ষত আছে।");refresh();return false}
 }
 // Upgrade only valid previous Hub records, leaving other stores untouched.
-if(!locked&&(!state.dsaModulesV1||!state.skillModulesV2))save(copy(state));
+if(!locked&&(!state.dsaModulesV1||!state.skillModulesV2||!state.cpRoadmapV1))save(copy(state));
 function adopt(textValue){
  if(textValue===null)return false;
  try{const candidate=JSON.parse(textValue);if(!valid(candidate))return false;
   state=candidate;raw=textValue;locked=false;error="";
-  if(!candidate.dsaModulesV1||!candidate.skillModulesV2)return save(copy(candidate));
+  if(!candidate.dsaModulesV1||!candidate.skillModulesV2||!candidate.cpRoadmapV1)return save(copy(candidate));
   refresh();return true
  }catch{return false}
 }

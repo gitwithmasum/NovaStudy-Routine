@@ -39,7 +39,7 @@ test("six existing skills are available as modular cards, without replacing road
  for(const old of ["ai","projects","resources"])assert.equal(b.hub.TABS.includes(old),false);
  assert.equal(b.hub.TABS.includes("dsa"),false);
  const dsa=skills.find(s=>s.id==="skill-dsa");
- assert.equal(dsa.modules.length,14);
+ assert.equal(dsa.modules.length,24);
  b.hub.handle("hub-skill-open",{dataset:{id:"skill-dsa"}});
  assert.match(b.hub.page(),/data-hub-progress="dsa"/);
  assert.equal(JSON.stringify(b.w.NOVA.get()),JSON.stringify(orig));
@@ -155,7 +155,7 @@ test("DSA migration preserves statuses and old custom module data",()=>{
  delete legacy.dsaModulesV1;
  const b=boot(JSON.stringify(legacy));
  const saved=b.hub.get(),mods=saved.skills.find(s=>s.id==="skill-dsa").modules;
- assert.equal(mods.length,15);
+ assert.equal(mods.length,25);
  assert.equal(saved.dsaModulesV1,true);
  assert.equal(saved.roadmaps.dsa.arrays,"completed");
  assert.equal(saved.roadmaps.dsa.hash,"review");
@@ -166,7 +166,7 @@ test("DSA migration preserves statuses and old custom module data",()=>{
  assert.equal(b.hub.get().roadmaps.dsa.hash,"practiced");
  b.hub.handle("hub-module-delete",{dataset:{id:"dsa-arrays",skill:"skill-dsa"}});
  const reloaded=boot(b.records.get(b.key)),after=reloaded.hub.activeSkills().find(s=>s.id==="skill-dsa").modules;
- assert.equal(after.length,14);
+ assert.equal(after.length,24);
  assert.equal(after.some(m=>m.id==="dsa-arrays"),false);
  assert.equal(after.some(m=>m.id==="custom"),true);
 });
@@ -175,7 +175,7 @@ test("older backups without a skills field get all DSA topics on import",()=>{
  delete old.skills;delete old.dsaModulesV1;
  old.roadmaps.dsa.arrays="learning";
  assert.equal(b.hub.save(old,{replace:true}),true);
- assert.equal(b.hub.activeSkills().find(s=>s.id==="skill-dsa").modules.length,14);
+ assert.equal(b.hub.activeSkills().find(s=>s.id==="skill-dsa").modules.length,24);
  assert.equal(b.hub.get().roadmaps.dsa.arrays,"learning");
 });
 
@@ -227,4 +227,38 @@ test("older v3.6.1 backups migrate once without losing progress or custom AI mod
  const restored=boot(updated.records.get(updated.key));
  assert.equal(restored.hub.activeSkills().find(s=>s.id==="skill-ai").modules.length,14);
  assert.equal(restored.hub.activeSkills().find(s=>s.id==="skill-ai").modules.some(m=>m.id==="ai-python"),false);
+});
+
+test("Codeforces Python CP phases retain original 14 DSA lessons and add 10 checked modules",()=>{
+ const b=boot(),skill=b.hub.activeSkills().find(x=>x.id==="skill-dsa");
+ const cp=skill.modules.filter(x=>x.id.startsWith("dsa-cp-"));
+ assert.equal(skill.modules.length,24);assert.equal(cp.length,10);
+ assert.equal(cp[0].id,"dsa-cp-basics");
+ assert.ok(cp[0].items.some(x=>x.title.includes("sys.stdin.buffer")));
+ assert.ok(cp[6].items.some(x=>x.title.includes("Knapsack")));
+ assert.ok(cp.every(x=>x.items.length>0&&x.items.every(item=>item.kind==="topic"&&!item.done)));
+ assert.equal(b.hub.ROADMAPS.dsa.length,24);
+ b.hub.handle("hub-skill-open",{dataset:{id:"skill-dsa"}});
+ assert.match(b.hub.page(),/CP 01 — Python CP Basics/);
+ assert.equal(b.hub.handleChange({dataset:{hubProgress:"dsa",topicId:"cp-basics"},value:"learning"}),true);
+ assert.equal(b.hub.get().roadmaps.dsa["cp-basics"],"learning");
+ b.hub.handle("hub-item-done",{dataset:{skill:"skill-dsa",module:cp[0].id,id:cp[0].items[0].id}});
+ assert.equal(b.hub.activeSkills().find(x=>x.id==="skill-dsa").modules.find(x=>x.id===cp[0].id).items[0].done,true);
+});
+test("Python CP one-time migration preserves old notes and does not recreate deleted phases",()=>{
+ const old=boot().hub.get(),skill=old.skills.find(x=>x.id==="skill-dsa");
+ skill.modules=skill.modules.filter(x=>!x.id.startsWith("dsa-cp-"));
+ skill.modules[0].items.push({id:"old-note",kind:"topic",title:"My notes",body:"Keep me",url:"",fileName:"",localId:"",done:true});
+ old.roadmaps.dsa.arrays="completed";delete old.cpRoadmapV1;
+ const b=boot(JSON.stringify(old)),state=b.hub.get(),modules=state.skills.find(x=>x.id==="skill-dsa").modules;
+ assert.equal(modules.length,24);
+ assert.equal(modules[0].items[0].body,"Keep me");
+ assert.equal(state.roadmaps.dsa.arrays,"completed");
+ assert.equal(state.cpRoadmapV1,true);
+ const reload=boot(b.records.get(b.key));
+ assert.equal(reload.hub.activeSkills().find(x=>x.id==="skill-dsa").modules.length,24);
+ reload.hub.handle("hub-module-delete",{dataset:{skill:"skill-dsa",id:"dsa-cp-basics"}});
+ const again=boot(reload.records.get(reload.key));
+ assert.equal(again.hub.activeSkills().find(x=>x.id==="skill-dsa").modules.length,23);
+ assert.equal(again.hub.activeSkills().find(x=>x.id==="skill-dsa").modules.some(x=>x.id==="dsa-cp-basics"),false);
 });
