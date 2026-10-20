@@ -414,10 +414,15 @@ async function saveSkillForm(form){
 function skillAction(action,b){
  const id=b?.dataset?.id,skillId=b?.dataset?.skill,moduleId=b?.dataset?.module;
  if(action==="hub-skill-add"){addingSkill=!addingSkill;editingSkillId="";refresh();return true}
- if(action==="hub-skill-open"){activeSkillId=id;tab="skills";editingSkillId="";editingModuleId="";addingItemModule="";
+ if(action==="hub-skill-open"){activeSkillId=id;tab="skills";editingSkillId="";editingModuleId="";addingItemModule="";addingTopicAttachmentId="";activeDsaPart="dsa";
   openedSkillModule=id==="skill-projects"?"projects-workspace":id==="skill-resources"?"resources-library":"";
   refresh();return true}
- if(action==="hub-skill-back"){activeSkillId="";editingSkillId="";editingModuleId="";addingItemModule="";refresh();return true}
+ if(action==="hub-skill-back"){activeSkillId="";editingSkillId="";editingModuleId="";addingItemModule="";addingTopicAttachmentId="";refresh();return true}
+  if(action==="hub-dsa-part"){
+   if(activeSkillId==="skill-dsa"&&["dsa","cp"].includes(id)){
+    activeDsaPart=id;openedSkillModule="";editingModuleId="";editingItemId="";addingModule=false;addingItemModule="";addingTopicAttachmentId="";refresh();
+   }return true;
+  }
  if(action==="hub-skill-edit"){if(findSkill(id)){editingSkillId=editingSkillId===id?"":id;addingSkill=false;refresh()}return true}
  if(action==="hub-skill-delete"){
   const skill=findSkill(id);if(!skill)return true;
@@ -442,8 +447,14 @@ function skillAction(action,b){
    m.items.map(i=>i.localId).filter(Boolean).forEach(k=>{void pdfStorage("delete",k).catch(()=>{})});
   editingModuleId="";return true;
  }
- if(action==="hub-item-add"){addingItemModule=addingItemModule===moduleId?"":moduleId;editingItemId="";refresh();return true}
- if(action==="hub-item-edit"){const item=skillLocation(skillId,moduleId,id).item;if(item){editingItemId=editingItemId===id?"":id;addingItemModule="";refresh()}return true}
+ if(action==="hub-topic-attach-add"){
+   const topic=skillLocation(skillId,moduleId,id);
+   if(isCpTopic(skillId,topic.module,topic.item)){
+    addingTopicAttachmentId=addingTopicAttachmentId===id?"":id;addingItemModule="";editingItemId="";refresh();
+   }return true;
+  }
+  if(action==="hub-item-add"){addingItemModule=addingItemModule===moduleId?"":moduleId;addingTopicAttachmentId="";editingItemId="";refresh();return true}
+ if(action==="hub-item-edit"){const item=skillLocation(skillId,moduleId,id).item;if(item){editingItemId=editingItemId===id?"":id;addingItemModule="";addingTopicAttachmentId="";refresh()}return true}
  if(action==="hub-item-delete"){
   const item=skillLocation(skillId,moduleId,id).item;
   if(!item||!window.confirm(tr("Delete this topic/resource?","এই টপিক/রিসোর্স মুছবে?")))return true;
@@ -492,9 +503,9 @@ function handle(action,button){
  const id=button?.dataset?.id,section=button?.dataset?.section;
  if(action==="hub-skill-cancel"){addingSkill=false;editingSkillId="";refresh();return true}
  if(action==="hub-module-cancel"){addingModule=false;editingModuleId="";refresh();return true}
- if(action==="hub-item-cancel"){addingItemModule="";editingItemId="";refresh();return true}
+ if(action==="hub-item-cancel"){addingItemModule="";addingTopicAttachmentId="";editingItemId="";refresh();return true}
  if(action==="hub-module-toggle"){openedSkillModule=openedSkillModule===id?"":id;refresh();return true}
- if(action.startsWith("hub-skill-")||action.startsWith("hub-module-")||action.startsWith("hub-item-")||action==="hub-pdf-open"||action==="hub-attachment-download")return skillAction(action,button);
+ if(action.startsWith("hub-skill-")||action.startsWith("hub-module-")||action.startsWith("hub-item-")||action==="hub-topic-attach-add"||action==="hub-dsa-part"||action==="hub-pdf-open"||action==="hub-attachment-download")return skillAction(action,button);
  if(action==="hub-tab"){selectTab(button?.dataset?.tab);return true}
  if(action==="hub-practice-delete"){if(window.confirm(tr("Delete this problem?","এই Problem মুছবে?")))mutate(n=>{n.practice=n.practice.filter(x=>x.id!==id)});return true}
  if(action==="hub-project-delete"){if(window.confirm(tr("Delete this project and milestones?","এই Project ও Milestones মুছবে?")))mutate(n=>{n.projects=n.projects.filter(x=>x.id!==id)});return true}
