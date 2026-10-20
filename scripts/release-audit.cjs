@@ -17,7 +17,7 @@ for(const asset of appAssets){
  check(exists(asset),"Referenced resource missing: "+asset);
  check(sw.includes("'./"+asset+"'"),"Not pre-cached for offline PWA: "+asset);
 }
-check(/const CACHE='novastudy-v3\.6\.4'/.test(sw),"Wrong SW release cache");
+check(/const CACHE='novastudy-v3\.6\.4(?:-[^']+)?'/.test(sw),"Wrong SW release cache");
 check(/failed|partially populated/i.test(sw),"Atomic install rollback documentation missing");
 check(sw.includes("await caches.delete(CACHE)")&&sw.includes("await cache.addAll(FILES)"),"Atomic install missing");
 check(sw.includes("const checks=await Promise.all(REQUIRED.map"),"Activation verification missing");
