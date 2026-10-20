@@ -239,6 +239,7 @@ test("Codeforces Python CP phases retain original 14 DSA lessons and add 10 chec
  assert.ok(cp.every(x=>x.items.length>0&&x.items.every(item=>item.kind==="topic"&&!item.done)));
  assert.equal(b.hub.ROADMAPS.dsa.length,24);
  b.hub.handle("hub-skill-open",{dataset:{id:"skill-dsa"}});
+ b.hub.handle("hub-dsa-part",{dataset:{id:"cp"}});
  assert.match(b.hub.page(),/CP 01 — Python CP Basics/);
  assert.equal(b.hub.handleChange({dataset:{hubProgress:"dsa",topicId:"cp-basics"},value:"learning"}),true);
  assert.equal(b.hub.get().roadmaps.dsa["cp-basics"],"learning");
@@ -296,10 +297,10 @@ test("CP topic upload buttons live below topics; invalid or orphan references ar
  module.items.push({id:"orphan",kind:"file",parentTopicId:"missing",title:"bad",body:"",url:"",fileName:"x",localId:"id",done:false});
  assert.equal(b.hub.valid(old),false);
 });
-test("New modules created inside CP and DSA tabs stay within their own group",()=>{
+test("New modules created inside CP and DSA tabs stay within their own group",async()=>{
  const b=boot();b.hub.handle("hub-skill-open",{dataset:{id:"skill-dsa"}});
  b.hub.handle("hub-dsa-part",{dataset:{id:"cp"}});
- assert.equal(b.hub.submit(form("hubModuleForm",{title:"Extra CP Problems",description:"Contest problems"},{skill:"skill-dsa",module:""})),true);
+ assert.equal(await b.hub.submit(form("hubModuleForm",{title:"Extra CP Problems",description:"Contest problems"},{skill:"skill-dsa",module:""})),true);
  const cp=b.hub.activeSkills().find(s=>s.id==="skill-dsa").modules.at(-1);
  assert.equal(cp.group,"cp");
  assert.match(b.hub.page(),/Extra CP Problems/);
