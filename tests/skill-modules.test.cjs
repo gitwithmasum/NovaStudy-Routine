@@ -262,3 +262,47 @@ test("Python CP one-time migration preserves old notes and does not recreate del
  assert.equal(again.hub.activeSkills().find(x=>x.id==="skill-dsa").modules.length,23);
  assert.equal(again.hub.activeSkills().find(x=>x.id==="skill-dsa").modules.some(x=>x.id==="dsa-cp-basics"),false);
 });
+
+test("DSA and CP are separate views with existing modules and statuses preserved",()=>{
+ const b=boot(),skill=b.hub.activeSkills().find(s=>s.id==="skill-dsa");
+ assert.equal(skill.modules.length,24);
+ b.hub.handle("hub-skill-open",{dataset:{id:"skill-dsa"}});
+ let html=b.hub.page();
+ assert.match(html,/data-action="hub-dsa-part"/);
+ assert.match(html,/DSA Modules/);
+ assert.match(html,/Arrays &amp; Strings/);
+ assert.doesNotMatch(html,/CP 01 — Python CP Basics/);
+ b.hub.handle("hub-dsa-part",{dataset:{id:"cp"}});
+ html=b.hub.page();
+ assert.match(html,/Competitive Programming Modules/);
+ assert.match(html,/CP 01 — Python CP Basics/);
+ assert.doesNotMatch(html,/Arrays &amp; Strings/);
+ const before=JSON.stringify(b.hub.get());
+ b.hub.handle("hub-dsa-part",{dataset:{id:"dsa"}});
+ assert.equal(JSON.stringify(b.hub.get()),before);
+});
+test("CP topic upload buttons live below topics; invalid or orphan references are rejected",()=>{
+ const b=boot(),cp=b.hub.activeSkills().find(s=>s.id==="skill-dsa").modules.find(m=>m.id==="dsa-cp-basics"),topic=cp.items[0];
+ b.hub.handle("hub-skill-open",{dataset:{id:"skill-dsa"}});
+ b.hub.handle("hub-dsa-part",{dataset:{id:"cp"}});
+ b.hub.handle("hub-module-toggle",{dataset:{id:cp.id}});
+ b.hub.handle("hub-topic-attach-add",{dataset:{skill:"skill-dsa",module:cp.id,id:topic.id}});
+ const html=b.hub.page();
+ assert.match(html,/data-parent-topic="dsa-cp-basics-topic-01"/);
+ assert.match(html,/name="folder_files"/);
+ assert.match(html,/name="upload_file"/);
+ assert.match(html,/webkitdirectory/);
+ let old=b.hub.get(),module=old.skills.find(s=>s.id==="skill-dsa").modules.find(m=>m.id===cp.id);
+ module.items.push({id:"orphan",kind:"file",parentTopicId:"missing",title:"bad",body:"",url:"",fileName:"x",localId:"id",done:false});
+ assert.equal(b.hub.valid(old),false);
+});
+test("New modules created inside CP and DSA tabs stay within their own group",()=>{
+ const b=boot();b.hub.handle("hub-skill-open",{dataset:{id:"skill-dsa"}});
+ b.hub.handle("hub-dsa-part",{dataset:{id:"cp"}});
+ assert.equal(b.hub.submit(form("hubModuleForm",{title:"Extra CP Problems",description:"Contest problems"},{skill:"skill-dsa",module:""})),true);
+ const cp=b.hub.activeSkills().find(s=>s.id==="skill-dsa").modules.at(-1);
+ assert.equal(cp.group,"cp");
+ assert.match(b.hub.page(),/Extra CP Problems/);
+ b.hub.handle("hub-dsa-part",{dataset:{id:"dsa"}});
+ assert.doesNotMatch(b.hub.page(),/Extra CP Problems/);
+});
