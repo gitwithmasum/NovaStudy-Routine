@@ -363,7 +363,7 @@ async function itemUpsert(form){
  if(!ok&&blob)await pdfStorage("delete",localId).catch(()=>{});
  if(ok){
   if(old?.localId&&old.localId!==localId)void pdfStorage("delete",old.localId).catch(()=>{});
-  editingItemId="";addingItemModule="";
+  editingItemId="";addingItemModule="";addingTopicAttachmentId="";
  }
  return ok;
 }
@@ -458,11 +458,12 @@ function skillAction(action,b){
  if(action==="hub-item-delete"){
   const item=skillLocation(skillId,moduleId,id).item;
   if(!item||!window.confirm(tr("Delete this topic/resource?","এই টপিক/রিসোর্স মুছবে?")))return true;
+  const children=item.kind==="topic"?skillLocation(skillId,moduleId).module.items.filter(x=>x.parentTopicId===id):[];
   if(mutate(n=>{
    const m=ensureSkills(n).find(s=>s.id===skillId)?.modules.find(x=>x.id===moduleId);
-   if(!m)return false;m.items=m.items.filter(x=>x.id!==id);
-  })&&item.localId)void pdfStorage("delete",item.localId).catch(()=>{});
-  editingItemId="";return true;
+   if(!m)return false;m.items=m.items.filter(x=>x.id!==id&&x.parentTopicId!==id);
+  }))[item,...children].map(x=>x.localId).filter(Boolean).forEach(k=>{void pdfStorage("delete",k).catch(()=>{})});
+  editingItemId="";addingTopicAttachmentId="";return true;
  }
  if(action==="hub-item-done"){
   mutate(n=>{
