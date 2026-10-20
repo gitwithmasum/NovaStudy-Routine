@@ -666,6 +666,8 @@ function skillWorkspace(){
  const skill=findSkill(activeSkillId);
  if(!skill)return skillsCatalog(false);
  const total=skill.modules.reduce((n,m)=>n+m.items.length,0),done=skill.modules.reduce((n,m)=>n+m.items.filter(i=>i.done).length,0);
+ const shownModules=skill.id==="skill-dsa"?skill.modules.filter(m=>modulePart(m)===activeDsaPart):skill.modules;
+ const dsaTotal=skill.modules.filter(m=>modulePart(m)==="dsa").length,cpTotal=skill.modules.filter(m=>modulePart(m)==="cp").length;
  return '<section class="panel hub-skill-detail">'+
  '<div class="hub-skill-detail-header"><div>'+btn("← "+tr("All Skills","সব স্কিল"),"hub-skill-back")+
  '<h2>'+E(tr(skill.title,skill.bn||skill.title))+'</h2>'+
@@ -674,10 +676,13 @@ function skillWorkspace(){
  '<div class="hub-skill-controls">'+btn(tr("Edit Skill","স্কিল এডিট"),"hub-skill-edit",'data-id="'+E(skill.id)+'"')+
  btn(tr("Delete Skill","স্কিল ডিলিট"),"hub-skill-delete",'data-id="'+E(skill.id)+'"',"danger-btn")+'</div></div>'+
  (editingSkillId===skill.id?skillForm(skill):"")+
- '<div class="hub-skill-module-top"><h3>'+tr("Course Modules","কোর্স মডিউল")+'</h3>'+
+ (skill.id==="skill-dsa"?'<div class="hub-dsa-part-tabs" role="group" aria-label="'+tr("Select DSA or CP modules","ডিএসএ বা সিপি মডিউল বেছে নাও")+'">'+
+ ["dsa","cp"].map(part=>'<button type="button" data-action="hub-dsa-part" data-id="'+part+'" aria-pressed="'+(activeDsaPart===part)+'" class="hub-dsa-part-button'+(activeDsaPart===part?" active":"")+'">'+
+ (part==="dsa"?"DSA":"CP")+' <span>'+E(I.number(part==="dsa"?dsaTotal:cpTotal))+' '+tr("modules","মডিউল")+'</span></button>').join("")+'</div>':"")+
+ '<div class="hub-skill-module-top"><h3>'+(skill.id==="skill-dsa"?(activeDsaPart==="dsa"?tr("DSA Modules","ডিএসএ মডিউল"):tr("Competitive Programming Modules","কম্পিটিটিভ প্রোগ্রামিং মডিউল")):tr("Course Modules","কোর্স মডিউল"))+'</h3>'+
  btn(tr("+ Add Module","+ মডিউল যোগ"),"hub-module-add",'data-skill="'+E(skill.id)+'"')+'</div>'+
  (addingModule?moduleForm(skill):"")+
- '<div class="hub-skill-modules">'+(skill.modules.length?skill.modules.map((module,index)=>{
+ '<div class="hub-skill-modules">'+(shownModules.length?shownModules.map((module,index)=>{
  const count=module.items.filter(x=>x.done).length,open=openedSkillModule===module.id,topic=skillRoadmapTopic(skill.id,module);
  return '<section class="hub-skill-module"><div class="hub-skill-module-header">'+
  '<button type="button" class="hub-skill-module-toggle" data-action="hub-module-toggle" data-id="'+E(module.id)+'" data-skill="'+E(skill.id)+'" aria-expanded="'+open+'" aria-controls="hub-module-content-'+E(module.id)+'">'+
@@ -690,7 +695,7 @@ function skillWorkspace(){
  (editingModuleId===module.id?moduleForm(skill,module):"")+
  '<div class="hub-skill-module-content" id="hub-module-content-'+E(module.id)+'"'+(open?"":" hidden")+">"+
  (module.description?'<p class="hub-note">'+E(module.description)+'</p>':"")+
- '<div class="hub-skill-item-list">'+module.items.map(item=>skillItemView(skill,module,item)).join("")+'</div>'+
+ '<div class="hub-skill-item-list">'+module.items.filter(item=>!item.parentTopicId).map(item=>skillItemView(skill,module,item)).join("")+'</div>'+
  (module.items.length?"":'<p class="hub-note">'+tr("No resources yet. Add a topic, code snippet or PDF.","এখনো কোনো রিসোর্স নেই। টপিক, কোড বা PDF যোগ করো।")+'</p>')+
  btn(tr("+ Add Topic / Code / PDF / File / Folder","+ টপিক / কোড / PDF / ফাইল / ফোল্ডার"),"hub-item-add",'data-skill="'+E(skill.id)+'" data-module="'+E(module.id)+'"')+
  (addingItemModule===module.id?itemForm(skill,module):"")+
