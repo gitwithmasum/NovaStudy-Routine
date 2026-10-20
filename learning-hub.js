@@ -118,6 +118,9 @@ const activeSkills=s=>Array.isArray(s.skills)?s.skills:skillSeed();
 const findSkill=(id)=>activeSkills(state).find(x=>x.id===id);
 const MAX_UPLOAD=20*1024*1024;
 const skillKinds=["topic","code","pdf","file","folder"];
+const isCpModule=m=>!!m&&(m.group==="cp"||m.id.startsWith("dsa-cp-"));
+const modulePart=m=>isCpModule(m)?"cp":"dsa";
+const isCpTopic=(skillId,module,item)=>skillId==="skill-dsa"&&isCpModule(module)&&item?.kind==="topic"&&!item.parentTopicId;
 const validSkillItem=x=>x&&bounded(x.id,128)&&!!x.id&&skillKinds.includes(x.kind)&&
  bounded(x.title,160)&&!!x.title.trim()&&bounded(x.body,12000)&&
  bounded(x.url,500)&&safeUrl(x.url)&&bounded(x.fileName,200)&&bounded(x.localId,128)&&
@@ -126,9 +129,13 @@ const validSkillItem=x=>x&&bounded(x.id,128)&&!!x.id&&skillKinds.includes(x.kind
  (x.totalBytes===undefined||(Number.isSafeInteger(x.totalBytes)&&x.totalBytes>=0&&x.totalBytes<=MAX_UPLOAD))&&
  (x.kind!=="pdf"||!!x.url||!!x.localId)&&
  (!["file","folder"].includes(x.kind)||!!x.localId)&&
- (x.kind!=="folder"||x.fileCount>=1);
+ (x.kind!=="folder"||x.fileCount>=1)&&
+  (x.parentTopicId===undefined||(bounded(x.parentTopicId,128)&&!!x.parentTopicId&&["file","folder","pdf"].includes(x.kind)));
 const validSkillModule=x=>x&&bounded(x.id,128)&&!!x.id&&bounded(x.title,160)&&!!x.title.trim()&&
- bounded(x.description,700)&&Array.isArray(x.items)&&x.items.length<=80&&unique(x.items)&&x.items.every(validSkillItem);
+ bounded(x.description,700)&&
+  (x.group===undefined||kind(x.group,["dsa","cp"]))&&
+  Array.isArray(x.items)&&x.items.length<=80&&unique(x.items)&&x.items.every(validSkillItem)&&
+  x.items.every(i=>!i.parentTopicId||(isCpModule(x)&&x.items.some(p=>p.id===i.parentTopicId&&p.kind==="topic"&&!p.parentTopicId)));
 const validSkill=x=>x&&bounded(x.id,128)&&!!x.id&&bounded(x.title,140)&&!!x.title.trim()&&
  bounded(x.bn,140)&&bounded(x.description,700)&&Array.isArray(x.modules)&&x.modules.length<=40&&
  unique(x.modules)&&x.modules.every(validSkillModule);
@@ -229,7 +236,7 @@ function createResource(form){
 
 /* Course-style skill workspace. Metadata is part of Learning Hub's existing validated JSON
    backup; optional local PDF binaries are isolated in IndexedDB and are not part of JSON backups. */
-let activeSkillId="",editingSkillId="",editingModuleId="",editingItemId="",addingSkill=false,addingModule=false,addingItemModule="";
+let activeSkillId="",editingSkillId="",editingModuleId="",editingItemId="",addingSkill=false,addingModule=false,addingItemModule="",addingTopicAttachmentId="",activeDsaPart="dsa";
 const ensureSkills=n=>(n.skills||(n.skills=skillSeed()));
 const skillLocation=(skillId,moduleId,itemId)=>{
  const skill=findSkill(skillId),module=skill?.modules.find(m=>m.id===moduleId);
@@ -258,7 +265,7 @@ function moduleUpsert(form){
   const skill=ensureSkills(n).find(x=>x.id===skillId);
   if(!skill)throw Error("Skill not found");
   if(id){const m=skill.modules.find(x=>x.id===id);if(!m)throw Error("Module not found");m.title=title;m.description=description}
-  else{if(skill.modules.length>=40)throw Error("Maximum 40 modules per skill");skill.modules.push({id:uid(),title,description,items:[]})}
+  else{if(skill.modules.length>=40)throw Error("Maximum 40 modules per skill");skill.modules.push({id:uid(),title,description,items:[],...(skillId==="skill-dsa"?{group:activeDsaPart}:{})})}
  });
  if(ok){addingModule=false;editingModuleId=""}
  return ok;
@@ -304,7 +311,10 @@ async function itemUpsert(form){
  kind=field(form,"kind",8),body=field(form,"body",12000),url=field(form,"url",500);
  if(!skillKinds.includes(kind))throw Error("Invalid resource type");
  if(url&&!safeUrl(url))throw Error("Only HTTPS or HTTP links are supported");
- const old=skillLocation(skillId,moduleId,id).item;
+ const location=skillLocation(skillId,moduleId,id),old=location.item;
+  const parentTopicId=id?(old?.parentTopicId||""):(form.dataset.parentTopic||"");
+  if(parentTopicId&&!location.module?.items.some(item=>isCpTopic(skillId,location.module,item)&&item.id===parentTopicId))throw Error("CP parent topic was not found");
+  if(parentTopicId&&!["file","folder","pdf"].includes(kind))throw Error("Only files, folders and PDFs can be attached to a CP topic");
  const single=kind==="pdf"?formValue(form,"pdf_file"):kind==="file"?formValue(form,"upload_file"):null;
  const selected=isUpload(single);
  const folder=kind==="folder"?folderFiles(form):[];
@@ -345,7 +355,7 @@ async function itemUpsert(form){
  const ok=mutate(n=>{
   const module=ensureSkills(n).find(x=>x.id===skillId)?.modules.find(x=>x.id===moduleId);
   if(!module)return false;
-  const row={id:id||uid(),kind,title,body,url:kind==="pdf"?url:"",localId,fileName,done:old?.done||false};
+  const row={id:id||uid(),kind,title,body,url:kind==="pdf"?url:"",localId,fileName,done:old?.done||false,...(parentTopicId?{parentTopicId}:{})};
   if(["file","folder"].includes(kind)||blob){row.fileCount=fileCount;row.totalBytes=totalBytes}
   if(id){const index=module.items.findIndex(x=>x.id===id);if(index<0)return false;module.items[index]=row}
   else{if(module.items.length>=80)throw Error("Maximum 80 resources per module");module.items.push(row)}
