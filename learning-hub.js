@@ -599,12 +599,14 @@ function moduleForm(skill,module=null){
  '<button class="primary-btn" type="submit">'+tr(module?"Save Module":"Add Module",module?"মডিউল সেভ":"মডিউল যোগ")+'</button>'+
  btn(tr("Cancel","বাতিল"),"hub-module-cancel")+'</form>';
 }
-function itemForm(skill,module,item=null){
- const kind=item?.kind||"topic",show=k=>' data-skill-upload="'+k+'"'+(kind===k?"":" hidden");
- return '<form id="hubItemForm" class="hub-form hub-skills-form" data-skill="'+E(skill.id)+'" data-module="'+E(module.id)+'" data-item="'+E(item?.id||"")+'">'+
+function itemForm(skill,module,item=null,parentTopicId=""){
+ const parentId=item?.parentTopicId||parentTopicId;
+ const kind=item?.kind||(parentId?"file":"topic"),allowed=parentId?["file","folder","pdf"]:skillKinds;
+ const show=k=>' data-skill-upload="'+k+'"'+(kind===k?"":" hidden");
+ return '<form id="hubItemForm" class="hub-form hub-skills-form" data-skill="'+E(skill.id)+'" data-module="'+E(module.id)+'" data-item="'+E(item?.id||"")+'" data-parent-topic="'+E(parentId)+'">'+
  '<label>'+tr("Resource title","রিসোর্সের নাম")+'<input name="title" maxlength="160" required value="'+E(item?.title||"")+'"></label>'+
  '<label>'+tr("Content type","কনটেন্ট টাইপ")+'<select name="kind">'+
- skillKinds.map(k=>'<option value="'+k+'"'+(kind===k?" selected":"")+'>'+E({topic:tr("Topic / Notes","টপিক / নোটস"),code:tr("Code Snippet","কোড"),pdf:tr("PDF","পিডিএফ"),file:tr("Any File","যেকোনো ফাইল"),folder:tr("Folder","ফোল্ডার")}[k])+'</option>').join("")+'</select></label>'+
+ allowed.map(k=>'<option value="'+k+'"'+(kind===k?" selected":"")+'>'+E({topic:tr("Topic / Notes","টপিক / নোটস"),code:tr("Code Snippet","কোড"),pdf:tr("PDF","পিডিএফ"),file:tr("Any File","যেকোনো ফাইল"),folder:tr("Folder","ফোল্ডার")}[k])+'</option>').join("")+'</select></label>'+
  '<label class="hub-wide">'+tr("Notes / Code","নোটস / কোড")+'<textarea name="body" maxlength="12000" rows="5">'+E(item?.body||"")+'</textarea></label>'+
  '<label class="hub-wide"'+show("pdf")+'>'+tr("PDF link (optional)","PDF লিংক (ঐচ্ছিক)")+'<input name="url" type="url" maxlength="500" value="'+E(item?.url||"")+'"></label>'+
  '<label class="hub-wide"'+show("pdf")+'>'+tr("Upload PDF (max 20 MB)","PDF আপলোড (সর্বোচ্চ ২০ MB)")+'<input name="pdf_file" type="file" accept=".pdf,application/pdf"></label>'+
