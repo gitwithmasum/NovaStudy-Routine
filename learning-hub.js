@@ -655,7 +655,12 @@ function skillItemView(skill,module,item){
  ' · '+E(item.kind==="folder"?String(item.fileCount||0)+" files":"1 file")+
  ' · '+E(((item.totalBytes||0)/1048576).toFixed(2))+' MB</span>'+
  btn(item.kind==="folder"?tr("Download folder ZIP","ফোল্ডার ZIP ডাউনলোড"):tr("Download file","ফাইল ডাউনলোড"),"hub-attachment-download",attrs)+'</div>':"")+
- (editingItemId===item.id?itemForm(skill,module,item):"")+'</article>';
+ (editingItemId===item.id?itemForm(skill,module,item):"")+
+ (isCpTopic(skill.id,module,item)?'<div class="hub-cp-topic-attachments"><div class="hub-cp-topic-attachments-head"><strong>'+tr("Topic files & folders","টপিকের ফাইল ও ফোল্ডার")+'</strong>'+
+ btn(tr("+ Add File / Folder","+ ফাইল / ফোল্ডার যোগ"),"hub-topic-attach-add",attrs,"tiny-btn")+'</div>'+
+ '<div class="hub-cp-topic-attachment-list">'+module.items.filter(x=>x.parentTopicId===item.id).map(child=>skillItemView(skill,module,child)).join("")+'</div>'+
+ (addingTopicAttachmentId===item.id?itemForm(skill,module,null,item.id):"")+
+ '<small class="hub-note">'+tr("20 MB per file or folder. Stored in this browser only.","প্রতি ফাইল বা ফোল্ডার সর্বোচ্চ ২০ MB। শুধু এই ব্রাউজারে সংরক্ষিত থাকবে।")+'</small></div>':"")+'</article>';
 }
 function skillWorkspace(){
  const skill=findSkill(activeSkillId);
