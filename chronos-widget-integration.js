@@ -2,7 +2,7 @@
 (function(){
  "use strict";
  const $=id=>document.getElementById(id);
- let mounted=false,widgets=[],scriptPromise=null;
+ let mounted=false,widgets=[],scriptPromise=null,statsWidget=null;
  function loadLoader(){
   if(window.ChronosWidgets)return Promise.resolve(window.ChronosWidgets);
   if(scriptPromise)return scriptPromise;
@@ -48,17 +48,11 @@
    $("chronosShareToggle")?.addEventListener("change",event=>{
     const target=$("chronosStudyStats");if(!target)return;
     if(event.currentTarget.checked){
-     if(!widgets.some(w=>w._kind==="stats")){
-      const stats=api.mount(target,{type:"stats",theme:"cyber",size:"regular",source:"host",data:summary()});
-      // Mark this instance for deterministic cleanup.
-      try{Object.defineProperty(stats,"_kind",{value:"stats"});}catch{}
-      widgets.push(stats);
-     }else widgets.find(w=>w._kind==="stats")?.update(summary());
+     if(!statsWidget){statsWidget=api.mount(target,{type:"stats",theme:"cyber",size:"regular",source:"host",data:summary()});widgets.push(statsWidget);}else statsWidget.update(summary());
      target.hidden=false;
      showStatus("Read-only study summary shared with the Chronos widget. No credentials or notes were sent.");
     }else{
-     const index=widgets.findIndex(w=>w._kind==="stats");
-     if(index>=0){widgets[index].destroy();widgets.splice(index,1);}
+     if(statsWidget){statsWidget.destroy();widgets=widgets.filter(w=>w!==statsWidget);statsWidget=null;}
      target.hidden=true;
      showStatus("Study summary sharing stopped.");
     }
@@ -68,8 +62,7 @@
  }
  function refreshSharedStats(){
   if(!$("chronosShareToggle")?.checked)return;
-  const widget=widgets.find(w=>w._kind==="stats");
-  if(widget)widget.update(summary());
+  if(statsWidget)statsWidget.update(summary());
  }
  document.addEventListener("click",event=>{
   if(event.target.closest("#chronosWidgetToggle"))openPanel();
