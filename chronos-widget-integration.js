@@ -17,17 +17,10 @@
   return scriptPromise;
  }
  function summary(){
-  // Explicitly selected fields only. Never send IDs, account/session tokens, notes, or course documents.
+  // Pure projection deliberately excludes routine schedule sessions, IDs, notes, auth tokens and course records.
   const state=window.NOVA?.get?.();
-  if(!state)return {tasks:[],stats:{sessions:0,focusSeconds:0}};
-  const tasks=(Array.isArray(state.tasks)?state.tasks:[]).slice(0,60).map((t,i)=>({
-   id:"study-"+(i+1),
-   text:String(t.title||"Study task").slice(0,100),
-   done:Boolean(t.done)
-  }));
-  const sessions=Array.isArray(state.sessions)?state.sessions:[];
-  const done=tasks.filter(t=>t.done).length;
-  return {tasks,stats:{sessions:Math.min(sessions.length,10000),focusSeconds:0,completedTasks:done,totalTasks:tasks.length}};
+  const focus=window.NOVA_FOCUS?.get?.();
+  return window.NOVA_CHRONOS_DATA?.snapshot?.(state,focus)||{tasks:[],stats:{sessions:0,focusSeconds:0}};
  }
  function showStatus(message,isError=false){
   const el=$("chronosWidgetStatus");if(!el)return;
