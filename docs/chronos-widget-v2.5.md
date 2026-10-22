@@ -9,7 +9,8 @@ This integration is on `feature/chronos-widget-v2.5`; it does not change the pro
 - Loads the publisher-hosted Chronos widget loader only when the user opens the panel.
 - Focus Timer works as a standalone widget and does not read or mutate NovaStudy state.
 - Study Stats sharing is **off by default** and requires an explicit checkbox action.
-- The only shared snapshot is a bounded list of visible task titles/completion flags and aggregate session count. No IDs, notes, course documents, authentication tokens, Supabase credentials or user profile are passed.
+- The only shared snapshot is a bounded list of task titles/completion flags and aggregate **completed focus sessions/minutes** read from NovaStudy's focus timer. Scheduled routine sessions are never misreported as focus sessions. No original IDs, notes, course documents, authentication tokens, Supabase credentials or user profile are passed.
+- The pure projection lives in `chronos-widget-data.js`; `tests/chronos-widget-data.test.cjs` checks field minimization, limits, missing data and correct focus totals.
 - Data flows from NovaStudy to the Chronos iframe as a read-only snapshot. No two-way sync and no Supabase schema/policy changes.
 - Responsive layout, lazy loading, keyboard-operable controls and error status are included.
 
