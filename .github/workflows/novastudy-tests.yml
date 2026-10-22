@@ -40,6 +40,8 @@ jobs:
           node --check study-planner.js
           node --check course-manager.js
           node --check app.js
+          node --check chronos-widget-data.js
+          node --check chronos-widget-integration.js
           node --check views.js
           node --check editors.js
           node --check exams.js

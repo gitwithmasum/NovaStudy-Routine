@@ -1,0 +1,65 @@
+/* NovaStudy x Masum-Chronos v2.5 — opt-in, least-privilege integration. */
+(function(){
+ "use strict";
+ const $=id=>document.getElementById(id);
+ let mounted=false,widgets=[],scriptPromise=null,statsWidget=null;
+ function loadLoader(){
+  if(window.ChronosWidgets)return Promise.resolve(window.ChronosWidgets);
+  if(scriptPromise)return scriptPromise;
+  scriptPromise=new Promise((resolve,reject)=>{
+   const s=document.createElement("script");
+   s.src="https://gitwithmasum.github.io/Masum-Chronos/web/widgets/chronos-widgets.js";
+   s.async=true;
+   s.onload=()=>window.ChronosWidgets?resolve(window.ChronosWidgets):reject(Error("Chronos widget loader unavailable"));
+   s.onerror=()=>reject(Error("Could not load Chronos widget loader. Check your connection."));
+   document.head.appendChild(s);
+  });
+  return scriptPromise;
+ }
+ function summary(){
+  // Pure projection deliberately excludes routine schedule sessions, IDs, notes, auth tokens and course records.
+  const state=window.NOVA?.get?.();
+  const focus=window.NOVA_FOCUS?.get?.();
+  return window.NOVA_CHRONOS_DATA?.snapshot?.(state,focus)||{tasks:[],stats:{sessions:0,focusSeconds:0}};
+ }
+ function showStatus(message,isError=false){
+  const el=$("chronosWidgetStatus");if(!el)return;
+  el.textContent=message;el.dataset.state=isError?"error":"ok";
+ }
+ async function openPanel(){
+  const panel=$("chronosWidgetPanel"),button=$("chronosWidgetToggle");
+  if(!panel||!button)return;
+  const opening=panel.hidden;panel.hidden=!opening;
+  button.setAttribute("aria-expanded",String(opening));
+  button.textContent=opening?"Hide Chronos Widgets":"Open Chronos Widgets";
+  if(!opening||mounted)return;
+  try{
+   const api=await loadLoader();
+   const focus=api.mount($("chronosFocusWidget"),{type:"focus",theme:"cyber",size:"regular",minutes:25});
+   widgets.push(focus);
+   mounted=true;
+   $("chronosShareToggle")?.addEventListener("change",event=>{
+    const target=$("chronosStudyStats");if(!target)return;
+    if(event.currentTarget.checked){
+     if(!statsWidget){statsWidget=api.mount(target,{type:"stats",theme:"cyber",size:"regular",source:"host",data:summary()});widgets.push(statsWidget);}else statsWidget.update(summary());
+     target.hidden=false;
+     showStatus("Read-only study summary shared with the Chronos widget. No credentials or notes were sent.");
+    }else{
+     if(statsWidget){statsWidget.destroy();widgets=widgets.filter(w=>w!==statsWidget);statsWidget=null;}
+     target.hidden=true;
+     showStatus("Study summary sharing stopped.");
+    }
+   },{once:false});
+   showStatus("Focus Timer ready. Study data sharing is off by default.");
+  }catch(error){showStatus(error?.message||"Chronos widget could not load.",true);}
+ }
+ function refreshSharedStats(){
+  if(!$("chronosShareToggle")?.checked)return;
+  if(statsWidget)statsWidget.update(summary());
+ }
+ document.addEventListener("click",event=>{
+  if(event.target.closest("#chronosWidgetToggle"))openPanel();
+  if(event.target.closest("#chronosShareRefresh"))refreshSharedStats();
+ });
+ window.addEventListener("beforeunload",()=>widgets.forEach(w=>w.destroy()));
+})();
