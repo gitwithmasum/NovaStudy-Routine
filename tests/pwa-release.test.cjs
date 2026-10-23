@@ -46,7 +46,7 @@ function fixture({failAdd=false,active=true,offline=false,partial=false}={}){
  };
  return{wait,maps,events,setOffline:v=>offline=v,handlers,cacheApi};
 }
-test('install populates v3.2 cache without automatically activating over active v3.1',async()=>{
+test('install populates v3.6.5 cache without automatically activating over an active version',async()=>{
  const f=fixture(),op=f.wait('install');
  await op.promise;
  assert.ok(f.maps.get(CACHE).has('./index.html'));
