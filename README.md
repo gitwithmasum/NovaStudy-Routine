@@ -6,6 +6,14 @@
 
 A free, no-login routine app for learners from early childhood to university / postgraduate studies. Supports Bengali education categories and a customizable international option.
 
+## App isolation — NovaStudy v3.6.5
+
+NovaStudy-Routine and Masum-Chronos are separate installable apps. NovaStudy keeps its own manifest identity, icon, start URL, service-worker scope, academic modules and authentication configuration. This release removes the optional Chronos widget panel and third-party Chronos loader from NovaStudy, so NovaStudy no longer embeds Chronos or sends study snapshots to it.
+
+**Data safety:** this is a frontend/PWA separation change. It does not delete NovaStudy routines, tasks, exams, focus history, authentication, or any existing Supabase tables. The existing `chronos_missions`, `chronos_preferences`, and `chronos_backups` tables are left untouched. Tables in one Supabase project are still in the same Postgres database; keep them as-is for now, and use a separate Supabase project only if independent infrastructure is required.
+
+For a clean install, open the canonical NovaStudy URL `https://gitwithmasum.github.io/NovaStudy-Routine/` and install from that page. If a previously installed shortcut still opens the wrong app, uninstall that shortcut first, then open the NovaStudy URL in Chrome and install again. The service-worker cache version is bumped to `novastudy-v3.6.5-isolated` so the app can download the isolated shell.
+
 ## Features
 
 **Source update:** Browser code is split into core state, view renderers, modal editors, and event/controller modules for maintainability.
