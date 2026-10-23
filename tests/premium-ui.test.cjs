@@ -127,7 +127,7 @@ test("v3.0 integration includes dashboard, PWA cache, skip access and mobile key
  assert.match(app,/ArrowRight/);assert.match(app,/ArrowLeft/);
  assert.match(dash,/window\.NOVA_UI\?\.widgets/);
  assert.match(views,/window\.NOVA_UI\?\.settingsPanel/);
- assert.match(sw,/novastudy-v3\.6\.4/);
+ assert.match(sw,/novastudy-v3\.6\.5/);
  assert.match(sw,/'\.\/ui-personalization\.js'/);
  assert.match(css,/prefers-reduced-motion:reduce/);
  assert.match(css,/data-ui-contrast="on"/);
