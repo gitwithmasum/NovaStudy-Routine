@@ -1,32 +1,14 @@
-# NovaStudy × Masum-Chronos v2.5 integration
+# Archived: NovaStudy × Masum-Chronos v2.5 integration
 
-## Development-only
+**Status: retired in NovaStudy v3.6.5 to keep the two apps separate.**
 
-This integration is on `feature/chronos-widget-v2.5`; it does not change the production `main` branch until reviewed and merged.
+The v2.5 integration previously embedded optional Focus Timer and read-only Stats widgets inside NovaStudy. It has now been removed from NovaStudy's active HTML, runtime imports, offline asset cache, and regression suite. NovaStudy no longer loads the Chronos widget publisher script or sends a study snapshot to Chronos.
 
-## Features
+This retirement affects only the optional frontend integration. It does **not** remove NovaStudy academic data, NovaStudy authentication, or the existing `chronos_missions`, `chronos_preferences`, and `chronos_backups` tables from Supabase. No Supabase schema/table deletion is part of this release.
 
-- Loads the publisher-hosted Chronos widget loader only when the user opens the panel.
-- Focus Timer works as a standalone widget and does not read or mutate NovaStudy state.
-- Study Stats sharing is **off by default** and requires an explicit checkbox action.
-- The only shared snapshot is a bounded list of task titles/completion flags and aggregate **completed focus sessions/minutes** read from NovaStudy's focus timer. Scheduled routine sessions are never misreported as focus sessions. No original IDs, notes, course documents, authentication tokens, Supabase credentials or user profile are passed.
-- The pure projection lives in `chronos-widget-data.js`; `tests/chronos-widget-data.test.cjs` checks field minimization, limits, missing data and correct focus totals.
-- Data flows from NovaStudy to the Chronos iframe as a read-only snapshot. No two-way sync and no Supabase schema/policy changes.
-- Responsive layout, lazy loading, keyboard-operable controls and error status are included.
+The standalone apps remain available independently:
 
-## Permission model
+- NovaStudy-Routine: https://gitwithmasum.github.io/NovaStudy-Routine/
+- Masum-Chronos: https://gitwithmasum.github.io/Masum-Chronos/
 
-The host deliberately selects the data fields in `chronos-widget-integration.js`. The widget iframe cannot read NovaStudy localStorage, DOM or JS state. The external widget script is publisher-controlled third-party code and should be reviewed before production release. Uncheck sharing to destroy the stats iframe; use **Refresh shared snapshot** after editing tasks.
-
-## QA checklist
-
-- [ ] Open/close widget panel on desktop and mobile widths.
-- [ ] Verify focus timer works while host task data sharing remains off.
-- [ ] Confirm stats widget stays hidden until the sharing checkbox is checked.
-- [ ] Confirm unchecking sharing destroys the stats iframe.
-- [ ] Test offline loader failure and reload while offline.
-- [ ] Test signed-out and different-account profiles; no tokens should cross the iframe boundary.
-- [ ] Verify NovaStudy task/routine/subjects/exams/cloud data remain unchanged.
-- [ ] Run existing NovaStudy regression suite and review CSP/third-party script policy before merge.
-
-This branch is not production deployment approval. Real-device testing and CI must pass before merging.
+If an old home-screen shortcut opens the wrong app, uninstall that shortcut and reinstall from the intended app's canonical URL. See the app-isolation section in the main README for the PWA recovery steps.
