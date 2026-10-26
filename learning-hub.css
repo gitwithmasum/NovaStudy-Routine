@@ -138,3 +138,25 @@ html[data-theme="gold"] .hub-tab.is-active{border-color:var(--mint);color:var(--
 .hub-cp-topic-attachment-list{display:grid;gap:9px;margin-top:10px}
 .hub-cp-topic-attachment-list .hub-skill-item{background:var(--panel)}
 @media(max-width:550px){.hub-dsa-part-button{flex-direction:column;align-items:flex-start}.hub-cp-topic-attachments{padding:9px}.hub-cp-topic-attachments-head button{width:100%}}
+
+
+/* 60 Days IELTS Challenge — independent progress tracker, responsive across themes. */
+.ielts-hero{display:grid;gap:12px;margin-bottom:16px}
+.ielts-hero h2{margin:0;font-size:clamp(22px,3vw,30px);letter-spacing:-.025em}
+.ielts-hero>p{margin:0;max-width:760px;color:var(--muted);line-height:1.65}
+.ielts-progress-line{display:flex;align-items:baseline;gap:10px;margin-top:4px}
+.ielts-progress-line strong{font-size:24px;color:var(--text)}
+.ielts-progress-line span{font-size:12px;color:var(--muted)}
+.ielts-day-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}
+.ielts-day-card{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+.ielts-day-card>div{display:flex;align-items:baseline;gap:7px}
+.ielts-day-card small{font-size:10px;letter-spacing:.1em;color:var(--muted)}
+.ielts-day-card strong{font-size:22px;color:var(--text)}
+.ielts-day-card a{font-size:12px;font-weight:700;color:var(--accent,var(--mint));text-decoration:none}
+.ielts-day-card button{width:100%;min-height:36px;white-space:normal}
+.ielts-day-card.is-complete{border-color:var(--mint);background:color-mix(in srgb,var(--mint) 9%,var(--panel2))}
+.ielts-day-card.is-complete strong{color:var(--mint)}
+.ielts-hero .primary-btn{display:inline-flex;width:fit-content;text-decoration:none;align-items:center;justify-content:center}
+@media(max-width:900px){.ielts-day-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:560px){.ielts-day-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ielts-day-card{padding:10px}.ielts-hero .primary-btn{width:100%;text-align:center}}
+@media(prefers-reduced-motion:reduce){.ielts-day-card{transition:none}}
