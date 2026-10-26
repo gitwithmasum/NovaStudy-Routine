@@ -204,3 +204,20 @@ html[data-theme="gold"] .hub-tab.is-active{border-color:var(--mint);color:var(--
 .vm-attachments button:focus-visible,.vm-attachments label:focus-within,.vm-root button:focus-visible,.vm-root input:focus-visible,.vm-root select:focus-visible,.vm-root textarea:focus-visible{outline:2px solid var(--mint,#5de1c2);outline-offset:2px}
 @media(max-width:520px){.vm-bulk{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}.vm-bulk>*{min-width:0;max-width:100%;box-sizing:border-box;text-align:center;white-space:normal}.vm-attachments{padding:11px}.vm-upload-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.vm-attachment button{min-height:40px}.vm-attachment-info small{word-break:break-word}}
 @media(max-width:360px){.vm-bulk{grid-template-columns:1fr}.vm-upload-actions{grid-template-columns:1fr}.vm-stats strong{font-size:19px}}
+
+
+/* IELTS Learning Center: two clear, clickable section cards. */
+.ielts-tool-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}
+.ielts-tool-card{display:flex;flex-direction:column;align-items:flex-start;gap:12px;min-width:0;min-height:220px;padding:20px;text-align:left;border:1px solid var(--line);border-radius:15px;background:var(--panel2);color:var(--text);font:inherit;cursor:pointer;box-shadow:none}
+.ielts-tool-card:hover,.ielts-tool-card:focus-visible{border-color:var(--mint);outline:2px solid color-mix(in srgb,var(--mint) 35%,transparent);outline-offset:2px}
+.ielts-tool-icon{display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--mint) 10%,var(--panel));color:var(--mint);font-size:22px;font-weight:850}
+.ielts-tool-copy{display:grid;gap:6px}
+.ielts-tool-copy strong{font-size:17px;line-height:1.35;overflow-wrap:anywhere}
+.ielts-tool-copy small{font-size:12px;line-height:1.65;color:var(--muted)}
+.ielts-tool-progress{font-size:12px;font-weight:800;color:var(--mint)}
+.ielts-tool-card>.hub-progress{width:100%;margin-top:auto}
+.ielts-tool-open{font-size:12px;font-weight:800;color:var(--mint)}
+.ielts-view-toolbar{display:flex;justify-content:flex-start;margin-bottom:12px}
+@media(max-width:560px){.ielts-tool-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ielts-tool-card{padding:12px;min-height:210px;gap:10px;border-radius:12px}.ielts-tool-copy strong{font-size:14px}.ielts-tool-copy small{font-size:11px}.ielts-tool-icon{width:36px;height:36px;font-size:18px}.ielts-tool-progress,.ielts-tool-open{font-size:10px}}
+@media(max-width:360px){.ielts-tool-card{padding:9px;min-height:215px}.ielts-tool-copy strong{font-size:12px}.ielts-tool-copy small{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.ielts-tool-card{transition:none}}
