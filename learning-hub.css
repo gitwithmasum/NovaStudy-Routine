@@ -196,3 +196,11 @@ html[data-theme="gold"] .hub-tab.is-active{border-color:var(--mint);color:var(--
 .vm-file-icon{display:grid;place-items:center;flex:0 0 34px;height:34px;border-radius:9px;background:var(--vm-bg);font-size:19px}
 .vm-attachment-info{display:grid;gap:4px;flex:1;min-width:0}.vm-attachment-info b{font-size:12px;overflow-wrap:anywhere}.vm-attachment-info small{font-size:10px;color:var(--vm-muted);overflow-wrap:anywhere;line-height:1.5}
 @media(max-width:520px){.vm-attachment{align-items:flex-start;flex-wrap:wrap}.vm-attachment-info{flex-basis:calc(100% - 48px)}.vm-attachment button{flex:1}.vm-upload-actions>*{flex:1;text-align:center}}
+
+
+/* Backup, restore and mobile-touch polish for Vocabulary Mastery */
+.vm-storage-summary{padding:8px 10px;border:1px solid var(--vm-line,var(--line));border-radius:9px;background:var(--vm-bg);overflow-wrap:anywhere}
+.vm-bulk .vm-file-btn,.vm-bulk button{min-height:40px;justify-content:center}
+.vm-attachments button:focus-visible,.vm-attachments label:focus-within,.vm-root button:focus-visible,.vm-root input:focus-visible,.vm-root select:focus-visible,.vm-root textarea:focus-visible{outline:2px solid var(--mint,#5de1c2);outline-offset:2px}
+@media(max-width:520px){.vm-bulk{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}.vm-bulk>*{min-width:0;max-width:100%;box-sizing:border-box;text-align:center;white-space:normal}.vm-attachments{padding:11px}.vm-upload-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.vm-attachment button{min-height:40px}.vm-attachment-info small{word-break:break-word}}
+@media(max-width:360px){.vm-bulk{grid-template-columns:1fr}.vm-upload-actions{grid-template-columns:1fr}.vm-stats strong{font-size:19px}}
