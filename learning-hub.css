@@ -182,3 +182,7 @@ html[data-theme="gold"] .hub-tab.is-active{border-color:var(--mint);color:var(--
 @media(max-width:720px){.vm-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.vm-word-grid{grid-template-columns:1fr}.vm-card-footer label{min-width:calc(50% - 8px)}}
 @media(max-width:480px){.vm-root{padding:10px}.vm-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.vm-daily{align-items:flex-start;flex-direction:column}.vm-toolbar{align-items:stretch}.vm-toolbar input,.vm-toolbar select,.vm-toolbar button{width:100%;box-sizing:border-box}.vm-form-grid,.vm-quiz-options{grid-template-columns:1fr}.vm-launch{align-items:flex-start;flex-direction:column}.vm-launch>.primary-btn{width:100%}.vm-mode-tabs button{flex:1}.vm-flash-actions>*{flex:1}}
 @media(prefers-reduced-motion:reduce){.vm-progress-track span{transition:none}}
+
+.vm-form-tags{margin-top:3px;min-height:8px}.vm-form-tags .vm-chip{overflow-wrap:anywhere}
+.vm-delete-dialog{width:min(420px,calc(100% - 28px));padding:20px;border:1px solid var(--line);border-radius:15px;background:var(--panel);color:var(--text);box-shadow:0 24px 80px #0007}
+.vm-delete-dialog::backdrop{background:#030712b8;backdrop-filter:blur(3px)}.vm-delete-dialog h3{margin:0 0 8px}.vm-delete-dialog p{color:var(--muted);line-height:1.6}
