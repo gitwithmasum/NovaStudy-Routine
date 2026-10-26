@@ -4,7 +4,7 @@
 "use strict";
 const N=window.NOVA,I=window.NOVA_I18N,E=N.escape,C=window.NOVA_CHALLENGE;
 const KEY="novastudy_learning_hub_v1";
-const TABS=["overview","skills","challenge","practice"];
+const TABS=["overview","skills","challenge","ielts","practice"];
 const LEVELS=["todo","learning","practiced","completed","review"];
 const STAGES=["idea","building","testing","completed"];
 const DIFFICULTY=["easy","medium","hard"];
@@ -12,7 +12,7 @@ const LANGS=["Python","C","C++","Java","JavaScript","TypeScript","SQL","Other"];
 const tr=(en,bn)=>I.language==="bn"?bn:en,copy=o=>JSON.parse(JSON.stringify(o));
 const today=()=>N.date(new Date());
 const labelTab={overview:["Overview","ওভারভিউ"],skills:["Skills & Modules","স্কিল ও মডিউল"],challenge:["CSE 100 Challenge","CSE ১০০ চ্যালেঞ্জ"],
- practice:["Programming Practice","প্রোগ্রামিং অনুশীলন"],dsa:["DSA & CP","ডিএসএ ও সিপি"],
+ ielts:["60 Days IELTS Challenge","৬০ দিনের IELTS চ্যালেঞ্জ"],practice:["Programming Practice","প্রোগ্রামিং অনুশীলন"],dsa:["DSA & CP","ডিএসএ ও সিপি"],
  ai:["AI & ML","এআই ও এমএল"],fullstack:["Full Stack","ফুল স্ট্যাক"],
  projects:["Projects","প্রজেক্ট"],resources:["Resources","রিসোর্স"]};
 const ROADMAPS={
@@ -508,6 +508,7 @@ function handle(action,button){
  if(action==="hub-module-toggle"){openedSkillModule=openedSkillModule===id?"":id;refresh();return true}
  if(action.startsWith("hub-skill-")||action.startsWith("hub-module-")||action.startsWith("hub-item-")||action==="hub-topic-attach-add"||action==="hub-dsa-part"||action==="hub-pdf-open"||action==="hub-attachment-download")return skillAction(action,button);
  if(action==="hub-tab"){selectTab(button?.dataset?.tab);return true}
+ if(action==="hub-ielts-toggle"){toggleIeltsDay(Number(button?.dataset?.day));return true}
  if(action==="hub-practice-delete"){if(window.confirm(tr("Delete this problem?","এই Problem মুছবে?")))mutate(n=>{n.practice=n.practice.filter(x=>x.id!==id)});return true}
  if(action==="hub-project-delete"){if(window.confirm(tr("Delete this project and milestones?","এই Project ও Milestones মুছবে?")))mutate(n=>{n.projects=n.projects.filter(x=>x.id!==id)});return true}
  if(action==="hub-milestone-toggle"){mutate(n=>{const p=n.projects.find(x=>x.id===section),m=p?.milestones.find(x=>x.id===id);if(!m)return false;m.done=!m.done});return true}
@@ -806,8 +807,12 @@ function resources(){
  '<section class="panel"><b class="panel-title">'+tr("My saved resources","আমার Saved Resources")+'</b><div class="hub-record-list">'+
  (rows||'<div class="empty-state">'+tr("No saved links yet.","এখনো কোনো Link Save করা হয়নি।")+'</div>')+'</div></section>';
 }
+const IELTS_KEY="novastudy_ielts_60day_v1";
+function getIeltsProgress(){try{const x=JSON.parse(localStorage.getItem(IELTS_KEY)||"{}");return x&&typeof x==="object"&&!Array.isArray(x)?x:{}}catch{return {}}}
+function toggleIeltsDay(day){if(!Number.isInteger(day)||day<1||day>60)return false;const p=getIeltsProgress();if(p[day])delete p[day];else p[day]=true;try{localStorage.setItem(IELTS_KEY,JSON.stringify(p));refresh();return true}catch{error=tr("Could not save IELTS progress in this browser.","এই ব্রাউজারে IELTS অগ্রগতি সংরক্ষণ করা যায়নি।");refresh();return false}}
+function ieltsChallenge(){const p=getIeltsProgress(),done=Array.from({length:60},(_,i)=>i+1).filter(d=>p[d]).length;return '<section class="panel ielts-hero"><span class="eyebrow">ENGLISH PROFICIENCY / 60-DAY TRACK</span><h2>60 Days IELTS Challenge</h2><p>'+tr("Follow the 60-day roadmap, open the original daily lesson, and mark each day complete. Your progress is saved separately in this browser.","৬০ দিনের রোডম্যাপ অনুসরণ করো, মূল ওয়েবসাইটে প্রতিদিনের লেসন খোলো এবং শেষ হলে সম্পন্ন হিসেবে চিহ্নিত করো। অগ্রগতি এই ব্রাউজারে আলাদাভাবে সংরক্ষিত থাকবে।")+'</p><div class="ielts-progress-line"><strong>'+E(I.number(done))+' / 60</strong><span>'+tr("days completed","দিন সম্পন্ন")+'</span></div>'+progressBar(done,60)+'<p><a class="primary-btn" href="https://moktadirsielts.com/roadmap/" target="_blank" rel="noopener noreferrer">'+tr("Open original IELTS roadmap ↗","মূল IELTS রোডম্যাপ খুলুন ↗")+'</a></p></section><section class="panel"><div class="panel-header"><b class="panel-title">'+tr("60-Day Roadmap","৬০ দিনের রোডম্যাপ")+'</b><span class="chip">'+E(I.number(60-done))+' '+tr("remaining","বাকি")+'</span></div><div class="ielts-day-grid">'+Array.from({length:60},(_,i)=>i+1).map(d=>'<article class="ielts-day-card'+(p[d]?" is-complete":"")+'"><div><small>DAY</small><strong>'+E(I.number(d))+'</strong></div><a href="https://moktadirsielts.com/roadmap/" target="_blank" rel="noopener noreferrer" aria-label="'+tr("Open original roadmap for day ","মূল রোডম্যাপে দিন ")+E(I.number(d))+'">'+tr("Open lesson ↗","লেসন খুলুন ↗")+'</a><button type="button" class="tiny-btn" data-action="hub-ielts-toggle" data-day="'+d+'" aria-pressed="'+Boolean(p[d])+'">'+(p[d]?tr("✓ Completed","✓ সম্পন্ন"):tr("Mark complete","সম্পন্ন করো"))+'</button></article>').join("")+'</div><p class="hub-note">'+tr("Daily lesson content remains on the original site; this NovaStudy module tracks your completion without copying or changing the source lessons.","প্রতিদিনের লেসনের বিষয়বস্তু মূল ওয়েবসাইটেই থাকবে; NovaStudy শুধু অগ্রগতি ট্র্যাক করবে, মূল লেসন কপি বা পরিবর্তন করবে না।")+'</p></section>'}
 function page(){
- const content=tab==="challenge"?C.view():tab==="overview"?overview()+skillsCatalog(true):tab==="skills"?skillWorkspace():tab==="practice"?practice():
+ const content=tab==="challenge"?C.view():tab==="ielts"?ieltsChallenge():tab==="overview"?overview()+skillsCatalog(true):tab==="skills"?skillWorkspace():tab==="practice"?practice():
  practice();
  return '<div class="hub-root">'+top()+(error?'<p class="hub-alert" role="alert">'+E(error)+'</p>':"")+
  '<div class="hub-content">'+content+'</div></div>';
