@@ -2,6 +2,20 @@
 
 # ✦ NovaStudy — Student Routine OS
 
+<p align="center">
+  <a href="https://novastudy-routine.vercel.app/product-landing/"><strong>🌌 Product Landing Page</strong></a>
+  &nbsp; · &nbsp;
+  <a href="https://novastudy-routine.vercel.app/"><strong>🚀 Live Demo</strong></a>
+  &nbsp; · &nbsp;
+  <a href="https://github.com/gitwithmasum/NovaStudy-Routine"><strong>💻 GitHub Repository</strong></a>
+</p>
+
+<p align="center">
+  <a href="https://novastudy-routine.vercel.app/product-landing/"><img src="https://img.shields.io/badge/Product-Landing%20Page-7c3aed?style=for-the-badge&logo=vercel&logoColor=white" alt="Product Landing Page"></a>
+  <a href="https://novastudy-routine.vercel.app/"><img src="https://img.shields.io/badge/Try-Live%20Demo-06b6d4?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Live Demo"></a>
+</p>
+
+
 **A futuristic, responsive, offline-first student planner with installable PWA support.**
 
 A free, no-login routine app for learners from early childhood to university / postgraduate studies. Supports Bengali education categories and a customizable international option.
